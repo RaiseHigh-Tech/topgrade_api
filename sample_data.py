@@ -366,7 +366,7 @@ def create_sample_data():
             "topics": [
                 {"topic_title": "Load Balancing Strategies", "video_url": "https://example.com/load-balancing"},
                 {"topic_title": "Horizontal vs Vertical Scaling", "video_url": "https://example.com/scaling"},
-            `    {"topic_title": "Caching Mechanisms", "video_url": "https://example.com/caching"},
+                {"topic_title": "Caching Mechanisms", "video_url": "https://example.com/caching"},
                 {"topic_title": "Database Sharding", "video_url": "https://example.com/sharding"},
             ]
         },
