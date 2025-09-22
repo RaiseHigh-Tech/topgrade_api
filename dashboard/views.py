@@ -608,3 +608,7 @@ def delete_program_view(request, id):
     programs_page = request.GET.get('programs_page', 1)
     categories_page = request.GET.get('categories_page', 1)
     return redirect(f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}')
+
+@admin_required
+def adv_program_view(request):
+    return render(request, 'dashboard/advance_programs.html')
