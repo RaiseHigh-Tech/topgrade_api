@@ -33,11 +33,15 @@
                     {% if program.subtitle %}
                       <h6 class="card-title mb-2">{{ program.subtitle }}</h6>
                     {% endif %}
-                    <p class="card-text">{{ program.description|truncatewords:20|default:'' }}</p>
+                    <p class="card-text">{{ program.description|truncatechars:200|default:'' }}</p>
                     <small class="text-muted">
                       <strong>Category:</strong> {{ program.category.name }}<br />
                       <strong>Duration:</strong> {{ program.duration }}<br />
-                      <strong>Slots:</strong> {{ program.available_slots }}
+                      <strong>Slots:</strong> {{ program.available_slots }}<br />
+                      <strong>Price:</strong> ₹{{ program.price }}
+                      {% if program.discount_percentage > 0 %}
+                        <span class="badge bg-success ms-1">{{ program.discount_percentage }}% OFF</span>
+                      {% endif %}
                     </small>
                   </div>
                   <div class="card-footer d-flex gap-1">
@@ -327,7 +331,7 @@
         <form method="post" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="programWizardForm">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="program" />
-          <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">`
+          <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
             <div class="step-arrow-nav mb-4">
                 <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -492,6 +496,22 @@
                                       <option value="fas fa-users"><i class="fas fa-users"></i> fas fa-users</option>
                                       <option value="fas fa-globe"><i class="fas fa-globe"></i> fas fa-globe</option>
                                   </select>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="price-input">Price (₹) <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <div class="invalid-feedback">Please enter a price</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="discount-input">Discount Percentage (%)</label>
+                                  <input type="number" class="form-control" id="discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <div class="form-text">Leave empty or 0 for no discount</div>
                               </div>
                           </div>
                         </div>
@@ -806,6 +826,22 @@
                                       <option value="fas fa-users" {% if edit_program.icon == "fas fa-users" %}selected{% endif %}><i class="fas fa-users"></i> fas fa-users</option>
                                       <option value="fas fa-globe" {% if edit_program.icon == "fas fa-globe" %}selected{% endif %}><i class="fas fa-globe"></i> fas fa-globe</option>
                                   </select>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-price-input">Price (₹) <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="edit-price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <div class="invalid-feedback">Please enter a price</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-discount-input">Discount Percentage (%)</label>
+                                  <input type="number" class="form-control" id="edit-discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <div class="form-text">Leave empty or 0 for no discount</div>
                               </div>
                           </div>
                         </div>
@@ -2741,6 +2777,8 @@ function openEditModal(programId) {
             program_rating: {{ program.program_rating }},
             is_best_seller: {{ program.is_best_seller|yesno:"true,false" }},
             icon: "{{ program.icon|escapejs }}",
+            price: {{ program.price }},
+            discount_percentage: {{ program.discount_percentage }},
             image_url: "{% if program.image %}{{ program.image.url }}{% endif %}",
             syllabuses: [
                 {% for syllabus in program.syllabuses.all %}
@@ -2766,7 +2804,7 @@ function openEditModal(programId) {
     
     // Update form action URL
     const form = document.getElementById('editProgramWizardForm');
-    form.action = `/edit_program/${programId}`;
+    form.action = `{% url 'dashboard:edit_program' 0 %}`.replace('0', programId);
     
     // Populate form fields
     document.getElementById('edit-steparrow-gen-info-title-input').value = program.title;
@@ -2788,6 +2826,8 @@ function openEditModal(programId) {
     document.getElementById('edit-program-rating-input').value = program.program_rating;
     document.getElementById('edit-is-best-seller-input').checked = program.is_best_seller;
     document.getElementById('edit-program-icon').value = program.icon;
+    document.getElementById('edit-price-input').value = program.price;
+    document.getElementById('edit-discount-input').value = program.discount_percentage;
     
     // Update image preview if exists
     const imagePreview = document.getElementById('editImagePreview');

@@ -95,6 +95,8 @@ def programs_view(request):
             program_rating = request.POST.get('program_rating')
             is_best_seller = request.POST.get('is_best_seller') == 'on'
             icon = request.POST.get('program_icon')
+            price = request.POST.get('price')
+            discount_percentage = request.POST.get('discount_percentage')
             
             if title and category_id and batch_starts and available_slots and duration:
                 try:
@@ -113,7 +115,9 @@ def programs_view(request):
                         avg_annual_salary=avg_annual_salary or '',
                         program_rating=float(program_rating) if program_rating else 0.0,
                         is_best_seller=is_best_seller,
-                        icon=icon
+                        icon=icon,
+                        price=float(price) if price else 0.0,
+                        discount_percentage=float(discount_percentage) if discount_percentage else 0.0
                     )
                     
                     # Handle syllabus and topics creation
@@ -381,6 +385,8 @@ def edit_program_view(request, id):
         program_rating = request.POST.get('program_rating')
         is_best_seller = request.POST.get('is_best_seller') == 'on'
         icon = request.POST.get('program_icon')
+        price = request.POST.get('price')
+        discount_percentage = request.POST.get('discount_percentage')
         
         if title and category_id and batch_starts and available_slots and duration:
             try:
@@ -400,6 +406,8 @@ def edit_program_view(request, id):
                 program.program_rating = float(program_rating) if program_rating else 0.0
                 program.is_best_seller = is_best_seller
                 program.icon = icon
+                program.price = float(price) if price else 0.0
+                program.discount_percentage = float(discount_percentage) if discount_percentage else 0.0
                 program.save()
                 
                 # Handle syllabus and topics update
