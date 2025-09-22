@@ -1007,6 +1007,13 @@ def get_my_learnings(
                 progress_percentage = min(100, max(0, (days_since_purchase / 30) * 100))
                 is_completed = progress_percentage >= 100
                 
+                # Check if user has bookmarked this program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='program',
+                    program=program
+                ).exists()
+                
                 learning_data = {
                     "purchase_id": purchase.id,
                     "program": {
@@ -1023,6 +1030,7 @@ def get_my_learnings(
                         "duration": program.duration,
                         "program_rating": float(program.program_rating),
                         "is_best_seller": program.is_best_seller,
+                        "is_bookmarked": is_bookmarked,
                         "enrolled_students": UserPurchase.objects.filter(
                             program=program,
                             status='completed'
@@ -1055,6 +1063,13 @@ def get_my_learnings(
                 days_since_purchase = (timezone.now() - purchase.purchase_date).days
                 progress_percentage = min(100, max(0, (days_since_purchase / 45) * 100))  # Advanced courses take longer
                 is_completed = progress_percentage >= 100
+
+                # Check if user has bookmarked this program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='program',
+                    program=program
+                ).exists()
                 
                 learning_data = {
                     "purchase_id": purchase.id,
@@ -1069,6 +1084,7 @@ def get_my_learnings(
                         "duration": program.duration,
                         "program_rating": float(program.program_rating),
                         "is_best_seller": program.is_best_seller,
+                        "is_bookmarked": is_bookmarked,
                         "enrolled_students": UserPurchase.objects.filter(
                             advanced_program=program,
                             status='completed'
