@@ -245,6 +245,21 @@ def programs_view(request):
             else:
                 messages.error(request, 'Title, category, batch starts, available slots, and duration are required')
         
+        elif form_type == 'delete_program':
+            program_id = request.POST.get('program_id')
+            if program_id:
+                try:
+                    program = Program.objects.get(id=program_id)
+                    program_title = program.title
+                    program.delete()
+                    messages.success(request, f'Program "{program_title}" has been deleted successfully.')
+                except Program.DoesNotExist:
+                    messages.error(request, 'Program not found.')
+                except Exception as e:
+                    messages.error(request, f'Error deleting program: {str(e)}')
+            else:
+                messages.error(request, 'Program ID is required for deletion.')
+        
         return redirect('dashboard:programs')
 
     user = request.user
@@ -663,6 +678,21 @@ def adv_program_view(request):
                     messages.error(request, f'Error creating advance program: {str(e)}')
             else:
                 messages.error(request, 'Title, batch starts, available slots, duration, and price are required.')
+        
+        elif form_type == 'delete_advance_program':
+            program_id = request.POST.get('program_id')
+            if program_id:
+                try:
+                    advance_program = AdvanceProgram.objects.get(id=program_id)
+                    program_title = advance_program.title
+                    advance_program.delete()
+                    messages.success(request, f'Advance Program "{program_title}" has been deleted successfully.')
+                except AdvanceProgram.DoesNotExist:
+                    messages.error(request, 'Advance Program not found.')
+                except Exception as e:
+                    messages.error(request, f'Error deleting advance program: {str(e)}')
+            else:
+                messages.error(request, 'Program ID is required for deletion.')
         
         return redirect('dashboard:adv_programs')
     
