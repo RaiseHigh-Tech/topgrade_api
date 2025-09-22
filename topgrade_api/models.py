@@ -146,6 +146,7 @@ class Topic(models.Model):
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=200)
     video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, help_text="Upload video file")
+    video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
     description = models.TextField(blank=True, null=True)
     is_intro = models.BooleanField(default=False)
 
@@ -188,6 +189,7 @@ class AdvanceTopic(models.Model):
     advance_syllabus = models.ForeignKey(AdvanceSyllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=200)
     video_file = models.FileField(upload_to=get_advance_topic_video_path, blank=True, null=True, help_text="Upload video file")
+    video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):

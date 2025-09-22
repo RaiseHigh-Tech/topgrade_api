@@ -9,6 +9,63 @@ from topgrade_api.models import Category, Program, Syllabus, Topic
 
 User = get_user_model()
 
+def calculate_video_duration(video_file):
+    """Calculate video duration and return formatted string"""
+    try:
+        import tempfile
+        import os
+        
+        # Save video file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.tmp') as temp_file:
+            for chunk in video_file.chunks():
+                temp_file.write(chunk)
+            temp_path = temp_file.name
+        
+        video_duration = None
+        try:
+            # Try with OpenCV first
+            import cv2
+            cap = cv2.VideoCapture(temp_path)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            if fps > 0:
+                duration_seconds = frame_count / fps
+                # Format duration as MM:SS or HH:MM:SS
+                minutes = int(duration_seconds // 60)
+                seconds = int(duration_seconds % 60)
+                if minutes >= 60:
+                    hours = minutes // 60
+                    minutes = minutes % 60
+                    video_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                else:
+                    video_duration = f"{minutes:02d}:{seconds:02d}"
+            cap.release()
+        except Exception:
+            # Fallback to moviepy
+            try:
+                from moviepy.editor import VideoFileClip
+                clip = VideoFileClip(temp_path)
+                duration_seconds = clip.duration
+                clip.close()
+                # Format duration
+                minutes = int(duration_seconds // 60)
+                seconds = int(duration_seconds % 60)
+                if minutes >= 60:
+                    hours = minutes // 60
+                    minutes = minutes % 60
+                    video_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                else:
+                    video_duration = f"{minutes:02d}:{seconds:02d}"
+            except Exception:
+                video_duration = None
+        
+        # Clean up temp file
+        os.unlink(temp_path)
+        return video_duration
+        
+    except Exception:
+        return None
+
 def admin_required(view_func):
     """
     Decorator to ensure only admin users (superusers) can access dashboard views
@@ -161,16 +218,20 @@ def programs_view(request):
                             # Create topics for this module
                             for topic_index, topic_data in module_data['topics'].items():
                                 if topic_data.get('title'):
-                                    # Handle video file upload
+                                    # Handle video file upload and duration calculation
                                     video_file = None
+                                    video_duration = None
                                     if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
                                         video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                        # Calculate video duration
+                                        video_duration = calculate_video_duration(video_file)
                                     
                                     Topic.objects.create(
                                         syllabus=syllabus,
                                         topic_title=topic_data['title'],
                                         description=topic_data.get('description', ''),
                                         video_file=video_file,
+                                        video_duration=video_duration,
                                         is_intro=topic_data.get('is_intro') == 'on'
                                     )
                     
@@ -461,16 +522,20 @@ def edit_program_view(request, id):
                         # Create topics for this module
                         for topic_index, topic_data in module_data['topics'].items():
                             if topic_data.get('title'):
-                                # Handle video file upload
+                                # Handle video file upload and duration calculation
                                 video_file = None
+                                video_duration = None
                                 if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
                                     video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                    # Calculate video duration
+                                    video_duration = calculate_video_duration(video_file)
                                 
                                 Topic.objects.create(
                                     syllabus=syllabus,
                                     topic_title=topic_data['title'],
                                     description=topic_data.get('description', ''),
                                     video_file=video_file,
+                                    video_duration=video_duration,
                                     is_intro=topic_data.get('is_intro') == 'on'
                                 )
                 

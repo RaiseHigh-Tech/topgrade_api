@@ -70,9 +70,9 @@ Retrieve all available categories.
 ### 3. Landing Page Data
 **GET** `/landing`
 
-Get landing page data with different program groups. Returns top courses, recently added programs, featured programs, regular programs, advanced programs, and continue watching (for authenticated users).
+Get landing page data with different program groups. Returns top courses, recently added programs, featured programs, regular programs, advanced programs, and continue watching.
 
-**Authentication Required:** No (but authentication affects continue_watching)
+**Authentication Required:** Yes
 
 **Response:**
 ```json
@@ -94,6 +94,7 @@ Get landing page data with different program groups. Returns top courses, recent
         "duration": "16 weeks",
         "program_rating": 4.8,
         "is_best_seller": true,
+        "is_bookmarked": true,
         "enrolled_students": 1250,
         "pricing": {
           "original_price": 599.00,
@@ -103,15 +104,192 @@ Get landing page data with different program groups. Returns top courses, recent
         }
       }
     ],
-    "recently_added": [...],
-    "featured": [...],
-    "programs": [...],
-    "advanced_programs": [...],
+    "recently_added": [
+      {
+        "id": 3,
+        "type": "program",
+        "title": "React Native Mobile Development",
+        "subtitle": "Build iOS & Android Apps",
+        "description": "Learn to build cross-platform mobile applications using React Native...",
+        "category": {
+          "id": 3,
+          "name": "Mobile Development"
+        },
+        "image": "/media/program_images/react_native.jpg",
+        "duration": "10 weeks",
+        "program_rating": 4.6,
+        "is_best_seller": false,
+        "is_bookmarked": false,
+        "enrolled_students": 892,
+        "pricing": {
+          "original_price": 449.00,
+          "discount_percentage": 10.00,
+          "discounted_price": 404.10,
+          "savings": 44.90
+        }
+      },
+      {
+        "id": 4,
+        "type": "advanced_program",
+        "title": "Blockchain & Web3 Development",
+        "subtitle": "Smart Contracts & DeFi Applications",
+        "description": "Advanced blockchain development covering Ethereum, Solidity...",
+        "category": null,
+        "image": "/media/advance_program_images/blockchain.jpg",
+        "duration": "18 weeks",
+        "program_rating": 4.7,
+        "is_best_seller": false,
+        "is_bookmarked": true,
+        "enrolled_students": 234,
+        "pricing": {
+          "original_price": 899.00,
+          "discount_percentage": 15.00,
+          "discounted_price": 764.15,
+          "savings": 134.85
+        }
+      }
+    ],
+    "featured": [
+      {
+        "id": 2,
+        "type": "program",
+        "title": "Python Data Science Masterclass",
+        "subtitle": "From Beginner to Data Scientist",
+        "description": "Comprehensive data science course covering Python, NumPy, Pandas...",
+        "category": {
+          "id": 2,
+          "name": "Data Science"
+        },
+        "image": "/media/program_images/python_ds.jpg",
+        "duration": "12 weeks",
+        "program_rating": 4.7,
+        "is_best_seller": true,
+        "is_bookmarked": true,
+        "enrolled_students": 1567,
+        "pricing": {
+          "original_price": 499.00,
+          "discount_percentage": 15.00,
+          "discounted_price": 424.15,
+          "savings": 74.85
+        }
+      },
+      {
+        "id": 5,
+        "type": "advanced_program",
+        "title": "AI & Machine Learning Expert Track",
+        "subtitle": "Advanced Deep Learning & Neural Networks",
+        "description": "Advanced course covering deep learning, neural networks, computer vision...",
+        "category": null,
+        "image": "/media/advance_program_images/ai_ml.jpg",
+        "duration": "24 weeks",
+        "program_rating": 4.9,
+        "is_best_seller": true,
+        "is_bookmarked": false,
+        "enrolled_students": 678,
+        "pricing": {
+          "original_price": 1299.00,
+          "discount_percentage": 30.00,
+          "discounted_price": 909.30,
+          "savings": 389.70
+        }
+      }
+    ],
+    "programs": [
+      {
+        "id": 1,
+        "type": "program",
+        "title": "Full Stack Web Development Bootcamp",
+        "subtitle": "Master MERN Stack Development",
+        "description": "Complete full-stack web development course covering HTML, CSS, JavaScript, React...",
+        "category": {
+          "id": 1,
+          "name": "Web Development"
+        },
+        "image": "/media/program_images/fullstack.jpg",
+        "duration": "16 weeks",
+        "program_rating": 4.8,
+        "is_best_seller": true,
+        "is_bookmarked": true,
+        "enrolled_students": 1250,
+        "pricing": {
+          "original_price": 599.00,
+          "discount_percentage": 20.00,
+          "discounted_price": 479.20,
+          "savings": 119.80
+        }
+      },
+      {
+        "id": 6,
+        "type": "program",
+        "title": "DevOps Engineering Complete Course",
+        "subtitle": "Master CI/CD and Cloud Technologies",
+        "description": "Complete DevOps course covering Git, Docker, Kubernetes, Jenkins, AWS...",
+        "category": {
+          "id": 4,
+          "name": "DevOps"
+        },
+        "image": "/media/program_images/devops.jpg",
+        "duration": "14 weeks",
+        "program_rating": 4.9,
+        "is_best_seller": true,
+        "is_bookmarked": false,
+        "enrolled_students": 934,
+        "pricing": {
+          "original_price": 699.00,
+          "discount_percentage": 25.00,
+          "discounted_price": 524.25,
+          "savings": 174.75
+        }
+      }
+    ],
+    "advanced_programs": [
+      {
+        "id": 7,
+        "type": "advanced_program",
+        "title": "Enterprise Architecture & System Design",
+        "subtitle": "Scalable Systems for Senior Engineers",
+        "description": "Advanced system design course for senior engineers. Learn to design scalable...",
+        "category": null,
+        "image": "/media/advance_program_images/architecture.jpg",
+        "duration": "20 weeks",
+        "program_rating": 4.8,
+        "is_best_seller": true,
+        "is_bookmarked": true,
+        "enrolled_students": 456,
+        "pricing": {
+          "original_price": 999.00,
+          "discount_percentage": 20.00,
+          "discounted_price": 799.20,
+          "savings": 199.80
+        }
+      },
+      {
+        "id": 8,
+        "type": "advanced_program",
+        "title": "Cloud Security & DevSecOps",
+        "subtitle": "Advanced Security for Cloud Environments",
+        "description": "Master cloud security, DevSecOps practices, and advanced cybersecurity...",
+        "category": null,
+        "image": "/media/advance_program_images/cloud_security.jpg",
+        "duration": "16 weeks",
+        "program_rating": 4.6,
+        "is_best_seller": false,
+        "is_bookmarked": false,
+        "enrolled_students": 289,
+        "pricing": {
+          "original_price": 799.00,
+          "discount_percentage": 18.00,
+          "discounted_price": 655.18,
+          "savings": 143.82
+        }
+      }
+    ],
     "continue_watching": [
       {
         "id": 1,
         "type": "program",
         "title": "Python Data Science Masterclass",
+        "is_bookmarked": false,
         "progress": {
           "percentage": 75.5,
           "status": "in_progress",
@@ -136,8 +314,8 @@ Get landing page data with different program groups. Returns top courses, recent
 
 **Notes:**
 - Each group contains maximum 5 programs (continue_watching limited to 2)
-- `continue_watching` returns empty array for non-authenticated users
-- `continue_watching` includes progress information for authenticated users
+- All programs include `is_bookmarked` status for authenticated user
+- `continue_watching` shows recently watched programs with progress information
 
 ---
 
@@ -146,7 +324,7 @@ Get landing page data with different program groups. Returns top courses, recent
 
 Get all programs (regular and advanced) with comprehensive filtering options.
 
-**Authentication Required:** No
+**Authentication Required:** Yes
 
 **Query Parameters:**
 - `program_type` (string, optional): Filter by type ('program', 'advanced_program', 'all')
@@ -184,7 +362,54 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
     "regular_programs_count": 12,
     "advanced_programs_count": 3
   },
-  "programs": [...]
+  "programs": [
+    {
+      "id": 1,
+      "type": "program",
+      "title": "Full Stack Web Development Bootcamp",
+      "subtitle": "Master MERN Stack Development",
+      "description": "Complete full-stack web development course covering HTML, CSS, JavaScript, React, Node.js, Express, and MongoDB.",
+      "category": {
+        "id": 1,
+        "name": "Web Development"
+      },
+      "image": "/media/program_images/fullstack.jpg",
+      "duration": "16 weeks",
+      "program_rating": 4.8,
+      "is_best_seller": true,
+      "is_bookmarked": false,
+      "enrolled_students": 1250,
+      "pricing": {
+        "original_price": 599.00,
+        "discount_percentage": 20.00,
+        "discounted_price": 479.20,
+        "savings": 119.80
+      }
+    },
+    {
+      "id": 2,
+      "type": "program",
+      "title": "Python Data Science Masterclass",
+      "subtitle": "From Beginner to Data Scientist",
+      "description": "Comprehensive data science course covering Python, NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn, and machine learning algorithms.",
+      "category": {
+        "id": 2,
+        "name": "Data Science"
+      },
+      "image": "/media/program_images/python_ds.jpg",
+      "duration": "12 weeks",
+      "program_rating": 4.7,
+      "is_best_seller": true,
+      "is_bookmarked": true,
+      "enrolled_students": 1567,
+      "pricing": {
+        "original_price": 499.00,
+        "discount_percentage": 15.00,
+        "discounted_price": 424.15,
+        "savings": 74.85
+      }
+    }
+  ]
 }
 ```
 
@@ -195,7 +420,7 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
 
 Get detailed information about a specific program including syllabus and topics.
 
-**Authentication Required:** No (but affects video access)
+**Authentication Required:** Yes
 
 **Path Parameters:**
 - `program_type`: 'program' or 'advanced-program'
@@ -224,6 +449,7 @@ GET /api/program/program/1/details
     "duration": "16 weeks",
     "program_rating": 4.8,
     "is_best_seller": true,
+    "is_bookmarked": true,
     "enrolled_students": 1250,
     "pricing": {
       "original_price": 599.00,
@@ -244,10 +470,57 @@ GET /api/program/program/1/details
           {
             "id": 1,
             "topic_title": "HTML5 Semantic Elements",
-            "is_free_trail": true,
-            "is_intro": true,
-            "is_locked": false,
-            "video_url": "https://example.com/video1"
+            "video_url": "/media/program/Master_MERN_Stack_Development/intro.mp4",
+            "video_duration": "15:32"
+          },
+          {
+            "id": 2,
+            "topic_title": "CSS3 Flexbox and Grid",
+            "video_url": "/media/program/Master_MERN_Stack_Development/css_flexbox.mp4",
+            "video_duration": "22:45"
+          },
+          {
+            "id": 3,
+            "topic_title": "JavaScript ES6+ Features",
+            "video_url": "",
+            "video_duration": null
+          },
+          {
+            "id": 4,
+            "topic_title": "DOM Manipulation",
+            "video_url": "",
+            "video_duration": null
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "module_title": "React Development",
+        "topics_count": 4,
+        "topics": [
+          {
+            "id": 5,
+            "topic_title": "React Components & JSX",
+            "video_url": "",
+            "video_duration": null
+          },
+          {
+            "id": 6,
+            "topic_title": "State Management with Hooks",
+            "video_url": "",
+            "video_duration": null
+          },
+          {
+            "id": 7,
+            "topic_title": "React Router & Navigation",
+            "video_url": "",
+            "video_duration": null
+          },
+          {
+            "id": 8,
+            "topic_title": "Context API & Redux",
+            "video_url": "",
+            "video_duration": null
           }
         ]
       }
@@ -353,6 +626,29 @@ Get all bookmarks for the authenticated user.
         }
       },
       "bookmarked_date": "2024-01-15T10:30:00Z"
+    },
+    {
+      "bookmark_id": 2,
+      "program": {
+        "id": 3,
+        "type": "advanced_program",
+        "title": "AI & Machine Learning Expert Track",
+        "subtitle": "Advanced Deep Learning & Neural Networks",
+        "description": "Advanced course covering deep learning, neural networks, computer vision, NLP, and AI deployment.",
+        "category": null,
+        "image": "/media/advance_program_images/ai_ml.jpg",
+        "duration": "24 weeks",
+        "program_rating": 4.9,
+        "is_best_seller": true,
+        "enrolled_students": 678,
+        "pricing": {
+          "original_price": 1299.00,
+          "discount_percentage": 30.00,
+          "discounted_price": 909.30,
+          "savings": 389.70
+        }
+      },
+      "bookmarked_date": "2024-01-12T08:15:00Z"
     }
   ]
 }
@@ -443,6 +739,7 @@ GET /api/my-learnings?status=onprogress
         "duration": "16 weeks",
         "program_rating": 4.8,
         "is_best_seller": true,
+        "is_bookmarked": true,
         "enrolled_students": 1250,
         "pricing": {
           "original_price": 599.00,
@@ -455,9 +752,71 @@ GET /api/my-learnings?status=onprogress
       "progress": {
         "percentage": 65.5,
         "status": "onprogress",
-        "completed_modules": 6,
-        "total_modules": 10,
-        "estimated_completion": "2-3 weeks"
+        "completed_modules": 2,
+        "total_modules": 4
+      }
+    },
+    {
+      "purchase_id": 2,
+      "program": {
+        "id": 2,
+        "type": "program",
+        "title": "Python Data Science Masterclass",
+        "subtitle": "From Beginner to Data Scientist",
+        "description": "Comprehensive data science course covering Python, NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn, and machine learning algorithms.",
+        "category": {
+          "id": 2,
+          "name": "Data Science"
+        },
+        "image": "/media/program_images/python_ds.jpg",
+        "duration": "12 weeks",
+        "program_rating": 4.7,
+        "is_best_seller": true,
+        "is_bookmarked": true,
+        "enrolled_students": 1567,
+        "pricing": {
+          "original_price": 499.00,
+          "discount_percentage": 15.00,
+          "discounted_price": 424.15,
+          "savings": 74.85
+        }
+      },
+      "purchase_date": "2024-01-10T14:22:00Z",
+      "progress": {
+        "percentage": 100.0,
+        "status": "completed",
+        "completed_modules": 3,
+        "total_modules": 3
+      }
+    },
+    {
+      "purchase_id": 3,
+      "program": {
+        "id": 5,
+        "type": "advanced_program",
+        "title": "Enterprise Architecture & System Design",
+        "subtitle": "Scalable Systems for Senior Engineers",
+        "description": "Advanced system design course for senior engineers. Learn to design scalable, distributed systems, microservices architecture.",
+        "category": null,
+        "image": "/media/advance_program_images/architecture.jpg",
+        "duration": "20 weeks",
+        "program_rating": 4.8,
+        "is_best_seller": true,
+        "is_bookmarked": false,
+        "enrolled_students": 456,
+        "pricing": {
+          "original_price": 999.00,
+          "discount_percentage": 20.00,
+          "discounted_price": 799.20,
+          "savings": 199.80
+        }
+      },
+      "purchase_date": "2024-01-08T11:45:00Z",
+      "progress": {
+        "percentage": 25.0,
+        "status": "onprogress",
+        "completed_modules": 1,
+        "total_modules": 5
       }
     }
   ]
@@ -469,17 +828,17 @@ GET /api/my-learnings?status=onprogress
 ### 11. Update Learning Progress
 **POST** `/learning/update-progress`
 
-Update user's progress for a specific topic/video.
+Update user's progress for a specific topic/video. Video duration is automatically retrieved from database.
 
 **Authentication Required:** Yes
 
 **Request Body:**
 ```json
 {
-  "topic_type": "topic",
+  "program_type": "program",
   "topic_id": 1,
-  "watch_time_seconds": 1200,
-  "total_duration_seconds": 1800
+  "purchase_id": 5,
+  "watch_time_seconds": 1200
 }
 ```
 
@@ -494,7 +853,8 @@ Update user's progress for a specific topic/video.
     "completion_percentage": 66.67,
     "watch_time_seconds": 1200,
     "total_duration_seconds": 1800,
-    "is_completed": false
+    "is_completed": false,
+    "last_watched_at": "2024-01-15T10:30:00Z"
   },
   "course_progress": {
     "completion_percentage": 25.5,
@@ -505,80 +865,11 @@ Update user's progress for a specific topic/video.
 }
 ```
 
----
-
-### 12. Get Course Learning Details
-**GET** `/learning/course/{purchase_id}`
-
-Get detailed learning information for a specific purchased course with all topics and progress.
-
-**Authentication Required:** Yes
-
-**Path Parameters:**
-- `purchase_id`: Purchase ID
-
-**Example Request:**
-```
-GET /api/learning/course/1
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "purchase": {
-    "id": 1,
-    "program_type": "program",
-    "purchase_date": "2024-01-15T10:30:00Z",
-    "status": "completed"
-  },
-  "program": {
-    "id": 1,
-    "type": "program",
-    "title": "Full Stack Web Development Bootcamp",
-    "subtitle": "Master MERN Stack Development",
-    "category": {
-      "id": 1,
-      "name": "Web Development"
-    },
-    "image": "/media/program_images/image.jpg",
-    "duration": "16 weeks",
-    "program_rating": 4.8,
-    "is_best_seller": true
-  },
-  "course_progress": {
-    "completion_percentage": 65.5,
-    "completed_topics": 10,
-    "total_topics": 15,
-    "is_completed": false,
-    "started_at": "2024-01-15T10:30:00Z",
-    "last_activity_at": "2024-01-20T14:45:00Z"
-  },
-  "syllabus": {
-    "total_modules": 4,
-    "modules": [
-      {
-        "id": 1,
-        "module_title": "Frontend Fundamentals",
-        "topics": [
-          {
-            "id": 1,
-            "topic_title": "HTML5 Semantic Elements",
-            "video_url": "https://example.com/video1",
-            "progress": {
-              "status": "completed",
-              "completion_percentage": 100.0,
-              "watch_time_seconds": 1800,
-              "total_duration_seconds": 1800,
-              "last_watched_at": "2024-01-16T09:30:00Z"
-            }
-          }
-        ]
-      }
-    ]
-  }
-}
-```
+**Notes:**
+- `total_duration_seconds` is automatically retrieved from video duration stored in database
+- `program_type` should match the purchase program type ('program' or 'advanced_program')
+- `purchase_id` ensures security and correct program context
+- Progress is considered completed at 90% watch time
 
 ---
 
@@ -667,10 +958,10 @@ Common HTTP status codes:
 
 ## Authentication Notes
 
-- JWT tokens are required for endpoints marked as "Authentication Required: Yes"
-- Tokens should be included in the Authorization header as: `Bearer <token>`
-- For endpoints that don't require authentication, providing a token may unlock additional features (e.g., continue_watching in landing endpoint)
+- **All API endpoints now require JWT authentication**
+- Tokens must be included in the Authorization header as: `Bearer <token>`
 - Invalid or expired tokens will result in 401 Unauthorized responses
+- Authentication provides personalized responses including bookmarks and progress tracking
 
 ---
 
@@ -686,10 +977,15 @@ The landing endpoint returns 6 different sections:
 6. **`continue_watching`** - Recently watched programs for authenticated users, max 2 items
 
 ### Video Access Rules
-- **Regular Programs**: Intro videos (`is_intro: true`) are always accessible
-- **Advanced Programs**: All videos require purchase
-- **Purchased Courses**: All videos accessible with progress tracking
-- **Locked Content**: No `video_url` field included in response
+- **Intro Videos**: Always accessible regardless of purchase status (`is_intro: true`)
+- **Regular Videos**: Only accessible after course purchase
+- **Video URLs**: Empty string when not accessible, full URL when accessible
+- **Video Duration**: Automatically calculated and stored during upload
+
+### Bookmark System
+- **Universal Bookmarking**: All endpoints include `is_bookmarked` status
+- **Real-time Status**: Bookmark status reflects current user's bookmarks
+- **Consistent Experience**: Same bookmark interface across all program lists
 
 ### Payment Gateway
 - Uses dummy payment gateway with 90% success rate
@@ -697,10 +993,16 @@ The landing endpoint returns 6 different sections:
 - Transaction IDs are auto-generated
 
 ### Progress Tracking
-- Videos considered completed at 90% watch time
-- Progress updates in real-time
-- Course completion based on topic completion
-- Time tracking in seconds and formatted strings
+- **Smart Duration**: Video duration automatically retrieved from database
+- **90% Completion Rule**: Videos considered completed at 90% watch time
+- **Real-time Updates**: Progress updates immediately
+- **Course Progress**: Based on actual module/topic counts from syllabus
+- **Secure Updates**: Requires purchase_id and program_type validation
+
+### Video Management
+- **Organized Storage**: Videos stored by program subtitle in `/media/program/Program_Name/`
+- **Duration Calculation**: Automatic duration extraction during upload using OpenCV/MoviePy
+- **Format Support**: Supports MM:SS and HH:MM:SS duration formats
 
 ---
 

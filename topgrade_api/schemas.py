@@ -45,7 +45,7 @@ class BookmarkSchema(Schema):
     program_id: int
 
 class UpdateProgressSchema(Schema):
+    program_type: str  # 'program' or 'advanced_program' - matches purchase program_type
     topic_id: int
-    topic_type: str  # 'topic' or 'advance_topic'
+    purchase_id: int  # Specific purchase to ensure correct program/topic mapping
     watch_time_seconds: int
-    total_duration_seconds: int = None  # optional

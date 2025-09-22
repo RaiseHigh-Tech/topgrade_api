@@ -5,7 +5,7 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from .schemas import AreaOfInterestSchema, PurchaseSchema, BookmarkSchema, UpdateProgressSchema
-from .models import Program, AdvanceProgram, Category, UserPurchase, UserBookmark, UserCourseProgress, UserTopicProgress
+from .models import Program, AdvanceProgram, Category, UserPurchase, UserBookmark, UserCourseProgress, UserTopicProgress, Topic, AdvanceTopic
 from django.db import models
 from django.utils import timezone
 from typing import List
@@ -559,7 +559,8 @@ def get_program_details(request, program_type: str, program_id: int):
                 topic_data = {
                     "id": topic.id,
                     "topic_title": topic.topic_title,
-                    "video_url": video_url
+                    "video_url": video_url,
+                    "video_duration": topic.video_duration  # Get duration from database
                 }
                 
                 topics_list.append(topic_data)
@@ -1046,9 +1047,8 @@ def get_my_learnings(
                     "progress": {
                         "percentage": round(progress_percentage, 2),
                         "status": "completed" if is_completed else "onprogress",
-                        "completed_modules": int((progress_percentage / 100) * 10),  # Simulate modules
-                        "total_modules": 10,  # Simulate total modules
-                        "estimated_completion": "2-3 weeks" if not is_completed else "Completed"
+                        "completed_modules": int((progress_percentage / 100) * program.syllabuses.count()),  # Based on actual syllabus count
+                        "total_modules": program.syllabuses.count()  # Actual syllabus count
                     }
                 }
             elif purchase.program_type == 'advanced_program' and purchase.advanced_program:
@@ -1100,9 +1100,8 @@ def get_my_learnings(
                     "progress": {
                         "percentage": round(progress_percentage, 2),
                         "status": "completed" if is_completed else "onprogress",
-                        "completed_modules": int((progress_percentage / 100) * 15),  # Advanced programs have more modules
-                        "total_modules": 15,
-                        "estimated_completion": "4-6 weeks" if not is_completed else "Completed"
+                        "completed_modules": int((progress_percentage / 100) * program.advance_syllabuses.count()),  # Based on actual advance syllabus count
+                        "total_modules": program.advance_syllabuses.count()  # Actual advance syllabus count
                     }
                 }
             else:
@@ -1134,56 +1133,95 @@ def get_my_learnings(
 def update_learning_progress(request, data: UpdateProgressSchema):
     """
     Update user's progress for a specific topic/video
+    Optimized for better performance and maintainability
     """
     try:
         user = request.auth
         
-        # Validate topic type
-        if data.topic_type not in ['topic', 'advance_topic']:
+        # Validate input
+        if data.program_type not in ['program', 'advanced_program']:
             return JsonResponse({
                 "success": False,
-                "message": "Invalid topic_type. Must be 'topic' or 'advance_topic'"
+                "message": "Invalid program_type. Must be 'program' or 'advanced_program'"
             }, status=400)
         
-        # Get the topic and associated purchase
-        from .models import Topic, AdvanceTopic, Syllabus, AdvanceSyllabus
+        if data.watch_time_seconds < 0:
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid watch time value"
+            }, status=400)
         
-        if data.topic_type == 'topic':
+        # Helper function to get topic and purchase with explicit purchase validation
+        def get_topic_and_purchase():
+            # First, verify the purchase belongs to the user
             try:
-                topic = Topic.objects.get(id=data.topic_id)
-                # Find the purchase for this topic's program
-                program = topic.syllabus.program
                 purchase = UserPurchase.objects.get(
+                    id=data.purchase_id,
                     user=user,
-                    program=program,
                     status='completed'
                 )
-                topic_obj = topic
-                advance_topic_obj = None
-            except (Topic.DoesNotExist, UserPurchase.DoesNotExist):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Topic not found or you don't have access to this course"
-                }, status=404)
-        else:
-            try:
-                advance_topic = AdvanceTopic.objects.get(id=data.topic_id)
-                # Find the purchase for this topic's program
-                program = advance_topic.advance_syllabus.advance_program
-                purchase = UserPurchase.objects.get(
-                    user=user,
-                    advanced_program=program,
-                    status='completed'
-                )
-                topic_obj = None
-                advance_topic_obj = advance_topic
-            except (AdvanceTopic.DoesNotExist, UserPurchase.DoesNotExist):
-                return JsonResponse({
-                    "success": False,
-                    "message": "Advanced topic not found or you don't have access to this course"
-                }, status=404)
+            except UserPurchase.DoesNotExist:
+                raise ValueError("Purchase not found or access denied")
+            
+            # Verify purchase program_type matches request program_type
+            if purchase.program_type != data.program_type:
+                raise ValueError("Program type mismatch with purchase")
+            
+            # Look in the correct table based on program_type
+            if data.program_type == 'program':
+                try:
+                    topic = Topic.objects.select_related('syllabus__program').get(id=data.topic_id)
+                    # Verify topic belongs to the purchased program
+                    if topic.syllabus.program != purchase.program:
+                        raise ValueError("Topic does not belong to the purchased program")
+                    return topic, None, purchase, topic.topic_title
+                except Topic.DoesNotExist:
+                    raise ValueError("Topic not found")
+            else:  # advanced_program
+                try:
+                    advance_topic = AdvanceTopic.objects.select_related('advance_syllabus__advance_program').get(id=data.topic_id)
+                    # Verify topic belongs to the purchased advanced program
+                    if advance_topic.advance_syllabus.advance_program != purchase.advanced_program:
+                        raise ValueError("Advanced topic does not belong to the purchased program")
+                    return None, advance_topic, purchase, advance_topic.topic_title
+                except AdvanceTopic.DoesNotExist:
+                    raise ValueError("Advanced topic not found")
         
-        # Get or create topic progress
+        # Get topic and purchase data
+        try:
+            topic_obj, advance_topic_obj, purchase, topic_title = get_topic_and_purchase()
+        except ValueError as e:
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=404)
+        
+        # Get video duration from database
+        video_duration = None
+        if topic_obj and topic_obj.video_duration:
+            # Parse video_duration string (MM:SS or HH:MM:SS) to seconds
+            try:
+                duration_parts = topic_obj.video_duration.split(':')
+                if len(duration_parts) == 2:  # MM:SS
+                    video_duration = int(duration_parts[0]) * 60 + int(duration_parts[1])
+                elif len(duration_parts) == 3:  # HH:MM:SS
+                    video_duration = int(duration_parts[0]) * 3600 + int(duration_parts[1]) * 60 + int(duration_parts[2])
+            except (ValueError, IndexError):
+                video_duration = None
+        elif advance_topic_obj and advance_topic_obj.video_duration:
+            # Parse advance topic video duration
+            try:
+                duration_parts = advance_topic_obj.video_duration.split(':')
+                if len(duration_parts) == 2:  # MM:SS
+                    video_duration = int(duration_parts[0]) * 60 + int(duration_parts[1])
+                elif len(duration_parts) == 3:  # HH:MM:SS
+                    video_duration = int(duration_parts[0]) * 3600 + int(duration_parts[1]) * 60 + int(duration_parts[2])
+            except (ValueError, IndexError):
+                video_duration = None
+        
+        total_duration = video_duration or 1800  # Default to 30 minutes if no duration found
+        
+        # Get or create topic progress with optimized defaults
         topic_progress, created = UserTopicProgress.objects.get_or_create(
             user=user,
             purchase=purchase,
@@ -1191,24 +1229,67 @@ def update_learning_progress(request, data: UpdateProgressSchema):
             advance_topic=advance_topic_obj,
             defaults={
                 'status': 'not_started',
-                'total_duration_seconds': data.total_duration_seconds or 1800
+                'total_duration_seconds': total_duration,
+                'watch_time_seconds': 0,
+                'completion_percentage': 0.0,
+                'last_watched_at': timezone.now()
             }
         )
         
-        # Update progress
-        topic_progress.update_progress(
-            watch_time_seconds=data.watch_time_seconds,
-            total_duration_seconds=data.total_duration_seconds
-        )
+        # Update progress with validation
+        topic_progress.watch_time_seconds = max(topic_progress.watch_time_seconds, data.watch_time_seconds)
+        topic_progress.total_duration_seconds = total_duration
+        topic_progress.last_watched_at = timezone.now()
         
-        # Update course progress
+        # Calculate completion percentage
+        completion_percentage = min(100.0, (topic_progress.watch_time_seconds / total_duration) * 100)
+        topic_progress.completion_percentage = completion_percentage
+        
+        # Update status based on completion
+        if completion_percentage >= 90:  # Consider 90% as completed
+            topic_progress.status = 'completed'
+            topic_progress.completed_at = timezone.now()
+        elif completion_percentage > 0:
+            topic_progress.status = 'in_progress'
+        
+        topic_progress.save()
+        
+        # Update course progress efficiently
         course_progress, _ = UserCourseProgress.objects.get_or_create(
             user=user,
-            purchase=purchase
+            purchase=purchase,
+            defaults={
+                'completion_percentage': 0.0,
+                'completed_topics': 0,
+                'total_topics': 0,
+                'is_completed': False
+            }
         )
-        course_progress.update_progress()
         
-        topic_title = topic_obj.topic_title if topic_obj else advance_topic_obj.topic_title
+        # Calculate course progress based on completed topics
+        if purchase.program_type == 'program':
+            total_topics = Topic.objects.filter(syllabus__program=purchase.program).count()
+            completed_topics = UserTopicProgress.objects.filter(
+                user=user,
+                purchase=purchase,
+                topic__isnull=False,
+                status='completed'
+            ).count()
+        else:
+            total_topics = AdvanceTopic.objects.filter(advance_syllabus__advance_program=purchase.advanced_program).count()
+            completed_topics = UserTopicProgress.objects.filter(
+                user=user,
+                purchase=purchase,
+                advance_topic__isnull=False,
+                status='completed'
+            ).count()
+        
+        course_completion = (completed_topics / total_topics * 100) if total_topics > 0 else 0
+        course_progress.completion_percentage = course_completion
+        course_progress.completed_topics = completed_topics
+        course_progress.total_topics = total_topics
+        course_progress.is_completed = course_completion >= 100
+        course_progress.save()
         
         return {
             "success": True,
@@ -1219,7 +1300,8 @@ def update_learning_progress(request, data: UpdateProgressSchema):
                 "completion_percentage": float(topic_progress.completion_percentage),
                 "watch_time_seconds": topic_progress.watch_time_seconds,
                 "total_duration_seconds": topic_progress.total_duration_seconds,
-                "is_completed": topic_progress.is_completed
+                "is_completed": topic_progress.status == 'completed',
+                "last_watched_at": topic_progress.last_watched_at.isoformat()
             },
             "course_progress": {
                 "completion_percentage": float(course_progress.completion_percentage),
@@ -1231,193 +1313,3 @@ def update_learning_progress(request, data: UpdateProgressSchema):
         
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error updating progress: {str(e)}"}, status=500)
-
-@api.get("/learning/course/{purchase_id}", auth=AuthBearer())
-def get_course_learning_details(request, purchase_id: int):
-    """
-    Get detailed learning information for a specific purchased course with all topics and progress
-    """
-    try:
-        user = request.auth
-        
-        # Get the purchase
-        try:
-            purchase = UserPurchase.objects.get(
-                id=purchase_id,
-                user=user,
-                status='completed'
-            )
-        except UserPurchase.DoesNotExist:
-            return JsonResponse({
-                "success": False,
-                "message": "Course not found or you don't have access"
-            }, status=404)
-        
-        # Get or create course progress
-        course_progress, created = UserCourseProgress.objects.get_or_create(
-            user=user,
-            purchase=purchase
-        )
-        
-        if created:
-            # Initialize progress for new purchase
-            from .models import Syllabus, AdvanceSyllabus
-            
-            if purchase.program_type == 'program' and purchase.program:
-                syllabi = Syllabus.objects.filter(program=purchase.program).prefetch_related('topics')
-                for syllabus in syllabi:
-                    for topic in syllabus.topics.all():
-                        UserTopicProgress.objects.get_or_create(
-                            user=user,
-                            purchase=purchase,
-                            topic=topic,
-                            defaults={
-                                'status': 'not_started',
-                                'total_duration_seconds': 1800,  # 30 minutes default
-                            }
-                        )
-            elif purchase.program_type == 'advanced_program' and purchase.advanced_program:
-                syllabi = AdvanceSyllabus.objects.filter(advance_program=purchase.advanced_program).prefetch_related('topics')
-                for syllabus in syllabi:
-                    for topic in syllabus.topics.all():
-                        UserTopicProgress.objects.get_or_create(
-                            user=user,
-                            purchase=purchase,
-                            advance_topic=topic,
-                            defaults={
-                                'status': 'not_started',
-                                'total_duration_seconds': 2700,  # 45 minutes default
-                            }
-                        )
-        course_progress.update_progress()
-        
-        # Get program details
-        if purchase.program_type == 'program':
-            program = purchase.program
-            syllabi = program.syllabuses.all().prefetch_related('topics')
-        else:
-            program = purchase.advanced_program
-            syllabi = program.syllabuses.all().prefetch_related('topics')
-        
-        # Build syllabus with progress
-        syllabus_data = []
-        for syllabus in syllabi:
-            topics_data = []
-            
-            if purchase.program_type == 'program':
-                topics = syllabus.topics.all()
-                topic_type = 'topic'
-            else:
-                topics = syllabus.topics.all()
-                topic_type = 'advance_topic'
-            
-            for topic in topics:
-                # Get topic progress
-                if purchase.program_type == 'program':
-                    topic_progress = UserTopicProgress.objects.filter(
-                        user=user,
-                        purchase=purchase,
-                        topic=topic
-                    ).first()
-                else:
-                    topic_progress = UserTopicProgress.objects.filter(
-                        user=user,
-                        purchase=purchase,
-                        advance_topic=topic
-                    ).first()
-                
-                if topic_progress:
-                    watch_hours = topic_progress.watch_time_seconds // 3600
-                    watch_minutes = (topic_progress.watch_time_seconds % 3600) // 60
-                    watch_seconds = topic_progress.watch_time_seconds % 60
-                    
-                    total_hours = topic_progress.total_duration_seconds // 3600
-                    total_minutes = (topic_progress.total_duration_seconds % 3600) // 60
-                    
-                    is_intro = getattr(topic, 'is_intro', False)
-                    topic_data = {
-                        "id": topic.id,
-                        "topic_title": topic.topic_title,
-                        "topic_type": topic_type,
-                        "is_free_trail": getattr(topic, 'is_free_trail', False),
-                        "is_intro": is_intro,
-                        "is_locked": False,  # User has purchased, so not locked
-                        "video_url": topic.video_url,  # Show video URL since user purchased
-                        "progress": {
-                            "status": topic_progress.status,
-                            "completion_percentage": float(topic_progress.completion_percentage),
-                            "watch_time": f"{watch_hours:02d}:{watch_minutes:02d}:{watch_seconds:02d}",
-                            "watch_time_seconds": topic_progress.watch_time_seconds,
-                            "total_duration": f"{total_hours:02d}:{total_minutes:02d}",
-                            "total_duration_seconds": topic_progress.total_duration_seconds,
-                            "started_at": topic_progress.started_at.isoformat() if topic_progress.started_at else None,
-                            "completed_at": topic_progress.completed_at.isoformat() if topic_progress.completed_at else None,
-                            "last_watched_at": topic_progress.last_watched_at.isoformat()
-                        }
-                    }
-                else:
-                    # Topic not started
-                    is_intro = getattr(topic, 'is_intro', False)
-                    topic_data = {
-                        "id": topic.id,
-                        "topic_title": topic.topic_title,
-                        "topic_type": topic_type,
-                        "is_free_trail": getattr(topic, 'is_free_trail', False),
-                        "is_intro": is_intro,
-                        "is_locked": False,  # User has purchased, so not locked
-                        "video_url": topic.video_url,  # Show video URL since user purchased
-                        "progress": {
-                            "status": "not_started",
-                            "completion_percentage": 0,
-                            "watch_time": "00:00:00",
-                            "watch_time_seconds": 0,
-                            "total_duration": "30:00" if purchase.program_type == 'program' else "45:00",
-                            "total_duration_seconds": 1800 if purchase.program_type == 'program' else 2700,
-                            "started_at": None,
-                            "completed_at": None,
-                            "last_watched_at": None
-                        }
-                    }
-                
-                topics_data.append(topic_data)
-            
-            syllabus_data.append({
-                "id": syllabus.id,
-                "module_title": syllabus.module_title,
-                "topics_count": len(topics_data),
-                "completed_topics": len([t for t in topics_data if t['progress']['status'] == 'completed']),
-                "topics": topics_data
-            })
-        
-        # Format course progress times
-        total_watch_hours = course_progress.total_watch_time_seconds // 3600
-        total_watch_minutes = (course_progress.total_watch_time_seconds % 3600) // 60
-        
-        return {
-            "success": True,
-            "course": {
-                "purchase_id": purchase.id,
-                "program_type": purchase.program_type,
-                "program_title": program.title,
-                "program_subtitle": program.subtitle,
-                "program_description": program.description,
-                "program_image": program.image.url if program.image else None,
-                "purchase_date": purchase.purchase_date.isoformat(),
-                "progress": {
-                    "completion_percentage": float(course_progress.completion_percentage),
-                    "completed_topics": course_progress.completed_topics,
-                    "total_topics": course_progress.total_topics,
-                    "in_progress_topics": course_progress.in_progress_topics,
-                    "total_watch_time": f"{total_watch_hours}h {total_watch_minutes}m",
-                    "total_watch_time_seconds": course_progress.total_watch_time_seconds,
-                    "is_completed": course_progress.is_completed,
-                    "started_at": course_progress.started_at.isoformat() if course_progress.started_at else None,
-                    "completed_at": course_progress.completed_at.isoformat() if course_progress.completed_at else None,
-                    "last_activity_at": course_progress.last_activity_at.isoformat()
-                },
-                "syllabus": syllabus_data
-            }
-        }
-        
-    except Exception as e:
-        return JsonResponse({"success": False, "message": f"Error fetching course details: {str(e)}"}, status=500)
