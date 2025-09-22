@@ -137,12 +137,16 @@ class Syllabus(models.Model):
     def __str__(self):
         return self.module_title
 
+def get_topic_video_path(instance, filename):
+    """Generate upload path for topic videos"""
+    program_subtitle = instance.syllabus.program.subtitle.replace(' ', '_').replace('/', '_') if instance.syllabus.program.subtitle else instance.syllabus.program.title.replace(' ', '_').replace('/', '_')
+    return f'program/{program_subtitle}/{filename}'
+
 class Topic(models.Model):
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=200)
-    video_url = models.URLField(blank=True, null=True)
+    video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, help_text="Upload video file")
     description = models.TextField(blank=True, null=True)
-    is_free_trail = models.BooleanField(default=False)
     is_intro = models.BooleanField(default=False)
 
     def __str__(self):
@@ -175,10 +179,15 @@ class AdvanceSyllabus(models.Model):
     def __str__(self):
         return self.module_title
 
+def get_advance_topic_video_path(instance, filename):
+    """Generate upload path for advance topic videos"""
+    program_subtitle = instance.advance_syllabus.advance_program.subtitle.replace(' ', '_').replace('/', '_') if instance.advance_syllabus.advance_program.subtitle else instance.advance_syllabus.advance_program.title.replace(' ', '_').replace('/', '_')
+    return f'advance_program/{program_subtitle}/{filename}'
+
 class AdvanceTopic(models.Model):
     advance_syllabus = models.ForeignKey(AdvanceSyllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=200)
-    video_url = models.URLField(blank=True, null=True)
+    video_file = models.FileField(upload_to=get_advance_topic_video_path, blank=True, null=True, help_text="Upload video file")
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):

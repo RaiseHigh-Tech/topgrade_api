@@ -159,8 +159,8 @@ class SyllabusAdmin(admin.ModelAdmin):
 
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ['topic_title', 'syllabus', 'is_free_trail', 'is_intro']
-    list_filter = ['is_free_trail', 'is_intro', 'syllabus__program']
+    list_display = ['topic_title', 'syllabus', 'is_intro']
+    list_filter = ['is_intro', 'syllabus__program']
     search_fields = ['topic_title']
 
 

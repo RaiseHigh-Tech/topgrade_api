@@ -546,28 +546,21 @@ def get_program_details(request, program_type: str, program_id: int):
         for syllabus in syllabi:
             topics_list = []
             for topic in syllabus.topics.all():
-                if program_type == 'program':
-                    # Regular programs have intro videos
-                    is_accessible = has_purchased or topic.is_intro
-                    topic_data = {
-                        "id": topic.id,
-                        "topic_title": topic.topic_title,
-                        "is_free_trail": topic.is_free_trail,
-                        "is_intro": topic.is_intro,
-                        "is_locked": not is_accessible
-                    }
-                else:
-                    # Advanced programs - all videos locked unless purchased
-                    topic_data = {
-                        "id": topic.id,
-                        "topic_title": topic.topic_title,
-                        "is_locked": not has_purchased
-                    }
-                    is_accessible = has_purchased
+                # Determine video access: intro videos always accessible, others only if purchased
+                video_url = ""
+                if topic.is_intro and topic.video_file:
+                    # Intro videos are always accessible
+                    video_url = topic.video_file.url
+                elif has_purchased and topic.video_file:
+                    # All videos accessible if user purchased
+                    video_url = topic.video_file.url
+                # Otherwise, video_url remains empty string
                 
-                # Only add video_url if accessible
-                if is_accessible:
-                    topic_data["video_url"] = topic.video_url
+                topic_data = {
+                    "id": topic.id,
+                    "topic_title": topic.topic_title,
+                    "video_url": video_url
+                }
                 
                 topics_list.append(topic_data)
             

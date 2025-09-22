@@ -570,17 +570,12 @@
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
-                                                    <input type="url" class="form-control form-control-sm" name="modules[0][topics][0][video_url]" placeholder="Video URL (optional)">
+                                                    <label class="form-label form-label-sm">Video File:</label>
+                                                    <input type="file" class="form-control form-control-sm" name="modules[0][topics][0][video_file]" accept="video/*">
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
-                                                <div class="col-6">
-                                                    <div class="form-check form-check-sm">
-                                                        <input class="form-check-input" type="checkbox" name="modules[0][topics][0][is_free_trail]" id="topic-0-0-free-trail">
-                                                        <label class="form-check-label" for="topic-0-0-free-trail">Free Trial</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
+                                                <div class="col-12">
                                                     <div class="form-check form-check-sm">
                                                         <input class="form-check-input" type="checkbox" name="modules[0][topics][0][is_intro]" id="topic-0-0-intro">
                                                         <label class="form-check-label" for="topic-0-0-intro">Intro Video</label>
@@ -921,17 +916,15 @@
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
-                                                    <input type="url" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_url]" value="{{ topic.video_url }}" placeholder="Video URL (optional)">
+                                                    <label class="form-label form-label-sm">Video File:</label>
+                                                    <input type="file" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    {% if topic.video_file %}
+                                                        <small class="text-muted">Current: {{ topic.video_file.name }}</small>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
-                                                <div class="col-6">
-                                                    <div class="form-check form-check-sm">
-                                                        <input class="form-check-input" type="checkbox" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][is_free_trail]" id="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-free-trail" {% if topic.is_free_trail %}checked{% endif %}>
-                                                        <label class="form-check-label" for="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-free-trail">Free Trial</label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6">
+                                                <div class="col-12">
                                                     <div class="form-check form-check-sm">
                                                         <input class="form-check-input" type="checkbox" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][is_intro]" id="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro" {% if topic.is_intro %}checked{% endif %}>
                                                         <label class="form-check-label" for="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro">Intro Video</label>
@@ -2383,17 +2376,12 @@ function addTopic(button) {
             </div>
             <div class="row mt-2">
                 <div class="col-12">
-                    <input type="url" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][video_url]" placeholder="Video URL (optional)">
+                    <label class="form-label form-label-sm">Video File:</label>
+                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][video_file]" accept="video/*">
                 </div>
             </div>
             <div class="row mt-2">
-                <div class="col-6">
-                    <div class="form-check form-check-sm">
-                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicCount}][is_free_trail]" id="topic-${moduleIndex}-${topicCount}-free-trail">
-                        <label class="form-check-label" for="topic-${moduleIndex}-${topicCount}-free-trail">Free Trial</label>
-                    </div>
-                </div>
-                <div class="col-6">
+                <div class="col-12">
                     <div class="form-check form-check-sm">
                         <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicCount}][is_intro]" id="topic-${moduleIndex}-${topicCount}-intro">
                         <label class="form-check-label" for="topic-${moduleIndex}-${topicCount}-intro">Intro Video</label>
@@ -2454,7 +2442,9 @@ function reindexTopics(moduleItem) {
         
         if (titleInput) titleInput.name = `modules[${moduleIndex}][topics][${topicIndex}][title]`;
         if (descriptionTextarea) descriptionTextarea.name = `modules[${moduleIndex}][topics][${topicIndex}][description]`;
+        const videoFileInput = topic.querySelector('input[type="file"]');
         if (videoUrlInput) videoUrlInput.name = `modules[${moduleIndex}][topics][${topicIndex}][video_url]`;
+        if (videoFileInput) videoFileInput.name = `modules[${moduleIndex}][topics][${topicIndex}][video_file]`;
         if (freeTrailCheckbox) {
             freeTrailCheckbox.name = `modules[${moduleIndex}][topics][${topicIndex}][is_free_trail]`;
             freeTrailCheckbox.id = `topic-${moduleIndex}-${topicIndex}-free-trail`;
@@ -2919,8 +2909,7 @@ function openEditModal(programId) {
                         {
                             topic_title: "{{ topic.topic_title|escapejs }}",
                             description: "{{ topic.description|escapejs }}",
-                            video_url: "{{ topic.video_url|escapejs }}",
-                            is_free_trail: {{ topic.is_free_trail|yesno:"true,false" }},
+                            video_file: "{{ topic.video_file.name|default:''|escapejs }}",
                             is_intro: {{ topic.is_intro|yesno:"true,false" }}
                         }{% if not forloop.last %},{% endif %}
                         {% endfor %}
@@ -3029,7 +3018,7 @@ function addEditModuleHTML(moduleIndex, moduleTitle = '', topics = []) {
                 </div>
                 
                 <div class="topics-container">
-                    ${topics.length === 0 ? getEditTopicHTML(moduleIndex, 0, '', '', '', false, false) : topics.map((topic, topicIndex) => getEditTopicHTML(moduleIndex, topicIndex, topic.topic_title, topic.description, topic.video_url, topic.is_free_trail, topic.is_intro)).join('')}
+                    ${topics.length === 0 ? getEditTopicHTML(moduleIndex, 0, '', '', '', false) : topics.map((topic, topicIndex) => getEditTopicHTML(moduleIndex, topicIndex, topic.topic_title, topic.description, topic.video_file, topic.is_intro)).join('')}
                 </div>
             </div>
         </div>
@@ -3039,7 +3028,7 @@ function addEditModuleHTML(moduleIndex, moduleTitle = '', topics = []) {
 }
 
 // Function to get topic HTML for edit modal
-function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescription = '', topicVideoUrl = '', topicFreeTrail = false, topicIntro = false) {
+function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescription = '', topicVideoFile = '', topicIntro = false) {
     return `
         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicIndex}">
             <div class="row align-items-start">
@@ -3060,17 +3049,13 @@ function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescrip
             </div>
             <div class="row mt-2">
                 <div class="col-12">
-                    <input type="url" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][video_url]" value="${topicVideoUrl || ''}" placeholder="Video URL (optional)">
+                    <label class="form-label form-label-sm">Video File:</label>
+                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][video_file]" accept="video/*">
+                    ${topicVideoFile ? `<small class="text-muted">Current: ${topicVideoFile}</small>` : ''}
                 </div>
             </div>
             <div class="row mt-2">
-                <div class="col-6">
-                    <div class="form-check form-check-sm">
-                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicIndex}][is_free_trail]" id="edit-topic-${moduleIndex}-${topicIndex}-free-trail" ${topicFreeTrail ? 'checked' : ''}>
-                        <label class="form-check-label" for="edit-topic-${moduleIndex}-${topicIndex}-free-trail">Free Trial</label>
-                    </div>
-                </div>
-                <div class="col-6">
+                <div class="col-12">
                     <div class="form-check form-check-sm">
                         <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicIndex}][is_intro]" id="edit-topic-${moduleIndex}-${topicIndex}-intro" ${topicIntro ? 'checked' : ''}>
                         <label class="form-check-label" for="edit-topic-${moduleIndex}-${topicIndex}-intro">Intro Video</label>

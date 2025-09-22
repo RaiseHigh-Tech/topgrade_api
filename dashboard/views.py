@@ -161,12 +161,16 @@ def programs_view(request):
                             # Create topics for this module
                             for topic_index, topic_data in module_data['topics'].items():
                                 if topic_data.get('title'):
+                                    # Handle video file upload
+                                    video_file = None
+                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                    
                                     Topic.objects.create(
                                         syllabus=syllabus,
                                         topic_title=topic_data['title'],
                                         description=topic_data.get('description', ''),
-                                        video_url=topic_data.get('video_url', ''),
-                                        is_free_trail=topic_data.get('is_free_trail') == 'on',
+                                        video_file=video_file,
                                         is_intro=topic_data.get('is_intro') == 'on'
                                     )
                     
@@ -457,12 +461,16 @@ def edit_program_view(request, id):
                         # Create topics for this module
                         for topic_index, topic_data in module_data['topics'].items():
                             if topic_data.get('title'):
+                                # Handle video file upload
+                                video_file = None
+                                if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                    video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                
                                 Topic.objects.create(
                                     syllabus=syllabus,
                                     topic_title=topic_data['title'],
                                     description=topic_data.get('description', ''),
-                                    video_url=topic_data.get('video_url', ''),
-                                    is_free_trail=topic_data.get('is_free_trail') == 'on',
+                                    video_file=video_file,
                                     is_intro=topic_data.get('is_intro') == 'on'
                                 )
                 
