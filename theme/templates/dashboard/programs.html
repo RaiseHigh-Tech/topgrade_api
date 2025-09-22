@@ -901,6 +901,25 @@
                                                     <textarea class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][description]" rows="2" placeholder="Topic description (optional)">{{ topic.description }}</textarea>
                                                 </div>
                                             </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <input type="url" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_url]" value="{{ topic.video_url }}" placeholder="Video URL (optional)">
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-6">
+                                                    <div class="form-check form-check-sm">
+                                                        <input class="form-check-input" type="checkbox" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][is_free_trail]" id="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-free-trail" {% if topic.is_free_trail %}checked{% endif %}>
+                                                        <label class="form-check-label" for="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-free-trail">Free Trial</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-check form-check-sm">
+                                                        <input class="form-check-input" type="checkbox" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][is_intro]" id="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro" {% if topic.is_intro %}checked{% endif %}>
+                                                        <label class="form-check-label" for="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro">Intro Video</label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                         {% empty %}
                                         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
@@ -2271,6 +2290,25 @@ function addModule() {
                                 <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
                             </div>
                         </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <input type="url" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][0][video_url]" placeholder="Video URL (optional)">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][0][is_free_trail]" id="topic-${moduleIndex}-0-free-trail">
+                                    <label class="form-check-label" for="topic-${moduleIndex}-0-free-trail">Free Trial</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][0][is_intro]" id="topic-${moduleIndex}-0-intro">
+                                    <label class="form-check-label" for="topic-${moduleIndex}-0-intro">Intro Video</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2456,6 +2494,26 @@ function resetSyllabusToInitialState() {
                         descriptionTextarea.value = '';
                         descriptionTextarea.name = 'modules[0][topics][0][description]';
                     }
+                    
+                    // Reset other topic fields
+                    const videoUrlInput = firstTopic.querySelector('input[type="url"]');
+                    const freeTrailCheckbox = firstTopic.querySelector('input[name*="is_free_trail"]');
+                    const introCheckbox = firstTopic.querySelector('input[name*="is_intro"]');
+                    
+                    if (videoUrlInput) {
+                        videoUrlInput.value = '';
+                        videoUrlInput.name = 'modules[0][topics][0][video_url]';
+                    }
+                    if (freeTrailCheckbox) {
+                        freeTrailCheckbox.checked = false;
+                        freeTrailCheckbox.name = 'modules[0][topics][0][is_free_trail]';
+                        freeTrailCheckbox.id = 'topic-0-0-free-trail';
+                    }
+                    if (introCheckbox) {
+                        introCheckbox.checked = false;
+                        introCheckbox.name = 'modules[0][topics][0][is_intro]';
+                        introCheckbox.id = 'topic-0-0-intro';
+                    }
                 }
             }
         }
@@ -2516,6 +2574,25 @@ function addEditModule() {
                         <div class="row">
                             <div class="col-12">
                                 <textarea class="form-control form-control-sm" name="modules[${editModuleIndex}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <input type="url" class="form-control form-control-sm" name="modules[${editModuleIndex}][topics][0][video_url]" placeholder="Video URL (optional)">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${editModuleIndex}][topics][0][is_free_trail]" id="edit-topic-${editModuleIndex}-0-free-trail">
+                                    <label class="form-check-label" for="edit-topic-${editModuleIndex}-0-free-trail">Free Trial</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${editModuleIndex}][topics][0][is_intro]" id="edit-topic-${editModuleIndex}-0-intro">
+                                    <label class="form-check-label" for="edit-topic-${editModuleIndex}-0-intro">Intro Video</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2788,7 +2865,10 @@ function openEditModal(programId) {
                         {% for topic in syllabus.topics.all %}
                         {
                             topic_title: "{{ topic.topic_title|escapejs }}",
-                            description: "{{ topic.description|escapejs }}"
+                            description: "{{ topic.description|escapejs }}",
+                            video_url: "{{ topic.video_url|escapejs }}",
+                            is_free_trail: {{ topic.is_free_trail|yesno:"true,false" }},
+                            is_intro: {{ topic.is_intro|yesno:"true,false" }}
                         }{% if not forloop.last %},{% endif %}
                         {% endfor %}
                     ]
@@ -2896,7 +2976,7 @@ function addEditModuleHTML(moduleIndex, moduleTitle = '', topics = []) {
                 </div>
                 
                 <div class="topics-container">
-                    ${topics.length === 0 ? getEditTopicHTML(moduleIndex, 0, '', '') : topics.map((topic, topicIndex) => getEditTopicHTML(moduleIndex, topicIndex, topic.topic_title, topic.description)).join('')}
+                    ${topics.length === 0 ? getEditTopicHTML(moduleIndex, 0, '', '', '', false, false) : topics.map((topic, topicIndex) => getEditTopicHTML(moduleIndex, topicIndex, topic.topic_title, topic.description, topic.video_url, topic.is_free_trail, topic.is_intro)).join('')}
                 </div>
             </div>
         </div>
@@ -2906,7 +2986,7 @@ function addEditModuleHTML(moduleIndex, moduleTitle = '', topics = []) {
 }
 
 // Function to get topic HTML for edit modal
-function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescription = '') {
+function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescription = '', topicVideoUrl = '', topicFreeTrail = false, topicIntro = false) {
     return `
         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicIndex}">
             <div class="row align-items-start">
@@ -2923,6 +3003,25 @@ function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescrip
             <div class="row">
                 <div class="col-12">
                     <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][description]" rows="2" placeholder="Topic description (optional)">${topicDescription}</textarea>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <input type="url" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][video_url]" value="${topicVideoUrl || ''}" placeholder="Video URL (optional)">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-6">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicIndex}][is_free_trail]" id="edit-topic-${moduleIndex}-${topicIndex}-free-trail" ${topicFreeTrail ? 'checked' : ''}>
+                        <label class="form-check-label" for="edit-topic-${moduleIndex}-${topicIndex}-free-trail">Free Trial</label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicIndex}][is_intro]" id="edit-topic-${moduleIndex}-${topicIndex}-intro" ${topicIntro ? 'checked' : ''}>
+                        <label class="form-check-label" for="edit-topic-${moduleIndex}-${topicIndex}-intro">Intro Video</label>
+                    </div>
                 </div>
             </div>
         </div>

@@ -164,7 +164,10 @@ def programs_view(request):
                                     Topic.objects.create(
                                         syllabus=syllabus,
                                         topic_title=topic_data['title'],
-                                        description=topic_data.get('description', '')
+                                        description=topic_data.get('description', ''),
+                                        video_url=topic_data.get('video_url', ''),
+                                        is_free_trail=topic_data.get('is_free_trail') == 'on',
+                                        is_intro=topic_data.get('is_intro') == 'on'
                                     )
                     
                     messages.success(request, 'Program with syllabus added successfully')
@@ -457,7 +460,10 @@ def edit_program_view(request, id):
                                 Topic.objects.create(
                                     syllabus=syllabus,
                                     topic_title=topic_data['title'],
-                                    description=topic_data.get('description', '')
+                                    description=topic_data.get('description', ''),
+                                    video_url=topic_data.get('video_url', ''),
+                                    is_free_trail=topic_data.get('is_free_trail') == 'on',
+                                    is_intro=topic_data.get('is_intro') == 'on'
                                 )
                 
                 messages.success(request, 'Program updated successfully')
