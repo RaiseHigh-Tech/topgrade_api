@@ -50,7 +50,7 @@ def add_area_of_interest(request, data: AreaOfInterestSchema):
         return JsonResponse({"message": f"Error updating area of interest: {str(e)}"}, status=500)
 
 
-@api.get("/categories")
+@api.get("/categories", auth=AuthBearer())
 def get_categories(request):
     """
     Get list of all categories
@@ -74,8 +74,7 @@ def get_categories(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error fetching categories: {str(e)}"}, status=500)
 
-
-@api.get("/landing")
+@api.get("/landing", auth=AuthBearer())
 def get_landing_data(request):
     """
     Get landing page data with different program groups
@@ -83,7 +82,7 @@ def get_landing_data(request):
     Each group contains max 5 programs
     """
     try:
-        def format_program_data(program, program_type):
+        def format_program_data(program, program_type, user):
             """Helper function to format program data consistently"""
             discounted_price = program.price
             if program.discount_percentage > 0:
@@ -101,6 +100,21 @@ def get_landing_data(request):
                     status='completed'
                 ).count()
             
+            # Check if user has bookmarked this program
+            is_bookmarked = False
+            if program_type == 'program':
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='program',
+                    program=program
+                ).exists()
+            else:
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='advanced_program',
+                    advanced_program=program
+                ).exists()
+            
             return {
                 "id": program.id,
                 "type": program_type,
@@ -115,6 +129,7 @@ def get_landing_data(request):
                 "duration": program.duration,
                 "program_rating": float(program.program_rating),
                 "is_best_seller": program.is_best_seller,
+                "is_bookmarked": is_bookmarked,
                 "enrolled_students": enrolled_students,
                 "pricing": {
                     "original_price": float(program.price),
@@ -124,15 +139,18 @@ def get_landing_data(request):
                 },
             }
         
+        # Get authenticated user
+        user = request.auth
+        
         # Top Courses - Highest rated programs (both regular and advanced)
         top_programs = Program.objects.filter(program_rating__gte=4.0).order_by('-program_rating', '-id')[:3]
         top_advanced = AdvanceProgram.objects.filter(program_rating__gte=4.0).order_by('-program_rating', '-id')[:2]
         
         top_course = []
         for program in top_programs:
-            top_course.append(format_program_data(program, 'program'))
+            top_course.append(format_program_data(program, 'program', user))
         for program in top_advanced:
-            top_course.append(format_program_data(program, 'advanced_program'))
+            top_course.append(format_program_data(program, 'advanced_program', user))
         
         # Recently Added - Latest programs by ID (assuming higher ID = newer)
         recent_programs = Program.objects.all().order_by('-id')[:3]
@@ -140,9 +158,9 @@ def get_landing_data(request):
         
         recently_added = []
         for program in recent_programs:
-            recently_added.append(format_program_data(program, 'program'))
+            recently_added.append(format_program_data(program, 'program', user))
         for program in recent_advanced:
-            recently_added.append(format_program_data(program, 'advanced_program'))
+            recently_added.append(format_program_data(program, 'advanced_program', user))
         
         # Featured - Best seller programs
         featured_programs = Program.objects.filter(is_best_seller=True).order_by('-program_rating', '-id')[:3]
@@ -150,27 +168,26 @@ def get_landing_data(request):
         
         featured = []
         for program in featured_programs:
-            featured.append(format_program_data(program, 'program'))
+            featured.append(format_program_data(program, 'program', user))
         for program in featured_advanced:
-            featured.append(format_program_data(program, 'advanced_program'))
+            featured.append(format_program_data(program, 'advanced_program', user))
         
         # Programs - Regular programs only (max 5)
         regular_programs = Program.objects.all().order_by('-program_rating', '-id')[:5]
         programs = []
         for program in regular_programs:
-            programs.append(format_program_data(program, 'program'))
+            programs.append(format_program_data(program, 'program', user))
         
         # Advanced Programs - Advanced programs only (max 5)
         advance_programs = AdvanceProgram.objects.all().order_by('-program_rating', '-id')[:5]
         advanced_programs = []
         for program in advance_programs:
-            advanced_programs.append(format_program_data(program, 'advanced_program'))
+            advanced_programs.append(format_program_data(program, 'advanced_program', user))
         
         # Continue Watching - Recently watched programs for authenticated users only
         continue_watching = []
-        user = getattr(request, 'auth', None) if hasattr(request, 'auth') else None
         
-        if user and user.is_authenticated:
+        if user:
             # Get user's recent topic progress (videos they've started but not completed)
             recent_progress = UserTopicProgress.objects.filter(
                 user=user,
@@ -207,7 +224,7 @@ def get_landing_data(request):
                         purchase=progress.purchase
                     ).first()
                     
-                    program_data = format_program_data(program, program_type)
+                    program_data = format_program_data(program, program_type, user)
                     
                     # Add progress information
                     program_data['progress'] = {
@@ -244,8 +261,7 @@ def get_landing_data(request):
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error fetching landing data: {str(e)}"}, status=500)
 
-
-@api.get("/programs/filter")
+@api.get("/programs/filter", auth=AuthBearer())
 def get_all_programs_with_filters(
     request,
     program_type: str = None,
@@ -262,6 +278,9 @@ def get_all_programs_with_filters(
     Get all programs (regular and advanced) with comprehensive filtering options
     """
     try:
+        # Get authenticated user
+        user = request.auth
+        
         # Filter parameters are now function arguments
         # Convert string category_id to int if provided
         if category_id is not None:
@@ -307,6 +326,13 @@ def get_all_programs_with_filters(
                 if program.discount_percentage > 0:
                     discounted_price = program.price * (1 - program.discount_percentage / 100)
                 
+                # Check if user has bookmarked this program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='program',
+                    program=program
+                ).exists()
+                
                 program_data = {
                     "id": program.id,
                     "type": "program",
@@ -321,6 +347,7 @@ def get_all_programs_with_filters(
                     "duration": program.duration,
                     "program_rating": float(program.program_rating),
                     "is_best_seller": program.is_best_seller,
+                    "is_bookmarked": is_bookmarked,
                     "enrolled_students": UserPurchase.objects.filter(
                         program=program,
                         status='completed'
@@ -364,6 +391,13 @@ def get_all_programs_with_filters(
                 if program.discount_percentage > 0:
                     discounted_price = program.price * (1 - program.discount_percentage / 100)
                 
+                # Check if user has bookmarked this advanced program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='advanced_program',
+                    advanced_program=program
+                ).exists()
+                
                 program_data = {
                     "id": program.id,
                     "type": "advanced_program",
@@ -375,6 +409,7 @@ def get_all_programs_with_filters(
                     "duration": program.duration,
                     "program_rating": float(program.program_rating),
                     "is_best_seller": program.is_best_seller,
+                    "is_bookmarked": is_bookmarked,
                     "enrolled_students": UserPurchase.objects.filter(
                         advanced_program=program,
                         status='completed'
@@ -439,8 +474,7 @@ def get_all_programs_with_filters(
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error fetching filtered programs: {str(e)}"}, status=500)
 
-
-@api.get("/program/{program_type}/{program_id}/details")
+@api.get("/program/{program_type}/{program_id}/details", auth=AuthBearer())
 def get_program_details(request, program_type: str, program_id: int):
     """
     Get detailed information about a specific program (regular or advanced) including syllabus and topics
@@ -473,8 +507,10 @@ def get_program_details(request, program_type: str, program_id: int):
             discounted_price = program.price * (1 - program.discount_percentage / 100)
         
         # Check if user has purchased this program (for video access)
-        user = request.auth if hasattr(request, 'auth') else None
+        user = request.auth
         has_purchased = False
+        is_bookmarked = False
+        
         if user:
             if program_type == 'program':
                 has_purchased = UserPurchase.objects.filter(
@@ -482,11 +518,25 @@ def get_program_details(request, program_type: str, program_id: int):
                     program=program,
                     status='completed'
                 ).exists()
+                
+                # Check if user has bookmarked this program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='program',
+                    program=program
+                ).exists()
             else:
                 has_purchased = UserPurchase.objects.filter(
                     user=user,
                     advanced_program=program,
                     status='completed'
+                ).exists()
+                
+                # Check if user has bookmarked this advanced program
+                is_bookmarked = UserBookmark.objects.filter(
+                    user=user,
+                    program_type='advanced_program',
+                    advanced_program=program
                 ).exists()
         
         # Get syllabus with topics
@@ -544,6 +594,7 @@ def get_program_details(request, program_type: str, program_id: int):
             "duration": program.duration,
             "program_rating": float(program.program_rating),
             "is_best_seller": program.is_best_seller,
+            "is_bookmarked": is_bookmarked,
             "enrolled_students": UserPurchase.objects.filter(
                 program=program,
                 status='completed'
@@ -1361,4 +1412,3 @@ def get_course_learning_details(request, purchase_id: int):
         
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error fetching course details: {str(e)}"}, status=500)
-
