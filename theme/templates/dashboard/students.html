@@ -1,0 +1,371 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}
+  Students
+{% endblock %}
+{% block breadcrumb %}
+  Students
+{% endblock %}
+{% block content %}
+  <div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Students</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-success fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ total_students }}">{{ total_students }}</span></h4>
+              <a href="#" class="text-decoration-underline">View all students</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-success-subtle rounded fs-3"><i class="bx bx-user-check text-success"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Today Enrolled</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-success fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ today_enrolled }}">{{ today_enrolled }}</span></h4>
+              <a href="#" class="text-decoration-underline">Today's registrations</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-info-subtle rounded fs-3"><i class="bx bx-user-plus text-info"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">High Interest Area</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-danger fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div class="flex-grow-1 me-2">
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="text-truncate d-block" style="max-width: 150px;" title="{{ high_interest_area }}">{{ high_interest_area }}</span></h4>
+              <a href="#" class="text-decoration-underline text-truncate d-block" style="max-width: 180px;">{{ high_interest_count }} students interested</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-warning-subtle rounded fs-3"><i class="bx bx-trending-up text-warning"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Active Learners</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-success fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ active_students }}">{{ active_students }}</span></h4>
+              <a href="#" class="text-decoration-underline">With purchases</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-primary-subtle rounded fs-3"><i class="bx bx-book-open text-primary"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Table -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title mb-0">Students List</h4>
+        </div>
+        <div class="card-body">
+          <div class="listjs-table" id="customerList">
+            <div class="row g-4 mb-3">
+              <div class="col-sm-auto">
+                <div>
+                  <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal" id="create-btn" data-bs-target="#addStudentModal"><i class="ri-add-line align-bottom me-1"></i> Add Student</button>
+                </div>
+              </div>
+              <div class="col-sm">
+                <div class="d-flex justify-content-sm-end">
+                  <div class="search-box ms-2">
+                    <input type="text" class="form-control search" placeholder="Search students..." />
+                    <i class="ri-search-line search-icon"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-responsive table-card mt-3 mb-1">
+              <table class="table align-middle table-nowrap" id="customerTable">
+                <thead class="table-light">
+                  <tr>
+                    <th>S No.</th>
+                    <th data-sort="customer_name">Student</th>
+                    <th data-sort="email">Email</th>
+                    <th data-sort="phone">Phone</th>
+                    <th data-sort="date">Joined Date</th>
+                    <th data-sort="interest">Interest Area</th>
+                    <th data-sort="status">Status</th>
+                    <th data-sort="action">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="list form-check-all">
+                  {% for student in students %}
+                    <tr>
+                      <td>{{ forloop.counter }}</td>
+                      <td class="customer_name">
+                        <div class="d-flex align-items-center">
+                          <div class="flex-shrink-0 me-2">
+                            <img src="{% static 'assets/dashboard/img/users/avatar-1.jpg' %}" alt="" class="avatar-xs rounded-circle" />
+                          </div>
+                          <div class="flex-grow-1">
+                            <h5 class="fs-13 mb-0"><a href="#" class="text-dark">{{ student.fullname|default:student.username }}</a></h5>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="email">{{ student.email }}</td>
+                      <td class="phone">{{ student.phone_number|default:'N/A' }}</td>
+                      <td class="date">{{ student.date_joined|date:'d/m/Y' }}</td>
+                      <td class="interest">
+                        {% if student.area_of_intrest %}
+                          <span class="badge bg-primary">{{ student.area_of_intrest|title|truncatechars:13 }}</span>
+                        {% else %}
+                          <span class="badge bg-secondary">Not specified</span>
+                        {% endif %}
+                      </td>
+                      <td class="status">
+                        {% if student.is_active %}
+                          <span class="badge bg-success-subtle text-success">Active</span>
+                        {% else %}
+                          <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="d-flex gap-2">
+                          <div class="view">
+                            <button class="btn btn-sm btn-primary view-item-btn"><i class="ri-eye-line align-bottom"></i></button>
+                          </div>
+                          <div class="remove">
+                            <button class="btn btn-sm btn-danger remove-item-btn" data-bs-toggle="modal" data-bs-target="#deleteRecordModal" onclick="setDeleteStudent({{ student.id }}, '{{ student.fullname|default:student.username|default:student.email }}')"><i class="ri-delete-bin-fill align-bottom"></i></button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="8" class="text-center">
+                        <div class="noresult">
+                          <div class="text-center">
+                            <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>
+                            <h5 class="mt-2">Sorry! No Students Found</h5>
+                            <p class="text-muted mb-0">We've searched everywhere but couldn't find any students.</p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if students.has_other_pages %}
+              <div class="d-flex justify-content-end">
+                <div class="pagination-wrap hstack gap-2">
+                  {% if students.has_previous %}
+                    <a class="page-item pagination-prev" href="?page={{ students.previous_page_number }}">Previous</a>
+                  {% else %}
+                    <a class="page-item pagination-prev disabled">Previous</a>
+                  {% endif %}
+
+                  <ul class="pagination listjs-pagination mb-0">
+                    {% for page_num in page_range %}
+                      {% if page_num == current_page %}
+                        <li class="active">
+                          <a class="page" href="#" data-i="{{ page_num }}" data-page="{{ page_num }}">{{ page_num }}</a>
+                        </li>
+                      {% else %}
+                        <li>
+                          <a class="page" href="?page={{ page_num }}" data-i="{{ page_num }}" data-page="{{ page_num }}">{{ page_num }}</a>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+
+                  {% if students.has_next %}
+                    <a class="page-item pagination-next" href="?page={{ students.next_page_number }}">Next</a>
+                  {% else %}
+                    <a class="page-item pagination-next disabled">Next</a>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Student Modal -->
+  <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-light p-3">
+          <h5 class="modal-title" id="addStudentModalLabel">Add New Student</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+        </div>
+        <form method="post" action="{% url 'dashboard:students' %}" class="tablelist-form" autocomplete="off">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="add_student" />
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="fullname-field" class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" id="fullname-field" name="fullname" class="form-control" placeholder="Enter full name" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="email-field" class="form-label">Email <span class="text-danger">*</span></label>
+              <input type="email" id="email-field" name="email" class="form-control" placeholder="Enter email address" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="phone-field" class="form-label">Phone Number</label>
+              <input type="tel" id="phone-field" name="phone_number" class="form-control" placeholder="Enter phone number" />
+            </div>
+
+            <div class="mb-3">
+              <label for="password-field" class="form-label">Password <span class="text-danger">*</span></label>
+              <div class="position-relative auth-pass-inputgroup">
+                <input type="password" id="password-field" name="password" class="form-control pe-5 password-input" placeholder="Enter password" required />
+                <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="area-interest-field" class="form-label">Area of Interest</label>
+              <select id="area-interest-field" name="area_of_intrest" class="form-select">
+                <option value="">Select interest area</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Mobile App Development">Mobile App Development</option>
+                <option value="Data Science">Data Science</option>
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                <option value="Cloud Computing">Cloud Computing</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="DevOps">DevOps</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="hstack gap-2 justify-content-end">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-success" id="add-btn">Add Student</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mt-2 text-center">
+            <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+            <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+              <h4>Are you Sure ?</h4>
+              <p class="text-muted mx-4 mb-0">
+                Are you sure you want to remove student <strong id="delete-student-name"></strong>?
+              </p>
+            </div>
+          </div>
+          <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
+            <form method="post" action="{% url 'dashboard:students' %}" style="display: inline;">
+              {% csrf_token %}
+              <input type="hidden" name="form_type" value="delete_student" />
+              <input type="hidden" name="student_id" id="delete-student-id" />
+              <button type="submit" class="btn w-sm btn-danger" id="delete-record">Yes, Delete It!</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+    // Password toggle functionality
+    document.addEventListener('DOMContentLoaded', function () {
+      const passwordInput = document.getElementById('password-field')
+      const passwordToggle = document.getElementById('password-addon')
+    
+      if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener('click', function () {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password'
+          passwordInput.setAttribute('type', type)
+    
+          // Toggle icon
+          const icon = passwordToggle.querySelector('i')
+          if (type === 'password') {
+            icon.classList.remove('ri-eye-off-fill')
+            icon.classList.add('ri-eye-fill')
+          } else {
+            icon.classList.remove('ri-eye-fill')
+            icon.classList.add('ri-eye-off-fill')
+          }
+        })
+      }
+    })
+    
+    // Delete student functionality
+    function setDeleteStudent(studentId, studentName) {
+      document.getElementById('delete-student-id').value = studentId
+      document.getElementById('delete-student-name').textContent = studentName
+    }
+  </script>
+{% endblock %}

@@ -609,6 +609,135 @@ def delete_program_view(request, id):
     categories_page = request.GET.get('categories_page', 1)
     return redirect(f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}')
 
+
 @admin_required
 def adv_program_view(request):
     return render(request, 'dashboard/advance_programs.html')
+
+@admin_required
+def students_view(request):
+    """Students view with statistics and student list"""
+    from django.utils import timezone
+    from django.db.models import Count
+    from topgrade_api.models import CustomUser, UserPurchase
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
+    # Handle POST request for adding new student
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+        
+        if form_type == 'add_student':
+            fullname = request.POST.get('fullname')
+            email = request.POST.get('email')
+            phone_number = request.POST.get('phone_number')
+            password = request.POST.get('password')
+            area_of_intrest = request.POST.get('area_of_intrest')
+            
+            if fullname and email and password:
+                try:
+                    # Check if email already exists
+                    if CustomUser.objects.filter(email=email).exists():
+                        messages.error(request, 'A user with this email already exists.')
+                    else:
+                        # Create new student
+                        student = CustomUser.objects.create_user(
+                            email=email,
+                            password=password,
+                            fullname=fullname,
+                            phone_number=phone_number,
+                            area_of_intrest=area_of_intrest,
+                            role='student'
+                        )
+                        messages.success(request, f'Student "{fullname}" has been added successfully.')
+                except Exception as e:
+                    messages.error(request, f'Error creating student: {str(e)}')
+            else:
+                messages.error(request, 'Full name, email, and password are required.')
+        
+        elif form_type == 'delete_student':
+            student_id = request.POST.get('student_id')
+            if student_id:
+                try:
+                    student = CustomUser.objects.get(id=student_id, role='student')
+                    student_name = student.fullname or student.username or student.email
+                    student.delete()
+                    messages.success(request, f'Student "{student_name}" has been deleted successfully.')
+                except CustomUser.DoesNotExist:
+                    messages.error(request, 'Student not found.')
+                except Exception as e:
+                    messages.error(request, f'Error deleting student: {str(e)}')
+            else:
+                messages.error(request, 'Student ID is required for deletion.')
+        
+        return redirect('dashboard:students')
+    
+    # Calculate statistics
+    today = timezone.now().date()
+    
+    # Get all students
+    all_students = CustomUser.objects.filter(role='student')
+    total_students = all_students.count()
+    
+    # Students enrolled today
+    today_enrolled = all_students.filter(date_joined__date=today).count()
+    
+    # Most popular area of interest
+    popular_interest = all_students.exclude(area_of_intrest__isnull=True)\
+                                 .exclude(area_of_intrest__exact='')\
+                                 .values('area_of_intrest')\
+                                 .annotate(count=Count('area_of_intrest'))\
+                                 .order_by('-count')\
+                                 .first()
+    
+    high_interest_area = popular_interest['area_of_intrest'] if popular_interest else 'N/A'
+    high_interest_count = popular_interest['count'] if popular_interest else 0
+    
+    # Students with purchases (active learners)
+    active_students = CustomUser.objects.filter(
+        role='student',
+        purchases__status='completed'
+    ).distinct().count()
+    
+    # Get students list with pagination
+    students_list = all_students.select_related().order_by('-date_joined')
+    
+    # Pagination
+    paginator = Paginator(students_list, 10)  # Show 10 students per page
+    page = request.GET.get('page')
+    
+    try:
+        students = paginator.page(page)
+    except PageNotAnInteger:
+        students = paginator.page(1)
+    except EmptyPage:
+        students = paginator.page(paginator.num_pages)
+    
+    # Pagination range logic
+    current_page = students.number
+    total_pages = paginator.num_pages
+    
+    start_page = max(1, current_page - 2)
+    end_page = min(total_pages, current_page + 2)
+    
+    if end_page - start_page < 4:
+        if start_page == 1:
+            end_page = min(total_pages, start_page + 4)
+        elif end_page == total_pages:
+            start_page = max(1, end_page - 4)
+    
+    page_range = range(start_page, end_page + 1)
+    
+    context = {
+        'user': request.user,
+        'total_students': total_students,
+        'today_enrolled': today_enrolled,
+        'high_interest_area': high_interest_area,
+        'high_interest_count': high_interest_count,
+        'active_students': active_students,
+        'students': students,
+        'page_range': page_range,
+        'total_pages': total_pages,
+        'current_page': current_page,
+    }
+    
+    return render(request, 'dashboard/students.html', context)

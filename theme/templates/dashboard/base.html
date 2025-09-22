@@ -138,6 +138,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:students' %}active{% endif %}" href="{% url 'dashboard:students' %}" role="button">
+                                <i class="ri-user-line"></i> Students
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link menu-link" role="button">
                                 <i class="ri-chat-quote-line"></i> Testimonials
                             </a>
