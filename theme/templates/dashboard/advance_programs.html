@@ -656,6 +656,133 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initialize footer buttons
         updateFooterButtons();
+        
+        // Handle modal close/reset
+        wizardModal.addEventListener('hidden.bs.modal', function () {
+            resetWizardModal();
+        });
+        
+        // Reset wizard modal function
+        function resetWizardModal() {
+            // Reset form
+            const form = wizardModal.querySelector('#advanceProgramWizardForm');
+            if (form) {
+                form.reset();
+            }
+            
+            // Clear image preview
+            const imagePreview = document.getElementById('advanceImagePreview');
+            if (imagePreview) {
+                imagePreview.style.display = 'none';
+                imagePreview.src = '#';
+            }
+            
+            // Reset to first tab
+            // Hide all tab contents
+            wizardModal.querySelectorAll('.tab-pane').forEach(function(pane) {
+                pane.classList.remove('show', 'active');
+            });
+            
+            // Remove active class from all tab buttons
+            wizardModal.querySelectorAll('.nav-link').forEach(function(link) {
+                link.classList.remove('active');
+                link.setAttribute('aria-selected', 'false');
+            });
+            
+            // Activate first tab
+            const firstTab = document.getElementById('steparrow-gen-info-tab');
+            const firstTabContent = document.getElementById('steparrow-gen-info');
+            
+            if (firstTab && firstTabContent) {
+                firstTab.classList.add('active');
+                firstTab.setAttribute('aria-selected', 'true');
+                firstTabContent.classList.add('show', 'active');
+            }
+            
+            // Reset syllabus to initial state
+            const syllabusContainer = document.getElementById('syllabusContainer');
+            if (syllabusContainer) {
+                // Remove all modules except the first one
+                const modules = syllabusContainer.querySelectorAll('.module-item');
+                modules.forEach(function(module, index) {
+                    if (index > 0) {
+                        module.remove();
+                    }
+                });
+                
+                // Reset the first module
+                const firstModule = syllabusContainer.querySelector('.module-item');
+                if (firstModule) {
+                    // Reset module title
+                    const moduleTitle = firstModule.querySelector('input[name*="[title]"]');
+                    if (moduleTitle) {
+                        moduleTitle.value = '';
+                        moduleTitle.name = 'advance_modules[0][title]';
+                    }
+                    
+                    // Reset topics to just one
+                    const topicsContainer = firstModule.querySelector('.topics-container');
+                    if (topicsContainer) {
+                        // Remove all topics except first
+                        const topics = topicsContainer.querySelectorAll('.topic-item');
+                        topics.forEach(function(topic, index) {
+                            if (index > 0) {
+                                topic.remove();
+                            }
+                        });
+                        
+                        // Reset first topic
+                        const firstTopic = topicsContainer.querySelector('.topic-item');
+                        if (firstTopic) {
+                            const topicInputs = firstTopic.querySelectorAll('input, textarea');
+                            topicInputs.forEach(function(input) {
+                                input.value = '';
+                                if (input.type === 'checkbox') {
+                                    input.checked = false;
+                                }
+                            });
+                            
+                            // Reset field names
+                            firstTopic.querySelector('input[name*="[title]"]').name = 'advance_modules[0][topics][0][title]';
+                            firstTopic.querySelector('textarea[name*="[description]"]').name = 'advance_modules[0][topics][0][description]';
+                            firstTopic.querySelector('input[type="file"]').name = 'advance_modules[0][topics][0][video_file]';
+                            firstTopic.querySelector('input[type="checkbox"]').name = 'advance_modules[0][topics][0][is_intro]';
+                        }
+                    }
+                    
+                    // Reset module index
+                    firstModule.setAttribute('data-module-index', '0');
+                    firstModule.querySelector('h6').textContent = 'Module 1';
+                    
+                    // Hide remove button
+                    const removeButton = firstModule.querySelector('.btn-outline-danger');
+                    if (removeButton) {
+                        removeButton.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Reset module counter
+            moduleCounter = 0;
+            
+            // Clear all validation states
+            wizardModal.querySelectorAll('.is-invalid').forEach(function(field) {
+                field.classList.remove('is-invalid');
+            });
+            
+            // Reset footer buttons
+            updateFooterButtons();
+            
+            // Clear review data
+            document.getElementById('review-title').textContent = '-';
+            document.getElementById('review-subtitle').textContent = '-';
+            document.getElementById('review-batch').textContent = '-';
+            document.getElementById('review-duration').textContent = '-';
+            document.getElementById('review-price').textContent = '-';
+            document.getElementById('review-slots').textContent = '-';
+            document.getElementById('review-discount').textContent = '-';
+            document.getElementById('review-rating').textContent = '-';
+        }
     }
     
 });
