@@ -4,8 +4,834 @@
   Advance Programs
 {% endblock %}
 {% block breadcrumb %}
-  Advance Programs
+  Course
 {% endblock %}
 {% block content %}
 
+<!-- Font Awesome for icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header align-items-center d-flex">
+          <h4 class="card-title mb-0 flex-grow-1">Advance Programs</h4>
+          <div class="flex-shrink-0">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdvanceProgramWizardModal">Add Advance Program</button>
+          </div>
+        </div>
+        <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
+          <div class="row">
+            {% for program in advance_programs %}
+              <div class="col-3 mb-3">
+                <div class="card" style="box-shadow: none; border: 1px solid var(--vz-border-color)">
+                  {% if program.image %}
+                    <img class="card-img-top img-fluid" src="{{ program.image.url }}" alt="{{ program.title }}" style="height: 200px; object-fit: cover;" />
+                  {% else %}
+                    <img class="card-img-top img-fluid" src="{% static 'assets/dashboard/img/img-1.jpg' %}" alt="{{ program.title }}" style="height: 200px; object-fit: cover;" />
+                  {% endif %}
+                  <div class="card-body">
+                    {% if program.subtitle %}
+                      <h6 class="card-title mb-2">{{ program.subtitle }}</h6>
+                    {% endif %}
+                    <small class="text-muted">
+                      <strong>Duration:</strong> {{ program.duration }}<br />
+                      <strong>Slots:</strong> {{ program.available_slots }}<br />
+                      <strong>Price:</strong> ₹{{ program.price }}
+                      {% if program.discount_percentage > 0 %}
+                        <span class="badge bg-success ms-1">{{ program.discount_percentage }}% OFF</span>
+                      {% endif %}
+                    </small>
+                  </div>
+                  <div class="card-footer d-flex gap-1">
+                    <a href="{% url 'dashboard:delete_advance_program' program.id %}?page={{ current_page }}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this advance program?')"><i class="bx bx-trash fs-18"></i></a>
+                    <button type="button" class="btn btn-icon btn-warning" onclick="openEditAdvanceModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
+                    <a href="javascript:void(0);" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-12">
+                <div class="text-center py-4">
+                  <p class="text-muted">No advance programs available. Add your first advance program!</p>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          
+          <!-- Pagination -->
+          {% if advance_programs.has_other_pages %}
+          <div class="row">
+            <div class="col-12">
+              <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Advance Programs pagination">
+                  <ul class="pagination pagination-rounded">
+                    <!-- Previous Button -->
+                    {% if advance_programs.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ advance_programs.previous_page_number }}" aria-label="Previous">
+                          <span aria-hidden="true">Previous</span>
+                        </a>
+                      </li>
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link" aria-label="Previous">
+                          <span aria-hidden="true">Previous</span>
+                        </span>
+                      </li>
+                    {% endif %}
+                    
+                    <!-- Page Numbers -->
+                    {% for page_num in page_range %}
+                      {% if page_num == current_page %}
+                        <li class="page-item active">
+                          <span class="page-link">{{ page_num }}</span>
+                        </li>
+                      {% else %}
+                        <li class="page-item">
+                          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                      {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Next Button -->
+                    {% if advance_programs.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ advance_programs.next_page_number }}" aria-label="Next">
+                          <span aria-hidden="true">Next</span>
+                        </a>
+                      </li>
+                    {% else %}
+                      <li class="page-item disabled">
+                        <span class="page-link" aria-label="Next">
+                          <span aria-hidden="true">Next</span>
+                        </span>
+                      </li>
+                    {% endif %}
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Advance Program Wizard Modal -->
+   <div class="modal fade" data-bs-backdrop="static" id="addAdvanceProgramWizardModal" tabindex="-1" aria-labelledby="addAdvanceProgramWizardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdvanceProgramWizardModalLabel">Add Advance Program</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="post" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="advanceProgramWizardForm">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="advance_program" />
+          <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
+            <div class="step-arrow-nav mb-4">
+                <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="steparrow-gen-info-tab"
+                            type="button" role="tab" aria-controls="steparrow-gen-info"
+                            aria-selected="true" style="pointer-events: none;">Program</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="steparrow-description-info-tab"
+                            type="button" role="tab" aria-controls="steparrow-description-info"
+                            aria-selected="false" style="pointer-events: none;">Program Details</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="steparrow-syllabus-tab"
+                            type="button" role="tab" aria-controls="steparrow-syllabus"
+                            aria-selected="false" style="pointer-events: none;">Syllabus</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-experience-tab"
+                            type="button" role="tab" aria-controls="pills-experience"
+                            aria-selected="false" style="pointer-events: none;">Finish</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="steparrow-gen-info" role="tabpanel"
+                    aria-labelledby="steparrow-gen-info-tab">
+                    <div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label"
+                                        for="steparrow-gen-info-title-input">Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control"
+                                        id="steparrow-gen-info-title-input" name="advance_program_title"
+                                        placeholder="Enter title">
+                                    <div class="invalid-feedback">Please enter a title</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label"
+                                      for="steparrow-gen-info-subtitle-input">Sub Title</label>
+                                  <input type="text" class="form-control"
+                                      id="steparrow-gen-info-subtitle-input" name="advance_program_subtitle"
+                                      placeholder="Enter subtitle">
+                              </div>
+                            </div>
+                            <div class="col-lg-12">
+                              <div class="mb-3">
+                                <label for="advance_program_image" class="col-form-label">Program Image <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="advance_program_image" name="advance_program_image" accept="image/*" onchange="previewImage(this, 'advanceImagePreview')" />
+                                <div class="mt-2">
+                                  <img id="advanceImagePreview" src="#" alt="Image Preview" required style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label"
+                                        for="steparrow-gen-info-description-input">Description</label>
+                                    <textarea class="form-control"
+                                        id="steparrow-gen-info-description-input" name="advance_program_description"
+                                        placeholder="Enter description" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="steparrow-description-info"
+                    role="tabpanel" aria-labelledby="steparrow-description-info-tab">
+                    <div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="batch-starts-input" name="advance_batch_starts" placeholder="e.g., Jan 15, 2024" required>
+                                    <div class="invalid-feedback">Please enter batch start date</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="available-slots-input">Available Slots <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="available-slots-input" name="advance_available_slots" placeholder="Enter available slots" required>
+                                    <div class="invalid-feedback">Please enter available slots</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="duration-input">Duration <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="duration-input" name="advance_duration" placeholder="e.g., 6 months" required>
+                                    <div class="invalid-feedback">Please enter duration</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="program-rating-input">Program Rating</label>
+                                    <input type="number" class="form-control" id="program-rating-input" name="advance_program_rating" min="0" max="5" step="0.1" placeholder="e.g., 4.5">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="job-openings-input">Job Openings</label>
+                                    <input type="text" class="form-control" id="job-openings-input" name="advance_job_openings" placeholder="e.g., 50,000+">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="global-market-size-input">Global Market Size</label>
+                                    <input type="text" class="form-control" id="global-market-size-input" name="advance_global_market_size" placeholder="e.g., $180B">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="avg-annual-salary-input">Avg Annual Salary</label>
+                                    <input type="text" class="form-control" id="avg-annual-salary-input" name="advance_avg_annual_salary" placeholder="e.g., ₹8-15 LPA">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="program-icon-input">Icon</label>
+                                    <select class="form-select" id="program-icon-input" name="advance_program_icon">
+                                        <option value="">Select Icon</option>
+                                        <option value="fas fa-code"><i class="fas fa-code"></i> fas fa-code</option>
+                                        <option value="fas fa-laptop"><i class="fas fa-laptop"></i> fas fa-laptop</option>
+                                        <option value="fas fa-database"><i class="fas fa-database"></i> fas fa-database</option>
+                                        <option value="fas fa-mobile-alt"><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
+                                        <option value="fas fa-chart-line"><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
+                                        <option value="fas fa-paint-brush"><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
+                                        <option value="fas fa-shield-alt"><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
+                                        <option value="fas fa-brain"><i class="fas fa-brain"></i> fas fa-brain</option>
+                                        <option value="fas fa-graduation-cap"><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="price-input">Price <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="price-input" name="advance_price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                    <div class="invalid-feedback">Please enter price</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="discount-input">Discount Percentage</label>
+                                    <input type="number" class="form-control" id="discount-input" name="advance_discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="is-best-seller" name="advance_is_best_seller">
+                                    <label class="form-check-label" for="is-best-seller">Mark as Best Seller</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="steparrow-syllabus" role="tabpanel" aria-labelledby="steparrow-syllabus-tab">
+                    <div>
+                        <div class="d-flex justify-content-end align-items-center mb-4">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addModule()">
+                                <i class="ri-add-line me-1"></i>Add Module
+                            </button>
+                        </div>
+                        
+                        <div id="syllabusContainer">
+                            <!-- Dynamic modules will be added here -->
+                            <div class="module-item border rounded p-3 mb-3" data-module-index="0">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-primary mb-0">Module 1</h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeModule(this)" style="display: none;">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control module-title" name="advance_modules[0][title]" placeholder="e.g., Introduction to Programming" required>
+                                        <div class="invalid-feedback">Please enter a module title</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="topics-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label mb-0">Topics</label>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addTopic(this)">
+                                            <i class="ri-add-line me-1"></i>Add Topic
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="topics-container">
+                                        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
+                                            <div class="row align-items-start">
+                                                <div class="col">
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[0][topics][0][title]" placeholder="Topic title *" required>
+                                                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTopic(this)" style="display: none;">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <textarea class="form-control form-control-sm" name="advance_modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <label class="form-label form-label-sm">Video File:</label>
+                                                    <input type="file" class="form-control form-control-sm" name="advance_modules[0][topics][0][video_file]" accept="video/*">
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <div class="form-check form-check-sm">
+                                                        <input class="form-check-input" type="checkbox" name="advance_modules[0][topics][0][is_intro]" id="topic-0-0-intro">
+                                                        <label class="form-check-label" for="topic-0-0-intro">Intro Video</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="ri-information-line me-2"></i>
+                            <strong>Tip:</strong> Add modules and topics to structure your program content. You can always edit these later.
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pills-experience" role="tabpanel">
+                    <div>
+                        <div class="text-center">
+                            <div class="avatar-md mx-auto mb-4">
+                                <div class="avatar-title bg-light text-success display-4 rounded-circle">
+                                    <i class="ri-checkbox-circle-fill"></i>
+                                </div>
+                            </div>
+                            <h5>Review Your Advance Program Details</h5>
+                            <p class="text-muted">Please review all the information before submitting your advance program.</p>
+                        </div>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <div class="card border">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Advance Program Summary</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless mb-0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="fw-medium">Title:</td>
+                                                        <td id="review-title">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Subtitle:</td>
+                                                        <td id="review-subtitle">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Batch Starts:</td>
+                                                        <td id="review-batch">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Duration:</td>
+                                                        <td id="review-duration">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Available Slots:</td>
+                                                        <td id="review-slots">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Price:</td>
+                                                        <td id="review-price">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Discount:</td>
+                                                        <td id="review-discount">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Rating:</td>
+                                                        <td id="review-rating">-</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light btn-label previestab" id="prevBtn" style="display: none;"
+                data-previous="steparrow-gen-info-tab"><i
+                    class="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>Back</button>
+            <button type="button" class="btn btn-success btn-label right ms-auto nexttab" id="nextBtn"
+                data-nexttab="steparrow-description-info-tab"><i
+                    class="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>Next</button>
+            <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+// Image preview function
+function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById(previewId).src = e.target.result;
+            document.getElementById(previewId).style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Custom wizard navigation script
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle wizard navigation for Add Advance Program Modal
+    const wizardModal = document.getElementById('addAdvanceProgramWizardModal');
+    
+    if (wizardModal) {
+        // Handle next/previous buttons
+        wizardModal.querySelectorAll('.nexttab').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const nextTabId = this.getAttribute('data-nexttab');
+                const currentTabContent = wizardModal.querySelector('.tab-pane.active');
+                
+                // Validate current tab before proceeding
+                if (!validateCurrentTab(currentTabContent)) {
+                    return false;
+                }
+                
+                if (nextTabId) {
+                    // Activate next tab
+                    const nextTab = document.getElementById(nextTabId);
+                    if (nextTab) {
+                        // Hide current active tab content
+                        if (currentTabContent) {
+                            currentTabContent.classList.remove('show', 'active');
+                        }
+                        
+                        // Remove active class from current tab button
+                        const currentTabButton = wizardModal.querySelector('.nav-link.active');
+                        if (currentTabButton) {
+                            currentTabButton.classList.remove('active');
+                            currentTabButton.setAttribute('aria-selected', 'false');
+                        }
+                        
+                        // Activate next tab button
+                        nextTab.classList.add('active');
+                        nextTab.setAttribute('aria-selected', 'true');
+                        
+                        // Show next tab content
+                        const nextTabContentId = nextTab.getAttribute('aria-controls');
+                        const nextTabContent = document.getElementById(nextTabContentId);
+                        if (nextTabContent) {
+                            nextTabContent.classList.add('show', 'active');
+                        }
+                        
+                        // Update review section when going to final step
+                        if (nextTabId === 'pills-experience-tab') {
+                            updateReviewSection();
+                        }
+                        
+                        // Update footer navigation buttons
+                        updateFooterButtons();
+                    }
+                }
+            });
+        });
+        
+        wizardModal.querySelectorAll('.previestab').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const prevTabId = this.getAttribute('data-previous');
+                if (prevTabId) {
+                    // Activate previous tab
+                    const prevTab = document.getElementById(prevTabId);
+                    if (prevTab) {
+                        // Hide current active tab content
+                        const currentTabContent = wizardModal.querySelector('.tab-pane.active');
+                        if (currentTabContent) {
+                            currentTabContent.classList.remove('show', 'active');
+                        }
+                        
+                        // Remove active class from current tab button
+                        const currentTabButton = wizardModal.querySelector('.nav-link.active');
+                        if (currentTabButton) {
+                            currentTabButton.classList.remove('active');
+                            currentTabButton.setAttribute('aria-selected', 'false');
+                        }
+                        
+                        // Activate previous tab button
+                        prevTab.classList.add('active');
+                        prevTab.setAttribute('aria-selected', 'true');
+                        
+                        // Show previous tab content
+                        const prevTabContentId = prevTab.getAttribute('aria-controls');
+                        const prevTabContent = document.getElementById(prevTabContentId);
+                        if (prevTabContent) {
+                            prevTabContent.classList.add('show', 'active');
+                        }
+                        
+                        // Update footer navigation buttons
+                        updateFooterButtons();
+                    }
+                }
+            });
+        });
+        
+        // Function to validate current tab
+        function validateCurrentTab(currentTabContent) {
+            if (!currentTabContent) return true;
+            
+            const tabId = currentTabContent.id;
+            let isValid = true;
+            
+            // Clear previous validation states
+            currentTabContent.querySelectorAll('.is-invalid').forEach(function(field) {
+                field.classList.remove('is-invalid');
+            });
+            
+            if (tabId === 'steparrow-gen-info') {
+                // Validate first tab - Title is required
+                const titleField = currentTabContent.querySelector('input[name="advance_program_title"]');
+                if (titleField && !titleField.value.trim()) {
+                    titleField.classList.add('is-invalid');
+                    isValid = false;
+                }
+            } else if (tabId === 'steparrow-description-info') {
+                // Validate second tab - Required fields
+                const requiredFields = currentTabContent.querySelectorAll('input[required]');
+                requiredFields.forEach(function(field) {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    }
+                });
+            }
+            
+            return isValid;
+        }
+        
+        // Function to update footer navigation buttons
+        function updateFooterButtons() {
+            const activeTab = wizardModal.querySelector('.nav-link.active');
+            const prevBtn = wizardModal.querySelector('#prevBtn');
+            const nextBtn = wizardModal.querySelector('#nextBtn');
+            const submitBtn = wizardModal.querySelector('#submitBtn');
+            
+            if (!activeTab) return;
+            
+            const activeTabId = activeTab.id;
+            
+            // Show/hide previous button
+            if (activeTabId === 'steparrow-gen-info-tab') {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'inline-block';
+            }
+            
+            // Update previous button data-previous attribute
+            if (activeTabId === 'steparrow-description-info-tab') {
+                prevBtn.setAttribute('data-previous', 'steparrow-gen-info-tab');
+            } else if (activeTabId === 'steparrow-syllabus-tab') {
+                prevBtn.setAttribute('data-previous', 'steparrow-description-info-tab');
+            } else if (activeTabId === 'pills-experience-tab') {
+                prevBtn.setAttribute('data-previous', 'steparrow-syllabus-tab');
+            }
+            
+            // Update next button or show submit button
+            if (activeTabId === 'steparrow-gen-info-tab') {
+                nextBtn.setAttribute('data-nexttab', 'steparrow-description-info-tab');
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            } else if (activeTabId === 'steparrow-description-info-tab') {
+                nextBtn.setAttribute('data-nexttab', 'steparrow-syllabus-tab');
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            } else if (activeTabId === 'steparrow-syllabus-tab') {
+                nextBtn.setAttribute('data-nexttab', 'pills-experience-tab');
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            } else if (activeTabId === 'pills-experience-tab') {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-block';
+            }
+        }
+        
+        // Function to update review section
+        function updateReviewSection() {
+            const titleField = wizardModal.querySelector('input[name="advance_program_title"]');
+            const subtitleField = wizardModal.querySelector('input[name="advance_program_subtitle"]');
+            const batchField = wizardModal.querySelector('input[name="advance_batch_starts"]');
+            const durationField = wizardModal.querySelector('input[name="advance_duration"]');
+            const priceField = wizardModal.querySelector('input[name="advance_price"]');
+            const slotsField = wizardModal.querySelector('input[name="advance_available_slots"]');
+            const discountField = wizardModal.querySelector('input[name="advance_discount_percentage"]');
+            const ratingField = wizardModal.querySelector('input[name="advance_program_rating"]');
+            
+            document.getElementById('review-title').textContent = titleField?.value || '-';
+            document.getElementById('review-subtitle').textContent = subtitleField?.value || '-';
+            document.getElementById('review-batch').textContent = batchField?.value || '-';
+            document.getElementById('review-duration').textContent = durationField?.value || '-';
+            document.getElementById('review-price').textContent = priceField?.value ? '₹' + priceField.value : '-';
+            document.getElementById('review-slots').textContent = slotsField?.value || '-';
+            document.getElementById('review-discount').textContent = discountField?.value ? discountField.value + '%' : '-';
+            document.getElementById('review-rating').textContent = ratingField?.value || '-';
+        }
+        
+        // Initialize footer buttons
+        updateFooterButtons();
+    }
+    
+});
+
+// Global variables for syllabus management
+let moduleCounter = 0;
+
+// Add Module Function
+function addModule() {
+    moduleCounter++;
+    const syllabusContainer = document.getElementById('syllabusContainer');
+    
+    const moduleHtml = `
+        <div class="module-item border rounded p-3 mb-3" data-module-index="${moduleCounter}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary mb-0">Module ${moduleCounter + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeModule(this)">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control module-title" name="advance_modules[${moduleCounter}][title]" placeholder="e.g., Introduction to Programming" required>
+                    <div class="invalid-feedback">Please enter a module title</div>
+                </div>
+            </div>
+            
+            <div class="topics-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Topics</label>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addTopic(this)">
+                        <i class="ri-add-line me-1"></i>Add Topic
+                    </button>
+                </div>
+                
+                <div class="topics-container">
+                    <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
+                        <div class="row align-items-start">
+                            <div class="col">
+                                <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[${moduleCounter}][topics][0][title]" placeholder="Topic title *" required>
+                                <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTopic(this)" style="display: none;">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <textarea class="form-control form-control-sm" name="advance_modules[${moduleCounter}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <label class="form-label form-label-sm">Video File:</label>
+                                <input type="file" class="form-control form-control-sm" name="advance_modules[${moduleCounter}][topics][0][video_file]" accept="video/*">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="advance_modules[${moduleCounter}][topics][0][is_intro]" id="topic-${moduleCounter}-0-intro">
+                                    <label class="form-check-label" for="topic-${moduleCounter}-0-intro">Intro Video</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    syllabusContainer.insertAdjacentHTML('beforeend', moduleHtml);
+    updateModuleVisibility();
+}
+
+// Remove Module Function
+function removeModule(button) {
+    const moduleItem = button.closest('.module-item');
+    moduleItem.remove();
+    updateModuleNumbers();
+    updateModuleVisibility();
+}
+
+// Add Topic Function
+function addTopic(button) {
+    const moduleItem = button.closest('.module-item');
+    const topicsContainer = moduleItem.querySelector('.topics-container');
+    const moduleIndex = moduleItem.getAttribute('data-module-index');
+    const topicIndex = topicsContainer.children.length;
+    
+    const topicHtml = `
+        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicIndex}">
+            <div class="row align-items-start">
+                <div class="col">
+                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[${moduleIndex}][topics][${topicIndex}][title]" placeholder="Topic title *" required>
+                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTopic(this)">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <textarea class="form-control form-control-sm" name="advance_modules[${moduleIndex}][topics][${topicIndex}][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <label class="form-label form-label-sm">Video File:</label>
+                    <input type="file" class="form-control form-control-sm" name="advance_modules[${moduleIndex}][topics][${topicIndex}][video_file]" accept="video/*">
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input" type="checkbox" name="advance_modules[${moduleIndex}][topics][${topicIndex}][is_intro]" id="topic-${moduleIndex}-${topicIndex}-intro">
+                        <label class="form-check-label" for="topic-${moduleIndex}-${topicIndex}-intro">Intro Video</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    topicsContainer.insertAdjacentHTML('beforeend', topicHtml);
+    updateTopicVisibility(moduleItem);
+}
+
+// Remove Topic Function
+function removeTopic(button) {
+    const topicItem = button.closest('.topic-item');
+    const moduleItem = topicItem.closest('.module-item');
+    topicItem.remove();
+    updateTopicVisibility(moduleItem);
+}
+
+// Update Module Numbers
+function updateModuleNumbers() {
+    const modules = document.querySelectorAll('#syllabusContainer .module-item');
+    modules.forEach((module, index) => {
+        const title = module.querySelector('h6');
+        title.textContent = `Module ${index + 1}`;
+        module.setAttribute('data-module-index', index);
+    });
+}
+
+// Update Module Visibility
+function updateModuleVisibility() {
+    const modules = document.querySelectorAll('#syllabusContainer .module-item');
+    modules.forEach((module, index) => {
+        const removeButton = module.querySelector('.btn-outline-danger');
+        if (modules.length > 1) {
+            removeButton.style.display = 'inline-block';
+        } else {
+            removeButton.style.display = 'none';
+        }
+    });
+}
+
+// Update Topic Visibility
+function updateTopicVisibility(moduleItem) {
+    const topics = moduleItem.querySelectorAll('.topic-item');
+    topics.forEach((topic, index) => {
+        const removeButton = topic.querySelector('.btn-outline-danger');
+        if (topics.length > 1) {
+            removeButton.style.display = 'inline-block';
+        } else {
+            removeButton.style.display = 'none';
+        }
+    });
+}
+
+</script>
 {% endblock %}

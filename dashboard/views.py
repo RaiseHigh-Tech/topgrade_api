@@ -612,7 +612,181 @@ def delete_program_view(request, id):
 
 @admin_required
 def adv_program_view(request):
-    return render(request, 'dashboard/advance_programs.html')
+    """Advance Programs view with CRUD operations"""
+    from topgrade_api.models import AdvanceProgram, AdvanceSyllabus, AdvanceTopic
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
+    # Handle POST request for adding new advance program
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+        
+        if form_type == 'advance_program':
+            title = request.POST.get('advance_program_title')
+            subtitle = request.POST.get('advance_program_subtitle')
+            description = request.POST.get('advance_program_description')
+            image = request.FILES.get('advance_program_image')
+            icon = request.POST.get('advance_program_icon')
+            batch_starts = request.POST.get('advance_batch_starts')
+            available_slots = request.POST.get('advance_available_slots')
+            duration = request.POST.get('advance_duration')
+            price = request.POST.get('advance_price')
+            discount_percentage = request.POST.get('advance_discount_percentage')
+            program_rating = request.POST.get('advance_program_rating')
+            job_openings = request.POST.get('advance_job_openings')
+            global_market_size = request.POST.get('advance_global_market_size')
+            avg_annual_salary = request.POST.get('advance_avg_annual_salary')
+            is_best_seller = request.POST.get('advance_is_best_seller') == 'on'
+            
+            if title and batch_starts and available_slots and duration and price:
+                try:
+                    advance_program = AdvanceProgram.objects.create(
+                        title=title,
+                        subtitle=subtitle,
+                        description=description,
+                        image=image,
+                        icon=icon,
+                        batch_starts=batch_starts,
+                        available_slots=int(available_slots),
+                        duration=duration,
+                        price=float(price),
+                        discount_percentage=float(discount_percentage) if discount_percentage else 0.0,
+                        program_rating=float(program_rating) if program_rating else 0.0,
+                        job_openings=job_openings or '',
+                        global_market_size=global_market_size or '',
+                        avg_annual_salary=avg_annual_salary or '',
+                        is_best_seller=is_best_seller
+                    )
+                    messages.success(request, f'Advance Program "{title}" has been added successfully.')
+                except ValueError as e:
+                    messages.error(request, f'Invalid input: {str(e)}')
+                except Exception as e:
+                    messages.error(request, f'Error creating advance program: {str(e)}')
+            else:
+                messages.error(request, 'Title, batch starts, available slots, duration, and price are required.')
+        
+        return redirect('dashboard:adv_programs')
+    
+    # Get advance programs list with pagination
+    advance_programs_list = AdvanceProgram.objects.all().order_by('-id')
+    
+    # Pagination
+    paginator = Paginator(advance_programs_list, 9)  # Show 9 programs per page
+    page = request.GET.get('page')
+    
+    try:
+        advance_programs = paginator.page(page)
+    except PageNotAnInteger:
+        advance_programs = paginator.page(1)
+    except EmptyPage:
+        advance_programs = paginator.page(paginator.num_pages)
+    
+    # Pagination range logic
+    current_page = advance_programs.number
+    total_pages = paginator.num_pages
+    
+    start_page = max(1, current_page - 2)
+    end_page = min(total_pages, current_page + 2)
+    
+    if end_page - start_page < 4:
+        if start_page == 1:
+            end_page = min(total_pages, start_page + 4)
+        elif end_page == total_pages:
+            start_page = max(1, end_page - 4)
+    
+    page_range = range(start_page, end_page + 1)
+    
+    context = {
+        'user': request.user,
+        'advance_programs': advance_programs,
+        'page_range': page_range,
+        'total_pages': total_pages,
+        'current_page': current_page,
+    }
+    
+    return render(request, 'dashboard/advance_programs.html', context)
+
+@admin_required
+def edit_advance_program_view(request, id):
+    """Edit advance program view"""
+    from topgrade_api.models import AdvanceProgram
+    
+    try:
+        advance_program = AdvanceProgram.objects.get(id=id)
+    except AdvanceProgram.DoesNotExist:
+        messages.error(request, 'Advance Program not found')
+        return redirect('dashboard:adv_programs')
+    
+    if request.method == 'POST':
+        # Handle Edit Advance Program form
+        title = request.POST.get('advance_program_title')
+        subtitle = request.POST.get('advance_program_subtitle')
+        description = request.POST.get('advance_program_description')
+        image = request.FILES.get('advance_program_image')
+        icon = request.POST.get('advance_program_icon')
+        batch_starts = request.POST.get('advance_batch_starts')
+        available_slots = request.POST.get('advance_available_slots')
+        duration = request.POST.get('advance_duration')
+        price = request.POST.get('advance_price')
+        discount_percentage = request.POST.get('advance_discount_percentage')
+        program_rating = request.POST.get('advance_program_rating')
+        job_openings = request.POST.get('advance_job_openings')
+        global_market_size = request.POST.get('advance_global_market_size')
+        avg_annual_salary = request.POST.get('advance_avg_annual_salary')
+        is_best_seller = request.POST.get('advance_is_best_seller') == 'on'
+        
+        if title and batch_starts and available_slots and duration and price:
+            try:
+                advance_program.title = title
+                advance_program.subtitle = subtitle
+                advance_program.description = description
+                if image:  # Only update image if new one is provided
+                    advance_program.image = image
+                advance_program.icon = icon
+                advance_program.batch_starts = batch_starts
+                advance_program.available_slots = int(available_slots)
+                advance_program.duration = duration
+                advance_program.price = float(price)
+                advance_program.discount_percentage = float(discount_percentage) if discount_percentage else 0.0
+                advance_program.program_rating = float(program_rating) if program_rating else 0.0
+                advance_program.job_openings = job_openings or ''
+                advance_program.global_market_size = global_market_size or ''
+                advance_program.avg_annual_salary = avg_annual_salary or ''
+                advance_program.is_best_seller = is_best_seller
+                advance_program.save()
+                
+                messages.success(request, 'Advance Program updated successfully')
+            except ValueError as e:
+                messages.error(request, f'Invalid input: {str(e)}')
+            except Exception as e:
+                messages.error(request, f'Error updating advance program: {str(e)}')
+        else:
+            messages.error(request, 'Title, batch starts, available slots, duration, and price are required')
+        
+        # Preserve pagination parameters when redirecting
+        page = request.GET.get('page', 1)
+        return redirect(f'/dashboard/adv_program/?page={page}')
+    
+    # For GET request, we would need to show the edit form (can be implemented as modal or separate page)
+    return redirect('dashboard:adv_programs')
+
+@admin_required
+def delete_advance_program_view(request, id):
+    """Delete advance program view"""
+    from topgrade_api.models import AdvanceProgram
+    
+    try:
+        advance_program = AdvanceProgram.objects.get(id=id)
+        program_title = advance_program.title
+        advance_program.delete()
+        messages.success(request, f'Advance Program "{program_title}" deleted successfully')
+    except AdvanceProgram.DoesNotExist:
+        messages.error(request, 'Advance Program not found')
+    except Exception as e:
+        messages.error(request, f'Error deleting advance program: {str(e)}')
+    
+    # Preserve pagination parameters when redirecting
+    page = request.GET.get('page', 1)
+    return redirect(f'/dashboard/adv_program/?page={page}')
 
 @admin_required
 def students_view(request):
