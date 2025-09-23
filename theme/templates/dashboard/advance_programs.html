@@ -1,10 +1,10 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% block title %}
-  Programs
+  Advance Programs
 {% endblock %}
 {% block breadcrumb %}
-  Course
+  Advance Course
 {% endblock %}
 {% block content %}
 
@@ -14,15 +14,15 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header align-items-center d-flex">
-          <h4 class="card-title mb-0 flex-grow-1">Programs</h4>
+          <h4 class="card-title mb-0 flex-grow-1">Advance Programs</h4>
           <div class="flex-shrink-0">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramWizardModal">Add Program</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramWizardModal">Add Advance Program</button>
           </div>
         </div>
         <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
           <div class="row">
-            {% for program in programs %}
-              <div class="col-4 mb-3">
+            {% for program in advance_programs %}
+              <div class="col-3 mb-3">
                 <div class="card" style="box-shadow: none; border: 1px solid var(--vz-border-color)">
                   {% if program.image %}
                     <img class="card-img-top img-fluid" src="{{ program.image.url }}" alt="{{ program.title }}" style="height: 200px; object-fit: cover;" />
@@ -43,8 +43,8 @@
                     </small>
                   </div>
                   <div class="card-footer d-flex gap-1">
-                    <a href="{% url 'dashboard:delete_program' program.id %}?programs_page={{ programs_current_page }}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this program?')"><i class="bx bx-trash fs-18"></i></a>
-                    <button type="button" class="btn btn-icon btn-warning" onclick="openEditModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
+                    <a href="{% url 'dashboard:delete_advance_program' program.id %}?page={{ current_page }}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this advance program?')"><i class="bx bx-trash fs-18"></i></a>
+                    <button type="button" class="btn btn-icon btn-warning" onclick="openEditAdvanceModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
                     <a href="javascript:void(0);" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
                   </div>
                 </div>
@@ -52,23 +52,23 @@
             {% empty %}
               <div class="col-12">
                 <div class="text-center py-4">
-                  <p class="text-muted">No programs available. Add your first program!</p>
+                  <p class="text-muted">No advance programs available. Add your first advance program!</p>
                 </div>
               </div>
             {% endfor %}
           </div>
           
           <!-- Pagination -->
-          {% if programs.has_other_pages %}
+          {% if advance_programs.has_other_pages %}
           <div class="row">
             <div class="col-12">
               <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Programs pagination">
+                <nav aria-label="Advance Programs pagination">
                   <ul class="pagination pagination-rounded">
                     <!-- Previous Button -->
-                    {% if programs.has_previous %}
+                    {% if advance_programs.has_previous %}
                       <li class="page-item">
-                        <a class="page-link" href="?programs_page={{ programs.previous_page_number }}" aria-label="Previous">
+                        <a class="page-link" href="?page={{ advance_programs.previous_page_number }}" aria-label="Previous">
                           <span aria-hidden="true">Previous</span>
                         </a>
                       </li>
@@ -81,22 +81,22 @@
                     {% endif %}
                     
                     <!-- Page Numbers -->
-                    {% for page_num in programs_page_range %}
-                      {% if page_num == programs_current_page %}
+                    {% for page_num in page_range %}
+                      {% if page_num == current_page %}
                         <li class="page-item active">
                           <span class="page-link">{{ page_num }}</span>
                         </li>
                       {% else %}
                         <li class="page-item">
-                          <a class="page-link" href="?programs_page={{ page_num }}">{{ page_num }}</a>
+                          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
                         </li>
                       {% endif %}
                     {% endfor %}
                     
                     <!-- Next Button -->
-                    {% if programs.has_next %}
+                    {% if advance_programs.has_next %}
                       <li class="page-item">
-                        <a class="page-link" href="?programs_page={{ programs.next_page_number }}" aria-label="Next">
+                        <a class="page-link" href="?page={{ advance_programs.next_page_number }}" aria-label="Next">
                           <span aria-hidden="true">Next</span>
                         </a>
                       </li>
@@ -116,19 +116,19 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> 
 
     <!-- Add Program Wizard Modal -->
    <div class="modal fade" data-bs-backdrop="static" id="addProgramWizardModal" tabindex="-1" aria-labelledby="addProgramWizardModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addProgramWizardModalLabel">Add Program</h5>
+          <h5 class="modal-title" id="addProgramWizardModalLabel">Add Advance Program</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form method="post" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="programWizardForm">
           {% csrf_token %}
-          <input type="hidden" name="form_type" value="program" />
+          <input type="hidden" name="form_type" value="advance_program" />
           <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
             <div class="step-arrow-nav mb-4">
                 <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
@@ -164,7 +164,7 @@
                                     <label class="form-label"
                                         for="steparrow-gen-info-title-input">Title <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control"
-                                        id="steparrow-gen-info-title-input" name="program_title"
+                                        id="steparrow-gen-info-title-input" name="advance_program_title"
                                         placeholder="Enter title">
                                     <div class="invalid-feedback">Please enter a title</div>
                                 </div>
@@ -174,14 +174,14 @@
                                   <label class="form-label"
                                       for="steparrow-gen-info-subtitle-input">Sub Title</label>
                                   <input type="text" class="form-control"
-                                      id="steparrow-gen-info-subtitle-input" name="program_subtitle"
+                                      id="steparrow-gen-info-subtitle-input" name="advance_program_subtitle"
                                       placeholder="Enter subtitle">
                               </div>
                             </div>
                             <div class="col-lg-12">
                               <div class="mb-3">
                                 <label for="program_image" class="col-form-label">Program Image <span class="text-danger">*</span></label>
-                                <input type="file" class="form-control" id="program_image" name="program_image" accept="image/*" onchange="previewImage(this, 'imagePreview')" />
+                                <input type="file" class="form-control" id="program_image" name="advance_program_image" accept="image/*" onchange="previewImage(this, 'imagePreview')" />
                                 <div class="mt-2">
                                   <img id="imagePreview" src="#" alt="Image Preview" required style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
                                 </div>
@@ -192,7 +192,7 @@
                                     <label class="form-label"
                                         for="steparrow-gen-info-description-input">Description</label>
                                     <textarea class="form-control"
-                                        id="steparrow-gen-info-description-input" name="program_description"
+                                        id="steparrow-gen-info-description-input" name="advance_program_description"
                                         placeholder="Enter description" rows="3"></textarea>
                                     <div class="invalid-feedback">Please enter a description</div>
                                 </div>
@@ -207,40 +207,40 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="batch-starts-input" name="batch_starts" placeholder="e.g., January 2024" required>
+                                  <input type="text" class="form-control" id="batch-starts-input" name="advance_batch_starts" placeholder="e.g., January 2024" required>
                                   <div class="invalid-feedback">Please enter batch start date</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="available-slots-input">Available Slots <span class="text-danger">*</span></label>
-                                  <input type="number" class="form-control" id="available-slots-input" name="available_slots" placeholder="e.g., 30" required>
+                                  <input type="number" class="form-control" id="available-slots-input" name="advance_available_slots" placeholder="e.g., 30" required>
                                   <div class="invalid-feedback">Please enter available slots</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="duration-input">Duration <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="duration-input" name="duration" placeholder="e.g., 6 months" required>
+                                  <input type="text" class="form-control" id="duration-input" name="advance_duration" placeholder="e.g., 6 months" required>
                                   <div class="invalid-feedback">Please enter duration</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="job-openings-input">Job Openings</label>
-                                  <input type="text" class="form-control" id="job-openings-input" name="job_openings" placeholder="e.g., 50K+">
+                                  <input type="text" class="form-control" id="job-openings-input" name="advance_job_openings" placeholder="e.g., 50K+">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="market-size-input">Global Market Size</label>
-                                  <input type="text" class="form-control" id="market-size-input" name="global_market_size" placeholder="e.g., $100B">
+                                  <input type="text" class="form-control" id="market-size-input" name="advance_global_market_size" placeholder="e.g., $100B">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="avg-salary-input">Avg Annual Salary</label>
-                                  <input type="text" class="form-control" id="avg-salary-input" name="avg_annual_salary" placeholder="e.g., $80K">
+                                  <input type="text" class="form-control" id="avg-salary-input" name="advance_avg_annual_salary" placeholder="e.g., $80K">
                               </div>
                           </div>
                         </div>
@@ -248,13 +248,13 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="program-rating-input">Program Rating</label>
-                                  <input type="number" class="form-control" id="program-rating-input" name="program_rating" min="0" max="5" step="0.1" placeholder="e.g., 4.5">
+                                  <input type="number" class="form-control" id="program-rating-input" name="advance_program_rating" min="0" max="5" step="0.1" placeholder="e.g., 4.5">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <div class="form-check form-switch form-switch-lg" style="margin-top: 2rem;">
-                                      <input class="form-check-input" type="checkbox" id="is-best-seller-input" name="is_best_seller">
+                                      <input class="form-check-input" type="checkbox" id="is-best-seller-input" name="advance_is_best_seller">
                                       <label class="form-check-label" for="is-best-seller-input">Mark as Best Seller</label>
                                   </div>
                               </div>
@@ -264,7 +264,7 @@
                           <div class="col-lg-12">
                               <div class="mb-3">
                                   <label class="form-label" for="program-icon">Program Icon</label>
-                                  <select class="form-select" id="program-icon" name="program_icon">
+                                  <select class="form-select" id="program-icon" name="advance_program_icon">
                                       <option value="">Select Icon</option>
                                       <option value="fas fa-chevron-right"><i class="fas fa-chevron-right"></i> fas fa-chevron-right</option>
                                       <option value="fas fa-code"><i class="fas fa-code"></i> fas fa-code</option>
@@ -289,14 +289,14 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="price-input">Price (₹) <span class="text-danger">*</span></label>
-                                  <input type="number" class="form-control" id="price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <input type="number" class="form-control" id="price-input" name="advance_price" min="0" step="0.01" placeholder="e.g., 499.99" required>
                                   <div class="invalid-feedback">Please enter a price</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="discount-input">Discount Percentage (%)</label>
-                                  <input type="number" class="form-control" id="discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <input type="number" class="form-control" id="discount-input" name="advance_discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
                                   <div class="form-text">Leave empty or 0 for no discount</div>
                               </div>
                           </div>
@@ -324,7 +324,7 @@
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <label class="form-label">Module Title <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control module-title" name="modules[0][title]" placeholder="e.g., Introduction to Programming" required>
+                                        <input type="text" class="form-control module-title" name="advance_modules[0][title]" placeholder="e.g., Introduction to Programming" required>
                                         <div class="invalid-feedback">Please enter a module title</div>
                                     </div>
                                 </div>
@@ -341,7 +341,7 @@
                                         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
                                             <div class="row align-items-start">
                                                 <div class="col">
-                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[0][topics][0][title]" placeholder="Topic title *" required>
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[0][topics][0][title]" placeholder="Topic title *" required>
                                                     <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
                                                 </div>
                                                 <div class="col-auto">
@@ -352,19 +352,19 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-12">
-                                                    <textarea class="form-control form-control-sm" name="modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                                    <textarea class="form-control form-control-sm" name="advance_modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm" name="modules[0][topics][0][video_file]" accept="video/*">
+                                                    <input type="file" class="form-control form-control-sm" name="advance_modules[0][topics][0][video_file]" accept="video/*">
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <div class="form-check form-check-sm">
-                                                        <input class="form-check-input" type="checkbox" name="modules[0][topics][0][is_intro]" id="topic-0-0-intro">
+                                                        <input class="form-check-input" type="checkbox" name="advance_modules[0][topics][0][is_intro]" id="topic-0-0-intro">
                                                         <label class="form-check-label" for="topic-0-0-intro">Intro Video</label>
                                                     </div>
                                                 </div>
@@ -461,6 +461,9 @@
         </div>
         <form method="post" action="" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="editProgramWizardForm">
           {% csrf_token %}
+          <input type="hidden" name="form_type" value="edit_advance_program" />
+          <input type="hidden" name="program_id" value="" id="edit-program-id" />
+          {% csrf_token %}
           <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
             <div class="step-arrow-nav mb-4">
                 <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
@@ -494,24 +497,24 @@
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label class="form-label" for="edit-steparrow-gen-info-title-input">Title <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit-steparrow-gen-info-title-input" name="program_title" value="{{ edit_program.title }}" placeholder="Enter title">
+                                    <input type="text" class="form-control" id="edit-steparrow-gen-info-title-input" name="advance_program_title" value="{{ edit_advance_program.title }}" placeholder="Enter title">
                                     <div class="invalid-feedback">Please enter a title</div>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-steparrow-gen-info-subtitle-input">Sub Title</label>
-                                  <input type="text" class="form-control" id="edit-steparrow-gen-info-subtitle-input" name="program_subtitle" value="{{ edit_program.subtitle }}" placeholder="Enter subtitle">
+                                  <input type="text" class="form-control" id="edit-steparrow-gen-info-subtitle-input" name="advance_program_subtitle" value="{{ edit_advance_program.subtitle }}" placeholder="Enter subtitle">
                               </div>
                             </div>
                             <div class="col-lg-12">
                               <div class="mb-3">
                                 <label for="edit_program_image" class="col-form-label">Program Image</label>
-                                <input type="file" class="form-control" id="edit_program_image" name="program_image" accept="image/*" onchange="previewImage(this, 'editImagePreview')" />
+                                <input type="file" class="form-control" id="edit_program_image" name="advance_program_image" accept="image/*" onchange="previewImage(this, 'editImagePreview')" />
                                 <div class="mt-2">
-                                  {% if edit_program.image %}
-                                    <img id="editImagePreview" src="{{ edit_program.image.url }}" alt="Current Image" style="min-width: 100%; object-fit: contain; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
-                                    <small class="text-muted d-block">Current: {{ edit_program.image.name }}</small>
+                                  {% if edit_advance_program.image %}
+                                    <img id="editImagePreview" src="{{ edit_advance_program.image.url }}" alt="Current Image" style="min-width: 100%; object-fit: contain; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                                    <small class="text-muted d-block">Current: {{ edit_advance_program.image.name }}</small>
                                   {% else %}
                                     <img id="editImagePreview" src="#" alt="Image Preview" style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
                                   {% endif %}
@@ -521,7 +524,7 @@
                             <div class="col-lg-12">
                                 <div class="mb-3">
                                     <label class="form-label" for="edit-steparrow-gen-info-description-input">Description</label>
-                                    <textarea class="form-control" id="edit-steparrow-gen-info-description-input" name="program_description" placeholder="Enter description" rows="3">{{ edit_program.description }}</textarea>
+                                    <textarea class="form-control" id="edit-steparrow-gen-info-description-input" name="advance_program_description" placeholder="Enter description" rows="3">{{ edit_advance_program.description }}</textarea>
                                     <div class="invalid-feedback">Please enter a description</div>
                                 </div>
                             </div>
@@ -535,40 +538,40 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="edit-batch-starts-input" name="batch_starts" value="{{ edit_program.batch_starts }}" placeholder="e.g., January 2024" required>
+                                  <input type="text" class="form-control" id="edit-batch-starts-input" name="advance_batch_starts" value="{{ edit_advance_program.batch_starts }}" placeholder="e.g., January 2024" required>
                                   <div class="invalid-feedback">Please enter batch start date</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-available-slots-input">Available Slots <span class="text-danger">*</span></label>
-                                  <input type="number" class="form-control" id="edit-available-slots-input" name="available_slots" value="{{ edit_program.available_slots }}" placeholder="e.g., 30" required>
+                                  <input type="number" class="form-control" id="edit-available-slots-input" name="advance_available_slots" value="{{ edit_advance_program.available_slots }}" placeholder="e.g., 30" required>
                                   <div class="invalid-feedback">Please enter available slots</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-duration-input">Duration <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="edit-duration-input" name="duration" value="{{ edit_program.duration }}" placeholder="e.g., 6 months" required>
+                                  <input type="text" class="form-control" id="edit-duration-input" name="advance_duration" value="{{ edit_advance_program.duration }}" placeholder="e.g., 6 months" required>
                                   <div class="invalid-feedback">Please enter duration</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-job-openings-input">Job Openings</label>
-                                  <input type="text" class="form-control" id="edit-job-openings-input" name="job_openings" value="{{ edit_program.job_openings }}" placeholder="e.g., 50K+">
+                                  <input type="text" class="form-control" id="edit-job-openings-input" name="advance_job_openings" value="{{ edit_advance_program.job_openings }}" placeholder="e.g., 50K+">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-market-size-input">Global Market Size</label>
-                                  <input type="text" class="form-control" id="edit-market-size-input" name="global_market_size" value="{{ edit_program.global_market_size }}" placeholder="e.g., $100B">
+                                  <input type="text" class="form-control" id="edit-market-size-input" name="advance_global_market_size" value="{{ edit_advance_program.global_market_size }}" placeholder="e.g., $100B">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-avg-salary-input">Avg Annual Salary</label>
-                                  <input type="text" class="form-control" id="edit-avg-salary-input" name="avg_annual_salary" value="{{ edit_program.avg_annual_salary }}" placeholder="e.g., $80K">
+                                  <input type="text" class="form-control" id="edit-avg-salary-input" name="advance_avg_annual_salary" value="{{ edit_advance_program.avg_annual_salary }}" placeholder="e.g., $80K">
                               </div>
                           </div>
                         </div>
@@ -576,13 +579,13 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-program-rating-input">Program Rating</label>
-                                  <input type="number" class="form-control" id="edit-program-rating-input" name="program_rating" min="0" max="5" step="0.1" value="{{ edit_program.program_rating }}" placeholder="e.g., 4.5">
+                                  <input type="number" class="form-control" id="edit-program-rating-input" name="advance_program_rating" min="0" max="5" step="0.1" value="{{ edit_advance_program.program_rating }}" placeholder="e.g., 4.5">
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <div class="form-check form-switch form-switch-lg" style="margin-top: 2rem;">
-                                      <input class="form-check-input" type="checkbox" id="edit-is-best-seller-input" name="is_best_seller" {% if edit_program.is_best_seller %}checked{% endif %}>
+                                      <input class="form-check-input" type="checkbox" id="edit-is-best-seller-input" name="advance_is_best_seller" {% if edit_advance_program.is_best_seller %}checked{% endif %}>
                                       <label class="form-check-label" for="edit-is-best-seller-input">Mark as Best Seller</label>
                                   </div>
                               </div>
@@ -592,23 +595,23 @@
                           <div class="col-lg-12">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-program-icon">Program Icon</label>
-                                  <select class="form-select" id="edit-program-icon" name="program_icon">
+                                  <select class="form-select" id="edit-program-icon" name="advance_program_icon">
                                       <option value="">Select Icon</option>
-                                      <option value="fas fa-chevron-right" {% if edit_program.icon == "fas fa-chevron-right" %}selected{% endif %}><i class="fas fa-chevron-right"></i> fas fa-chevron-right</option>
-                                      <option value="fas fa-code" {% if edit_program.icon == "fas fa-code" %}selected{% endif %}><i class="fas fa-code"></i> fas fa-code</option>
-                                      <option value="fas fa-laptop" {% if edit_program.icon == "fas fa-laptop" %}selected{% endif %}><i class="fas fa-laptop"></i> fas fa-laptop</option>
-                                      <option value="fas fa-database" {% if edit_program.icon == "fas fa-database" %}selected{% endif %}><i class="fas fa-database"></i> fas fa-database</option>
-                                      <option value="fas fa-mobile-alt" {% if edit_program.icon == "fas fa-mobile-alt" %}selected{% endif %}><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
-                                      <option value="fas fa-chart-line" {% if edit_program.icon == "fas fa-chart-line" %}selected{% endif %}><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
-                                      <option value="fas fa-paint-brush" {% if edit_program.icon == "fas fa-paint-brush" %}selected{% endif %}><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
-                                      <option value="fas fa-shield-alt" {% if edit_program.icon == "fas fa-shield-alt" %}selected{% endif %}><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
-                                      <option value="fas fa-brain" {% if edit_program.icon == "fas fa-brain" %}selected{% endif %}><i class="fas fa-brain"></i> fas fa-brain</option>
-                                      <option value="fas fa-graduation-cap" {% if edit_program.icon == "fas fa-graduation-cap" %}selected{% endif %}><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
-                                      <option value="fas fa-cog" {% if edit_program.icon == "fas fa-cog" %}selected{% endif %}><i class="fas fa-cog"></i> fas fa-cog</option>
-                                      <option value="fas fa-rocket" {% if edit_program.icon == "fas fa-rocket" %}selected{% endif %}><i class="fas fa-rocket"></i> fas fa-rocket</option>
-                                      <option value="fas fa-lightbulb" {% if edit_program.icon == "fas fa-lightbulb" %}selected{% endif %}><i class="fas fa-lightbulb"></i> fas fa-lightbulb</option>
-                                      <option value="fas fa-users" {% if edit_program.icon == "fas fa-users" %}selected{% endif %}><i class="fas fa-users"></i> fas fa-users</option>
-                                      <option value="fas fa-globe" {% if edit_program.icon == "fas fa-globe" %}selected{% endif %}><i class="fas fa-globe"></i> fas fa-globe</option>
+                                      <option value="fas fa-chevron-right" {% if edit_advance_program.icon == "fas fa-chevron-right" %}selected{% endif %}><i class="fas fa-chevron-right"></i> fas fa-chevron-right</option>
+                                      <option value="fas fa-code" {% if edit_advance_program.icon == "fas fa-code" %}selected{% endif %}><i class="fas fa-code"></i> fas fa-code</option>
+                                      <option value="fas fa-laptop" {% if edit_advance_program.icon == "fas fa-laptop" %}selected{% endif %}><i class="fas fa-laptop"></i> fas fa-laptop</option>
+                                      <option value="fas fa-database" {% if edit_advance_program.icon == "fas fa-database" %}selected{% endif %}><i class="fas fa-database"></i> fas fa-database</option>
+                                      <option value="fas fa-mobile-alt" {% if edit_advance_program.icon == "fas fa-mobile-alt" %}selected{% endif %}><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
+                                      <option value="fas fa-chart-line" {% if edit_advance_program.icon == "fas fa-chart-line" %}selected{% endif %}><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
+                                      <option value="fas fa-paint-brush" {% if edit_advance_program.icon == "fas fa-paint-brush" %}selected{% endif %}><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
+                                      <option value="fas fa-shield-alt" {% if edit_advance_program.icon == "fas fa-shield-alt" %}selected{% endif %}><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
+                                      <option value="fas fa-brain" {% if edit_advance_program.icon == "fas fa-brain" %}selected{% endif %}><i class="fas fa-brain"></i> fas fa-brain</option>
+                                      <option value="fas fa-graduation-cap" {% if edit_advance_program.icon == "fas fa-graduation-cap" %}selected{% endif %}><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
+                                      <option value="fas fa-cog" {% if edit_advance_program.icon == "fas fa-cog" %}selected{% endif %}><i class="fas fa-cog"></i> fas fa-cog</option>
+                                      <option value="fas fa-rocket" {% if edit_advance_program.icon == "fas fa-rocket" %}selected{% endif %}><i class="fas fa-rocket"></i> fas fa-rocket</option>
+                                      <option value="fas fa-lightbulb" {% if edit_advance_program.icon == "fas fa-lightbulb" %}selected{% endif %}><i class="fas fa-lightbulb"></i> fas fa-lightbulb</option>
+                                      <option value="fas fa-users" {% if edit_advance_program.icon == "fas fa-users" %}selected{% endif %}><i class="fas fa-users"></i> fas fa-users</option>
+                                      <option value="fas fa-globe" {% if edit_advance_program.icon == "fas fa-globe" %}selected{% endif %}><i class="fas fa-globe"></i> fas fa-globe</option>
                                   </select>
                               </div>
                           </div>
@@ -617,14 +620,14 @@
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-price-input">Price (₹) <span class="text-danger">*</span></label>
-                                  <input type="number" class="form-control" id="edit-price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <input type="number" class="form-control" id="edit-price-input" name="advance_price" min="0" step="0.01" value="{{ edit_advance_program.price }}" placeholder="e.g., 499.99" required>
                                   <div class="invalid-feedback">Please enter a price</div>
                               </div>
                           </div>
                           <div class="col-lg-6">
                               <div class="mb-3">
                                   <label class="form-label" for="edit-discount-input">Discount Percentage (%)</label>
-                                  <input type="number" class="form-control" id="edit-discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <input type="number" class="form-control" id="edit-discount-input" name="advance_discount_percentage" min="0" max="100" step="0.1" value="{{ edit_advance_program.discount_percentage }}" placeholder="e.g., 20.0">
                                   <div class="form-text">Leave empty or 0 for no discount</div>
                               </div>
                           </div>
@@ -641,11 +644,11 @@
                         
                         <div id="editSyllabusContainer">
                             <!-- Existing modules will be loaded here -->
-                            {% for syllabus in edit_program.syllabuses.all %}
+                            {% for syllabus in edit_advance_program.syllabuses.all %}
                             <div class="module-item border rounded p-3 mb-3" data-module-index="{{ forloop.counter0 }}">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="text-primary mb-0">Module {{ forloop.counter }}</h6>
-                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)" {% if edit_program.syllabuses.all|length == 1 %}style="display: none;"{% endif %}>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)" {% if edit_advance_program.syllabuses.all|length == 1 %}style="display: none;"{% endif %}>
                                         <i class="ri-delete-bin-line"></i>
                                     </button>
                                 </div>
@@ -653,7 +656,7 @@
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <label class="form-label">Module Title <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control module-title" name="modules[{{ forloop.counter0 }}][title]" value="{{ syllabus.module_title }}" placeholder="e.g., Introduction to Programming" required>
+                                        <input type="text" class="form-control module-title" name="advance_modules[{{ forloop.counter0 }}][title]" value="{{ syllabus.module_title }}" placeholder="e.g., Introduction to Programming" required>
                                         <div class="invalid-feedback">Please enter a module title</div>
                                     </div>
                                 </div>
@@ -671,7 +674,7 @@
                                         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="{{ forloop.counter0 }}">
                                             <div class="row align-items-start">
                                                 <div class="col">
-                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][title]" value="{{ topic.topic_title }}" placeholder="Topic title *" required>
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][title]" value="{{ topic.topic_title }}" placeholder="Topic title *" required>
                                                     <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
                                                 </div>
                                                 <div class="col-auto">
@@ -682,13 +685,13 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-12">
-                                                    <textarea class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][description]" rows="2" placeholder="Topic description (optional)">{{ topic.description }}</textarea>
+                                                    <textarea class="form-control form-control-sm" name="advance_modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][description]" rows="2" placeholder="Topic description (optional)">{{ topic.description }}</textarea>
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    <input type="file" class="form-control form-control-sm" name="advance_modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
                                                     {% if topic.video_file %}
                                                         <small class="text-muted">Current: {{ topic.video_file.name }}</small>
                                                     {% endif %}
@@ -2620,10 +2623,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Function to open edit modal with program data
-function openEditModal(programId) {
+function openEditAdvanceModal(programId) {
     // Find the program data from the page
     const programs = [
-        {% for program in programs %}
+        {% for program in advance_programs %}
         {
             id: {{ program.id }},
             title: "{{ program.title|escapejs }}",
@@ -2668,7 +2671,7 @@ function openEditModal(programId) {
     
     // Update form action URL
     const form = document.getElementById('editProgramWizardForm');
-    form.action = `{% url 'dashboard:edit_program' 0 %}`.replace('0', programId);
+    form.action = `{% url 'dashboard:edit_advance_program' 0 %}`.replace('0', programId);
     
     // Populate form fields
     document.getElementById('edit-steparrow-gen-info-title-input').value = program.title;
@@ -2922,5 +2925,165 @@ function updateEditDeleteButtonVisibility() {
         });
     });
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Wizard navigation functionality
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const submitBtn = document.getElementById('submitProgramBtn');
+    
+    let currentStep = 0;
+    const steps = [
+        'steparrow-gen-info',
+        'steparrow-description-info', 
+        'steparrow-syllabus',
+        'pills-experience'
+    ];
+    
+    const tabIds = [
+        'steparrow-gen-info-tab',
+        'steparrow-description-info-tab',
+        'steparrow-syllabus-tab', 
+        'pills-experience-tab'
+    ];
+    
+    // Initialize wizard
+    updateWizardState();
+    
+    // Next button click handler
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (validateCurrentStep()) {
+                if (currentStep < steps.length - 1) {
+                    currentStep++;
+                    navigateToStep(currentStep);
+                    updateWizardState();
+                }
+            }
+        });
+    }
+    
+    // Previous button click handler
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (currentStep > 0) {
+                currentStep--;
+                navigateToStep(currentStep);
+                updateWizardState();
+            }
+        });
+    }
+    
+    function navigateToStep(stepIndex) {
+        // Hide all tabs
+        steps.forEach((step, index) => {
+            const tabPane = document.getElementById(step);
+            const tabButton = document.getElementById(tabIds[index]);
+            
+            if (tabPane && tabButton) {
+                if (index === stepIndex) {
+                    tabPane.classList.add('show', 'active');
+                    tabButton.classList.add('active');
+                    tabButton.setAttribute('aria-selected', 'true');
+                } else {
+                    tabPane.classList.remove('show', 'active');
+                    tabButton.classList.remove('active');
+                    tabButton.setAttribute('aria-selected', 'false');
+                }
+            }
+        });
+    }
+    
+    function updateWizardState() {
+        // Update previous button
+        if (prevBtn) {
+            if (currentStep === 0) {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'inline-block';
+            }
+        }
+        
+        // Update next/submit button
+        if (nextBtn && submitBtn) {
+            if (currentStep === steps.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-block';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            }
+        }
+        
+        // Update review section if on last step
+        if (currentStep === steps.length - 1) {
+            updateReviewSection();
+        }
+    }
+    
+    function validateCurrentStep() {
+        const currentStepElement = document.getElementById(steps[currentStep]);
+        if (!currentStepElement) return true;
+        
+        const requiredFields = currentStepElement.querySelectorAll('input[required], textarea[required], select[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        return isValid;
+    }
+    
+    function updateReviewSection() {
+        // Update review table with form data
+        const title = document.getElementById('steparrow-gen-info-title-input');
+        const batchStarts = document.getElementById('batch-starts-input');
+        const duration = document.getElementById('duration-input');
+        const slots = document.getElementById('available-slots-input');
+        
+        if (title && document.getElementById('review-title')) {
+            document.getElementById('review-title').textContent = title.value || '-';
+        }
+        if (batchStarts && document.getElementById('review-batch')) {
+            document.getElementById('review-batch').textContent = batchStarts.value || '-';
+        }
+        if (duration && document.getElementById('review-duration')) {
+            document.getElementById('review-duration').textContent = duration.value || '-';
+        }
+        if (slots && document.getElementById('review-slots')) {
+            document.getElementById('review-slots').textContent = slots.value || '-';
+        }
+    }
+    
+    // Image preview function
+    window.previewImage = function(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (input.files && input.files[0] && preview) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+    
+    // Edit modal functionality
+    window.openEditAdvanceModal = function(programId) {
+        window.location.href = `/dashboard/edit_advance_program/${programId}`;
+    };
+});
 </script>
 {% endblock %}

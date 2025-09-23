@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from topgrade_api.models import Category, Program, Syllabus, Topic
+from topgrade_api.models import Category, Program, Syllabus, Topic, AdvanceProgram, AdvanceSyllabus, AdvanceTopic
 
 User = get_user_model()
 
@@ -624,16 +624,15 @@ def delete_program_view(request, id):
     categories_page = request.GET.get('categories_page', 1)
     return redirect(f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}')
 
-
 @admin_required
 def adv_program_view(request):
     """Advance Programs view with CRUD operations"""
-    from topgrade_api.models import AdvanceProgram, AdvanceSyllabus, AdvanceTopic
-    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     
     # Handle POST request for adding new advance program
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
+        print(f"DEBUG: Form type received: {form_type}")  # Debug line
+        print(f"DEBUG: POST data keys: {list(request.POST.keys())}")  # Debug line
         
         if form_type == 'advance_program':
             title = request.POST.get('advance_program_title')
@@ -652,8 +651,10 @@ def adv_program_view(request):
             avg_annual_salary = request.POST.get('advance_avg_annual_salary')
             is_best_seller = request.POST.get('advance_is_best_seller') == 'on'
             
+            print(f"DEBUG: Required fields - title: {title}, batch_starts: {batch_starts}, available_slots: {available_slots}, duration: {duration}, price: {price}")  # Debug line
             if title and batch_starts and available_slots and duration and price:
                 try:
+                    print("DEBUG: Creating advance program...")  # Debug line
                     advance_program = AdvanceProgram.objects.create(
                         title=title,
                         subtitle=subtitle,
@@ -671,6 +672,63 @@ def adv_program_view(request):
                         avg_annual_salary=avg_annual_salary or '',
                         is_best_seller=is_best_seller
                     )
+                    
+                    # Handle syllabus and topics creation for advance programs
+                    modules_data = {}
+                    
+                    # Parse modules and topics from POST data
+                    for key, value in request.POST.items():
+                        if key.startswith('advance_modules[') and value.strip():
+                            # Extract module index and field type
+                            # Format: advance_modules[0][title] or advance_modules[0][topics][0][title]
+                            parts = key.replace('advance_modules[', '').replace(']', '').split('[')
+                            
+                            if len(parts) >= 2:
+                                module_index = int(parts[0])
+                                
+                                if module_index not in modules_data:
+                                    modules_data[module_index] = {'title': '', 'topics': {}}
+                                
+                                if parts[1] == 'title':
+                                    # Module title
+                                    modules_data[module_index]['title'] = value
+                                elif parts[1] == 'topics' and len(parts) >= 4:
+                                    # Topic data
+                                    topic_index = int(parts[2])
+                                    topic_field = parts[3]
+                                    
+                                    if topic_index not in modules_data[module_index]['topics']:
+                                        modules_data[module_index]['topics'][topic_index] = {}
+                                    
+                                    modules_data[module_index]['topics'][topic_index][topic_field] = value
+                    
+                    # Create syllabus modules and topics
+                    for module_index, module_data in modules_data.items():
+                        if module_data['title']:
+                            # Create syllabus module
+                            syllabus = AdvanceSyllabus.objects.create(
+                                advance_program=advance_program,
+                                module_title=module_data['title']
+                            )
+                            
+                            # Create topics for this module
+                            for topic_index, topic_data in module_data['topics'].items():
+                                if topic_data.get('title'):
+                                    # Handle video file upload and duration calculation
+                                    video_file = None
+                                    video_duration = None
+                                    if f'advance_modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        video_file = request.FILES[f'advance_modules[{module_index}][topics][{topic_index}][video_file]']
+                                        # Calculate video duration
+                                        video_duration = calculate_video_duration(video_file)
+                                    
+                                    AdvanceTopic.objects.create(
+                                        advance_syllabus=syllabus,
+                                        topic_title=topic_data['title'],
+                                        description=topic_data.get('description', ''),
+                                        video_file=video_file,
+                                        video_duration=video_duration
+                                    )
                     messages.success(request, f'Advance Program "{title}" has been added successfully.')
                 except ValueError as e:
                     messages.error(request, f'Invalid input: {str(e)}')
@@ -854,7 +912,6 @@ def adv_program_view(request):
 @admin_required
 def edit_advance_program_view(request, id):
     """Edit advance program view"""
-    from topgrade_api.models import AdvanceProgram, AdvanceSyllabus, AdvanceTopic
     
     try:
         advance_program = AdvanceProgram.objects.get(id=id)
@@ -1020,7 +1077,6 @@ def edit_advance_program_view(request, id):
 @admin_required
 def delete_advance_program_view(request, id):
     """Delete advance program view"""
-    from topgrade_api.models import AdvanceProgram
     
     try:
         advance_program = AdvanceProgram.objects.get(id=id)
