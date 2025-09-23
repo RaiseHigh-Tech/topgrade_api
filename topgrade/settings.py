@@ -175,7 +175,7 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://859788080b2c.ngrok-free.app",
+    "https://5f81cc1c5b3b.ngrok-free.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -184,5 +184,5 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
-    "https://859788080b2c.ngrok-free.app",
+    "https://5f81cc1c5b3b.ngrok-free.app",
 ]

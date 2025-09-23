@@ -1,7 +1,7 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% block title %}
-  Advance Programs
+  Programs
 {% endblock %}
 {% block breadcrumb %}
   Course
@@ -14,15 +14,15 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header align-items-center d-flex">
-          <h4 class="card-title mb-0 flex-grow-1">Advance Programs</h4>
+          <h4 class="card-title mb-0 flex-grow-1">Programs</h4>
           <div class="flex-shrink-0">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdvanceProgramWizardModal">Add Advance Program</button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramWizardModal">Add Program</button>
           </div>
         </div>
         <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
           <div class="row">
-            {% for program in advance_programs %}
-              <div class="col-3 mb-3">
+            {% for program in programs %}
+              <div class="col-4 mb-3">
                 <div class="card" style="box-shadow: none; border: 1px solid var(--vz-border-color)">
                   {% if program.image %}
                     <img class="card-img-top img-fluid" src="{{ program.image.url }}" alt="{{ program.title }}" style="height: 200px; object-fit: cover;" />
@@ -43,8 +43,8 @@
                     </small>
                   </div>
                   <div class="card-footer d-flex gap-1">
-                    <button class="btn btn-icon btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAdvanceProgramModal" onclick="setDeleteAdvanceProgram({{ program.id }}, '{{ program.title|escapejs }}')"><i class="bx bx-trash fs-18"></i></button>
-                    <button type="button" class="btn btn-icon btn-warning" onclick="openEditAdvanceModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
+                    <a href="{% url 'dashboard:delete_program' program.id %}?programs_page={{ programs_current_page }}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this program?')"><i class="bx bx-trash fs-18"></i></a>
+                    <button type="button" class="btn btn-icon btn-warning" onclick="openEditModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
                     <a href="javascript:void(0);" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
                   </div>
                 </div>
@@ -52,23 +52,23 @@
             {% empty %}
               <div class="col-12">
                 <div class="text-center py-4">
-                  <p class="text-muted">No advance programs available. Add your first advance program!</p>
+                  <p class="text-muted">No programs available. Add your first program!</p>
                 </div>
               </div>
             {% endfor %}
           </div>
           
           <!-- Pagination -->
-          {% if advance_programs.has_other_pages %}
+          {% if programs.has_other_pages %}
           <div class="row">
             <div class="col-12">
               <div class="d-flex justify-content-center mt-4">
-                <nav aria-label="Advance Programs pagination">
+                <nav aria-label="Programs pagination">
                   <ul class="pagination pagination-rounded">
                     <!-- Previous Button -->
-                    {% if advance_programs.has_previous %}
+                    {% if programs.has_previous %}
                       <li class="page-item">
-                        <a class="page-link" href="?page={{ advance_programs.previous_page_number }}" aria-label="Previous">
+                        <a class="page-link" href="?programs_page={{ programs.previous_page_number }}" aria-label="Previous">
                           <span aria-hidden="true">Previous</span>
                         </a>
                       </li>
@@ -81,22 +81,22 @@
                     {% endif %}
                     
                     <!-- Page Numbers -->
-                    {% for page_num in page_range %}
-                      {% if page_num == current_page %}
+                    {% for page_num in programs_page_range %}
+                      {% if page_num == programs_current_page %}
                         <li class="page-item active">
                           <span class="page-link">{{ page_num }}</span>
                         </li>
                       {% else %}
                         <li class="page-item">
-                          <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                          <a class="page-link" href="?programs_page={{ page_num }}">{{ page_num }}</a>
                         </li>
                       {% endif %}
                     {% endfor %}
                     
                     <!-- Next Button -->
-                    {% if advance_programs.has_next %}
+                    {% if programs.has_next %}
                       <li class="page-item">
-                        <a class="page-link" href="?page={{ advance_programs.next_page_number }}" aria-label="Next">
+                        <a class="page-link" href="?programs_page={{ programs.next_page_number }}" aria-label="Next">
                           <span aria-hidden="true">Next</span>
                         </a>
                       </li>
@@ -118,17 +118,17 @@
     </div>
   </div>
 
-  <!-- Add Advance Program Wizard Modal -->
-   <div class="modal fade" data-bs-backdrop="static" id="addAdvanceProgramWizardModal" tabindex="-1" aria-labelledby="addAdvanceProgramWizardModalLabel" aria-hidden="true">
+    <!-- Add Program Wizard Modal -->
+   <div class="modal fade" data-bs-backdrop="static" id="addProgramWizardModal" tabindex="-1" aria-labelledby="addProgramWizardModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addAdvanceProgramWizardModalLabel">Add Advance Program</h5>
+          <h5 class="modal-title" id="addProgramWizardModalLabel">Add Program</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form method="post" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="advanceProgramWizardForm">
+        <form method="post" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="programWizardForm">
           {% csrf_token %}
-          <input type="hidden" name="form_type" value="advance_program" />
+          <input type="hidden" name="form_type" value="program" />
           <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
             <div class="step-arrow-nav mb-4">
                 <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
@@ -164,7 +164,7 @@
                                     <label class="form-label"
                                         for="steparrow-gen-info-title-input">Title <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control"
-                                        id="steparrow-gen-info-title-input" name="advance_program_title"
+                                        id="steparrow-gen-info-title-input" name="program_title"
                                         placeholder="Enter title">
                                     <div class="invalid-feedback">Please enter a title</div>
                                 </div>
@@ -174,16 +174,16 @@
                                   <label class="form-label"
                                       for="steparrow-gen-info-subtitle-input">Sub Title</label>
                                   <input type="text" class="form-control"
-                                      id="steparrow-gen-info-subtitle-input" name="advance_program_subtitle"
+                                      id="steparrow-gen-info-subtitle-input" name="program_subtitle"
                                       placeholder="Enter subtitle">
                               </div>
                             </div>
                             <div class="col-lg-12">
                               <div class="mb-3">
-                                <label for="advance_program_image" class="col-form-label">Program Image <span class="text-danger">*</span></label>
-                                <input type="file" class="form-control" id="advance_program_image" name="advance_program_image" accept="image/*" onchange="previewImage(this, 'advanceImagePreview')" />
+                                <label for="program_image" class="col-form-label">Program Image <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" id="program_image" name="program_image" accept="image/*" onchange="previewImage(this, 'imagePreview')" />
                                 <div class="mt-2">
-                                  <img id="advanceImagePreview" src="#" alt="Image Preview" required style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                                  <img id="imagePreview" src="#" alt="Image Preview" required style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
                                 </div>
                               </div>
                             </div>
@@ -192,8 +192,9 @@
                                     <label class="form-label"
                                         for="steparrow-gen-info-description-input">Description</label>
                                     <textarea class="form-control"
-                                        id="steparrow-gen-info-description-input" name="advance_program_description"
+                                        id="steparrow-gen-info-description-input" name="program_description"
                                         placeholder="Enter description" rows="3"></textarea>
+                                    <div class="invalid-feedback">Please enter a description</div>
                                 </div>
                             </div>
                         </div>
@@ -203,87 +204,102 @@
                     role="tabpanel" aria-labelledby="steparrow-description-info-tab">
                     <div>
                         <div class="row">
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="batch-starts-input" name="advance_batch_starts" placeholder="e.g., Jan 15, 2024" required>
-                                    <div class="invalid-feedback">Please enter batch start date</div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="available-slots-input">Available Slots <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="available-slots-input" name="advance_available_slots" placeholder="Enter available slots" required>
-                                    <div class="invalid-feedback">Please enter available slots</div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="duration-input">Duration <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="duration-input" name="advance_duration" placeholder="e.g., 6 months" required>
-                                    <div class="invalid-feedback">Please enter duration</div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="program-rating-input">Program Rating</label>
-                                    <input type="number" class="form-control" id="program-rating-input" name="advance_program_rating" min="0" max="5" step="0.1" placeholder="e.g., 4.5">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="job-openings-input">Job Openings</label>
-                                    <input type="text" class="form-control" id="job-openings-input" name="advance_job_openings" placeholder="e.g., 50,000+">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="global-market-size-input">Global Market Size</label>
-                                    <input type="text" class="form-control" id="global-market-size-input" name="advance_global_market_size" placeholder="e.g., $180B">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="avg-annual-salary-input">Avg Annual Salary</label>
-                                    <input type="text" class="form-control" id="avg-annual-salary-input" name="advance_avg_annual_salary" placeholder="e.g., ₹8-15 LPA">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="program-icon-input">Icon</label>
-                                    <select class="form-select" id="program-icon-input" name="advance_program_icon">
-                                        <option value="">Select Icon</option>
-                                        <option value="fas fa-code"><i class="fas fa-code"></i> fas fa-code</option>
-                                        <option value="fas fa-laptop"><i class="fas fa-laptop"></i> fas fa-laptop</option>
-                                        <option value="fas fa-database"><i class="fas fa-database"></i> fas fa-database</option>
-                                        <option value="fas fa-mobile-alt"><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
-                                        <option value="fas fa-chart-line"><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
-                                        <option value="fas fa-paint-brush"><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
-                                        <option value="fas fa-shield-alt"><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
-                                        <option value="fas fa-brain"><i class="fas fa-brain"></i> fas fa-brain</option>
-                                        <option value="fas fa-graduation-cap"><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="price-input">Price <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="price-input" name="advance_price" min="0" step="0.01" placeholder="e.g., 499.99" required>
-                                    <div class="invalid-feedback">Please enter price</div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="mb-3">
-                                    <label class="form-label" for="discount-input">Discount Percentage</label>
-                                    <input type="number" class="form-control" id="discount-input" name="advance_discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="is-best-seller" name="advance_is_best_seller">
-                                    <label class="form-check-label" for="is-best-seller">Mark as Best Seller</label>
-                                </div>
-                            </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
+                                  <input type="text" class="form-control" id="batch-starts-input" name="batch_starts" placeholder="e.g., January 2024" required>
+                                  <div class="invalid-feedback">Please enter batch start date</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="available-slots-input">Available Slots <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="available-slots-input" name="available_slots" placeholder="e.g., 30" required>
+                                  <div class="invalid-feedback">Please enter available slots</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="duration-input">Duration <span class="text-danger">*</span></label>
+                                  <input type="text" class="form-control" id="duration-input" name="duration" placeholder="e.g., 6 months" required>
+                                  <div class="invalid-feedback">Please enter duration</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="job-openings-input">Job Openings</label>
+                                  <input type="text" class="form-control" id="job-openings-input" name="job_openings" placeholder="e.g., 50K+">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="market-size-input">Global Market Size</label>
+                                  <input type="text" class="form-control" id="market-size-input" name="global_market_size" placeholder="e.g., $100B">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="avg-salary-input">Avg Annual Salary</label>
+                                  <input type="text" class="form-control" id="avg-salary-input" name="avg_annual_salary" placeholder="e.g., $80K">
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="program-rating-input">Program Rating</label>
+                                  <input type="number" class="form-control" id="program-rating-input" name="program_rating" min="0" max="5" step="0.1" placeholder="e.g., 4.5">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <div class="form-check form-switch form-switch-lg" style="margin-top: 2rem;">
+                                      <input class="form-check-input" type="checkbox" id="is-best-seller-input" name="is_best_seller">
+                                      <label class="form-check-label" for="is-best-seller-input">Mark as Best Seller</label>
+                                  </div>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-12">
+                              <div class="mb-3">
+                                  <label class="form-label" for="program-icon">Program Icon</label>
+                                  <select class="form-select" id="program-icon" name="program_icon">
+                                      <option value="">Select Icon</option>
+                                      <option value="fas fa-chevron-right"><i class="fas fa-chevron-right"></i> fas fa-chevron-right</option>
+                                      <option value="fas fa-code"><i class="fas fa-code"></i> fas fa-code</option>
+                                      <option value="fas fa-laptop"><i class="fas fa-laptop"></i> fas fa-laptop</option>
+                                      <option value="fas fa-database"><i class="fas fa-database"></i> fas fa-database</option>
+                                      <option value="fas fa-mobile-alt"><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
+                                      <option value="fas fa-chart-line"><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
+                                      <option value="fas fa-paint-brush"><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
+                                      <option value="fas fa-shield-alt"><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
+                                      <option value="fas fa-brain"><i class="fas fa-brain"></i> fas fa-brain</option>
+                                      <option value="fas fa-graduation-cap"><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
+                                      <option value="fas fa-cog"><i class="fas fa-cog"></i> fas fa-cog</option>
+                                      <option value="fas fa-rocket"><i class="fas fa-rocket"></i> fas fa-rocket</option>
+                                      <option value="fas fa-lightbulb"><i class="fas fa-lightbulb"></i> fas fa-lightbulb</option>
+                                      <option value="fas fa-users"><i class="fas fa-users"></i> fas fa-users</option>
+                                      <option value="fas fa-globe"><i class="fas fa-globe"></i> fas fa-globe</option>
+                                  </select>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="price-input">Price (₹) <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <div class="invalid-feedback">Please enter a price</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="discount-input">Discount Percentage (%)</label>
+                                  <input type="number" class="form-control" id="discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <div class="form-text">Leave empty or 0 for no discount</div>
+                              </div>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -308,7 +324,7 @@
                                 <div class="row mb-3">
                                     <div class="col-12">
                                         <label class="form-label">Module Title <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control module-title" name="advance_modules[0][title]" placeholder="e.g., Introduction to Programming" required>
+                                        <input type="text" class="form-control module-title" name="modules[0][title]" placeholder="e.g., Introduction to Programming" required>
                                         <div class="invalid-feedback">Please enter a module title</div>
                                     </div>
                                 </div>
@@ -325,7 +341,7 @@
                                         <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
                                             <div class="row align-items-start">
                                                 <div class="col">
-                                                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[0][topics][0][title]" placeholder="Topic title *" required>
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[0][topics][0][title]" placeholder="Topic title *" required>
                                                     <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
                                                 </div>
                                                 <div class="col-auto">
@@ -336,19 +352,19 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-12">
-                                                    <textarea class="form-control form-control-sm" name="advance_modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                                    <textarea class="form-control form-control-sm" name="modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm" name="advance_modules[0][topics][0][video_file]" accept="video/*">
+                                                    <input type="file" class="form-control form-control-sm" name="modules[0][topics][0][video_file]" accept="video/*">
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <div class="form-check form-check-sm">
-                                                        <input class="form-check-input" type="checkbox" name="advance_modules[0][topics][0][is_intro]" id="topic-0-0-intro">
+                                                        <input class="form-check-input" type="checkbox" name="modules[0][topics][0][is_intro]" id="topic-0-0-intro">
                                                         <label class="form-check-label" for="topic-0-0-intro">Intro Video</label>
                                                     </div>
                                                 </div>
@@ -373,25 +389,21 @@
                                     <i class="ri-checkbox-circle-fill"></i>
                                 </div>
                             </div>
-                            <h5>Review Your Advance Program Details</h5>
-                            <p class="text-muted">Please review all the information before submitting your advance program.</p>
+                            <h5>Review Your Program Details</h5>
+                            <p class="text-muted">Please review all the information before submitting your program.</p>
                         </div>
                         
                         <div class="row justify-content-center">
                             <div class="col-lg-8">
                                 <div class="card border">
                                     <div class="card-body">
-                                        <h6 class="card-title">Advance Program Summary</h6>
+                                        <h6 class="card-title">Program Summary</h6>
                                         <div class="table-responsive">
                                             <table class="table table-borderless mb-0">
                                                 <tbody>
                                                     <tr>
                                                         <td class="fw-medium">Title:</td>
                                                         <td id="review-title">-</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-medium">Subtitle:</td>
-                                                        <td id="review-subtitle">-</td>
                                                     </tr>
                                                     <tr>
                                                         <td class="fw-medium">Batch Starts:</td>
@@ -405,17 +417,411 @@
                                                         <td class="fw-medium">Available Slots:</td>
                                                         <td id="review-slots">-</td>
                                                     </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="modal-footer border-top">
+            <div class="d-flex align-items-center justify-content-between w-100 pt-2">
+              <!-- Previous Button -->
+              <button type="button" class="btn btn-light btn-label previestab" id="prevBtn" style="display: none;"
+                  data-previous=""><i
+                      class="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>
+                  <span id="prevBtnText">Previous</span></button>
+              
+              <!-- Next/Submit Button -->
+              <button type="button" class="btn btn-success btn-label right ms-auto nexttab" id="nextBtn"
+                  data-nexttab="steparrow-description-info-tab"><i
+                      class="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                  <span id="nextBtnText">Next</span></button>
+              
+              <button type="submit" class="btn btn-primary btn-label right ms-auto" id="submitProgramBtn" style="display: none;">
+                  <i class="ri-check-line label-icon align-middle fs-16 ms-2"></i>Create Program</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+   </div>
+
+  <!-- Edit Program Wizard Modal -->
+  <div class="modal fade" id="editProgramWizardModal" tabindex="-1" aria-labelledby="editProgramWizardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProgramWizardModalLabel">Edit Program</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="post" action="" enctype="multipart/form-data" class="form-steps" autocomplete="on" id="editProgramWizardForm">
+          {% csrf_token %}
+          <div class="modal-body" style="overflow-y: auto; height: calc(90vh - 140px);">
+            <div class="step-arrow-nav mb-4">
+                <ul class="nav nav-pills custom-nav nav-justified" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="edit-steparrow-gen-info-tab"
+                            type="button" role="tab" aria-controls="edit-steparrow-gen-info"
+                            aria-selected="true" style="pointer-events: none;">Program</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="edit-steparrow-description-info-tab"
+                            type="button" role="tab" aria-controls="edit-steparrow-description-info"
+                            aria-selected="false" style="pointer-events: none;">Program Details</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="edit-steparrow-syllabus-tab"
+                            type="button" role="tab" aria-controls="edit-steparrow-syllabus"
+                            aria-selected="false" style="pointer-events: none;">Syllabus</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="edit-pills-experience-tab"
+                            type="button" role="tab" aria-controls="edit-pills-experience"
+                            aria-selected="false" style="pointer-events: none;">Review</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="edit-steparrow-gen-info" role="tabpanel"
+                    aria-labelledby="edit-steparrow-gen-info-tab">
+                    <div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label" for="edit-steparrow-gen-info-title-input">Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit-steparrow-gen-info-title-input" name="program_title" value="{{ edit_program.title }}" placeholder="Enter title">
+                                    <div class="invalid-feedback">Please enter a title</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-steparrow-gen-info-subtitle-input">Sub Title</label>
+                                  <input type="text" class="form-control" id="edit-steparrow-gen-info-subtitle-input" name="program_subtitle" value="{{ edit_program.subtitle }}" placeholder="Enter subtitle">
+                              </div>
+                            </div>
+                            <div class="col-lg-12">
+                              <div class="mb-3">
+                                <label for="edit_program_image" class="col-form-label">Program Image</label>
+                                <input type="file" class="form-control" id="edit_program_image" name="program_image" accept="image/*" onchange="previewImage(this, 'editImagePreview')" />
+                                <div class="mt-2">
+                                  {% if edit_program.image %}
+                                    <img id="editImagePreview" src="{{ edit_program.image.url }}" alt="Current Image" style="min-width: 100%; object-fit: contain; max-height: 150px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                                    <small class="text-muted d-block">Current: {{ edit_program.image.name }}</small>
+                                  {% else %}
+                                    <img id="editImagePreview" src="#" alt="Image Preview" style="min-width: 100%; object-fit: contain; max-height: 150px; display: none; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="edit-steparrow-gen-info-description-input">Description</label>
+                                    <textarea class="form-control" id="edit-steparrow-gen-info-description-input" name="program_description" placeholder="Enter description" rows="3">{{ edit_program.description }}</textarea>
+                                    <div class="invalid-feedback">Please enter a description</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="edit-steparrow-description-info"
+                    role="tabpanel" aria-labelledby="edit-steparrow-description-info-tab">
+                    <div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-batch-starts-input">Batch Starts <span class="text-danger">*</span></label>
+                                  <input type="text" class="form-control" id="edit-batch-starts-input" name="batch_starts" value="{{ edit_program.batch_starts }}" placeholder="e.g., January 2024" required>
+                                  <div class="invalid-feedback">Please enter batch start date</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-available-slots-input">Available Slots <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="edit-available-slots-input" name="available_slots" value="{{ edit_program.available_slots }}" placeholder="e.g., 30" required>
+                                  <div class="invalid-feedback">Please enter available slots</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-duration-input">Duration <span class="text-danger">*</span></label>
+                                  <input type="text" class="form-control" id="edit-duration-input" name="duration" value="{{ edit_program.duration }}" placeholder="e.g., 6 months" required>
+                                  <div class="invalid-feedback">Please enter duration</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-job-openings-input">Job Openings</label>
+                                  <input type="text" class="form-control" id="edit-job-openings-input" name="job_openings" value="{{ edit_program.job_openings }}" placeholder="e.g., 50K+">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-market-size-input">Global Market Size</label>
+                                  <input type="text" class="form-control" id="edit-market-size-input" name="global_market_size" value="{{ edit_program.global_market_size }}" placeholder="e.g., $100B">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-avg-salary-input">Avg Annual Salary</label>
+                                  <input type="text" class="form-control" id="edit-avg-salary-input" name="avg_annual_salary" value="{{ edit_program.avg_annual_salary }}" placeholder="e.g., $80K">
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-program-rating-input">Program Rating</label>
+                                  <input type="number" class="form-control" id="edit-program-rating-input" name="program_rating" min="0" max="5" step="0.1" value="{{ edit_program.program_rating }}" placeholder="e.g., 4.5">
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <div class="form-check form-switch form-switch-lg" style="margin-top: 2rem;">
+                                      <input class="form-check-input" type="checkbox" id="edit-is-best-seller-input" name="is_best_seller" {% if edit_program.is_best_seller %}checked{% endif %}>
+                                      <label class="form-check-label" for="edit-is-best-seller-input">Mark as Best Seller</label>
+                                  </div>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-12">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-program-icon">Program Icon</label>
+                                  <select class="form-select" id="edit-program-icon" name="program_icon">
+                                      <option value="">Select Icon</option>
+                                      <option value="fas fa-chevron-right" {% if edit_program.icon == "fas fa-chevron-right" %}selected{% endif %}><i class="fas fa-chevron-right"></i> fas fa-chevron-right</option>
+                                      <option value="fas fa-code" {% if edit_program.icon == "fas fa-code" %}selected{% endif %}><i class="fas fa-code"></i> fas fa-code</option>
+                                      <option value="fas fa-laptop" {% if edit_program.icon == "fas fa-laptop" %}selected{% endif %}><i class="fas fa-laptop"></i> fas fa-laptop</option>
+                                      <option value="fas fa-database" {% if edit_program.icon == "fas fa-database" %}selected{% endif %}><i class="fas fa-database"></i> fas fa-database</option>
+                                      <option value="fas fa-mobile-alt" {% if edit_program.icon == "fas fa-mobile-alt" %}selected{% endif %}><i class="fas fa-mobile-alt"></i> fas fa-mobile-alt</option>
+                                      <option value="fas fa-chart-line" {% if edit_program.icon == "fas fa-chart-line" %}selected{% endif %}><i class="fas fa-chart-line"></i> fas fa-chart-line</option>
+                                      <option value="fas fa-paint-brush" {% if edit_program.icon == "fas fa-paint-brush" %}selected{% endif %}><i class="fas fa-paint-brush"></i> fas fa-paint-brush</option>
+                                      <option value="fas fa-shield-alt" {% if edit_program.icon == "fas fa-shield-alt" %}selected{% endif %}><i class="fas fa-shield-alt"></i> fas fa-shield-alt</option>
+                                      <option value="fas fa-brain" {% if edit_program.icon == "fas fa-brain" %}selected{% endif %}><i class="fas fa-brain"></i> fas fa-brain</option>
+                                      <option value="fas fa-graduation-cap" {% if edit_program.icon == "fas fa-graduation-cap" %}selected{% endif %}><i class="fas fa-graduation-cap"></i> fas fa-graduation-cap</option>
+                                      <option value="fas fa-cog" {% if edit_program.icon == "fas fa-cog" %}selected{% endif %}><i class="fas fa-cog"></i> fas fa-cog</option>
+                                      <option value="fas fa-rocket" {% if edit_program.icon == "fas fa-rocket" %}selected{% endif %}><i class="fas fa-rocket"></i> fas fa-rocket</option>
+                                      <option value="fas fa-lightbulb" {% if edit_program.icon == "fas fa-lightbulb" %}selected{% endif %}><i class="fas fa-lightbulb"></i> fas fa-lightbulb</option>
+                                      <option value="fas fa-users" {% if edit_program.icon == "fas fa-users" %}selected{% endif %}><i class="fas fa-users"></i> fas fa-users</option>
+                                      <option value="fas fa-globe" {% if edit_program.icon == "fas fa-globe" %}selected{% endif %}><i class="fas fa-globe"></i> fas fa-globe</option>
+                                  </select>
+                              </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-price-input">Price (₹) <span class="text-danger">*</span></label>
+                                  <input type="number" class="form-control" id="edit-price-input" name="price" min="0" step="0.01" placeholder="e.g., 499.99" required>
+                                  <div class="invalid-feedback">Please enter a price</div>
+                              </div>
+                          </div>
+                          <div class="col-lg-6">
+                              <div class="mb-3">
+                                  <label class="form-label" for="edit-discount-input">Discount Percentage (%)</label>
+                                  <input type="number" class="form-control" id="edit-discount-input" name="discount_percentage" min="0" max="100" step="0.1" placeholder="e.g., 20.0">
+                                  <div class="form-text">Leave empty or 0 for no discount</div>
+                              </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="edit-steparrow-syllabus" role="tabpanel" aria-labelledby="edit-steparrow-syllabus-tab">
+                    <div>
+                        <div class="d-flex justify-content-end align-items-center mb-4">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addEditModule()">
+                                <i class="ri-add-line me-1"></i>Add Module
+                            </button>
+                        </div>
+                        
+                        <div id="editSyllabusContainer">
+                            <!-- Existing modules will be loaded here -->
+                            {% for syllabus in edit_program.syllabuses.all %}
+                            <div class="module-item border rounded p-3 mb-3" data-module-index="{{ forloop.counter0 }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-primary mb-0">Module {{ forloop.counter }}</h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)" {% if edit_program.syllabuses.all|length == 1 %}style="display: none;"{% endif %}>
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control module-title" name="modules[{{ forloop.counter0 }}][title]" value="{{ syllabus.module_title }}" placeholder="e.g., Introduction to Programming" required>
+                                        <div class="invalid-feedback">Please enter a module title</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="topics-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label mb-0">Topics</label>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditTopic(this)">
+                                            <i class="ri-add-line me-1"></i>Add Topic
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="topics-container">
+                                        {% for topic in syllabus.topics.all %}
+                                        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="{{ forloop.counter0 }}">
+                                            <div class="row align-items-start">
+                                                <div class="col">
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][title]" value="{{ topic.topic_title }}" placeholder="Topic title *" required>
+                                                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)" {% if syllabus.topics.all|length == 1 %}style="display: none;"{% endif %}>
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <textarea class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][description]" rows="2" placeholder="Topic description (optional)">{{ topic.description }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <label class="form-label form-label-sm">Video File:</label>
+                                                    <input type="file" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    {% if topic.video_file %}
+                                                        <small class="text-muted">Current: {{ topic.video_file.name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12">
+                                                    <div class="form-check form-check-sm">
+                                                        <input class="form-check-input" type="checkbox" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][is_intro]" id="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro" {% if topic.is_intro %}checked{% endif %}>
+                                                        <label class="form-check-label" for="edit-topic-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}-intro">Intro Video</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
+                                            <div class="row align-items-start">
+                                                <div class="col">
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[{{ forloop.counter0 }}][topics][0][title]" placeholder="Topic title *" required>
+                                                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)" style="display: none;">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <textarea class="form-control form-control-sm" name="modules[{{ forloop.counter0 }}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="module-item border rounded p-3 mb-3" data-module-index="0">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="text-primary mb-0">Module 1</h6>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)" style="display: none;">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control module-title" name="modules[0][title]" placeholder="e.g., Introduction to Programming" required>
+                                        <div class="invalid-feedback">Please enter a module title</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="topics-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label mb-0">Topics</label>
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditTopic(this)">
+                                            <i class="ri-add-line me-1"></i>Add Topic
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="topics-container">
+                                        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
+                                            <div class="row align-items-start">
+                                                <div class="col">
+                                                    <input type="text" class="form-control form-control-sm mb-2" name="modules[0][topics][0][title]" placeholder="Topic title *" required>
+                                                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)" style="display: none;">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <textarea class="form-control form-control-sm" name="modules[0][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="ri-information-line me-2"></i>
+                            <strong>Tip:</strong> Edit modules and topics to update your program content. Changes will be saved when you submit.
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="tab-pane fade" id="edit-pills-experience" role="tabpanel">
+                    <div>
+                        <div class="text-center">
+                            <div class="avatar-md mx-auto mb-4">
+                                <div class="avatar-title bg-light text-success display-4 rounded-circle">
+                                    <i class="ri-checkbox-circle-fill"></i>
+                                </div>
+                            </div>
+                            <h5>Review Your Program Changes</h5>
+                            <p class="text-muted">Please review all the information before updating your program.</p>
+                        </div>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8">
+                                <div class="card border">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Program Summary</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless mb-0">
+                                                <tbody>
                                                     <tr>
-                                                        <td class="fw-medium">Price:</td>
-                                                        <td id="review-price">-</td>
+                                                        <td class="fw-medium">Title:</td>
+                                                        <td id="edit-review-title">-</td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="fw-medium">Discount:</td>
-                                                        <td id="review-discount">-</td>
+                                                        <td class="fw-medium">Category:</td>
+                                                        <td id="edit-review-category">-</td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="fw-medium">Rating:</td>
-                                                        <td id="review-rating">-</td>
+                                                        <td class="fw-medium">Batch Starts:</td>
+                                                        <td id="edit-review-batch">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Duration:</td>
+                                                        <td id="edit-review-duration">-</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="fw-medium">Available Slots:</td>
+                                                        <td id="edit-review-slots">-</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -428,71 +834,84 @@
                 </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-light btn-label previestab" id="prevBtn" style="display: none;"
-                data-previous="steparrow-gen-info-tab"><i
-                    class="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>Back</button>
-            <button type="button" class="btn btn-success btn-label right ms-auto nexttab" id="nextBtn"
-                data-nexttab="steparrow-description-info-tab"><i
-                    class="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>Next</button>
-            <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">Submit</button>
+          <div class="modal-footer border-top ">
+            <div class="d-flex align-items-center justify-content-between w-100 pt-2">
+              <!-- Previous Button -->
+              <button type="button" class="btn btn-light btn-label previestab" id="editPrevBtn" style="display: none;"
+                  data-previous=""><i
+                      class="ri-arrow-left-line label-icon align-middle fs-16 me-2"></i>
+                  <span id="editPrevBtnText">Previous</span></button>
+              
+              <!-- Next/Submit Button -->
+              <button type="button" class="btn btn-success btn-label right ms-auto nexttab" id="editNextBtn"
+                  data-nexttab="edit-steparrow-description-info-tab"><i
+                      class="ri-arrow-right-line label-icon align-middle fs-16 ms-2"></i>
+                  <span id="editNextBtnText">Next</span></button>
+              
+              <button type="submit" class="btn btn-primary btn-label right ms-auto" id="editSubmitProgramBtn" style="display: none;">
+                  <i class="ri-check-line label-icon align-middle fs-16 ms-2"></i>Update Program</button>
+            </div>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div class="modal fade zoomIn" id="deleteAdvanceProgramModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mt-2 text-center">
-            <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
-            <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-              <h4>Are you Sure ?</h4>
-              <p class="text-muted mx-4 mb-0">
-                Are you sure you want to remove advance program <strong id="delete-program-name"></strong>?
-              </p>
-            </div>
-          </div>
-          <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
-            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
-            <form method="post" action="{% url 'dashboard:adv_programs' %}" style="display: inline;">
-              {% csrf_token %}
-              <input type="hidden" name="form_type" value="delete_advance_program">
-              <input type="hidden" name="program_id" id="delete-program-id">
-              <button type="submit" class="btn w-sm btn-danger" id="delete-record">Yes, Delete It!</button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-{% endblock %}
-
-{% block js %}
-<script>
+  <script>
 // Image preview function
 function previewImage(input, previewId) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
+    const preview = document.getElementById(previewId);
+    const file = input.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        
         reader.onload = function(e) {
-            document.getElementById(previewId).src = e.target.result;
-            document.getElementById(previewId).style.display = 'block';
+            preview.src = e.target.result;
+            preview.style.display = 'block';
         }
-        reader.readAsDataURL(input.files[0]);
+        
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = '#';
+        preview.style.display = 'none';
     }
 }
 
-// Custom wizard navigation script
+// Close modals after successful form submission
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle wizard navigation for Add Advance Program Modal
-    const wizardModal = document.getElementById('addAdvanceProgramWizardModal');
+    // Check if there are any success messages and close modals
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %}
+                // Close any open modals
+                var modals = document.querySelectorAll('.modal.show');
+                modals.forEach(function(modal) {
+                    var modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                });
+                
+                // Reset forms
+                document.querySelectorAll('form').forEach(function(form) {
+                    if (form.closest('.modal')) {
+                        form.reset();
+                    }
+                });
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+
+// Form validation removed for categories
+</script>
+
+<!-- Custom wizard navigation script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle wizard navigation for Add Program Modal
+    const wizardModal = document.getElementById('addProgramWizardModal');
     
     if (wizardModal) {
         // Handle next/previous buttons
@@ -587,10 +1006,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Function to validate current tab
         function validateCurrentTab(currentTabContent) {
-            if (!currentTabContent) return true;
+            if (!currentTabContent) return false;
             
             const tabId = currentTabContent.id;
             let isValid = true;
+            let errorMessage = '';
             
             // Clear previous validation states
             currentTabContent.querySelectorAll('.is-invalid').forEach(function(field) {
@@ -598,244 +1018,992 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (tabId === 'steparrow-gen-info') {
-                // Validate first tab - Title is required
-                const titleField = currentTabContent.querySelector('input[name="advance_program_title"]');
-                if (titleField && !titleField.value.trim()) {
-                    titleField.classList.add('is-invalid');
+                // Validate Program tab
+                const title = document.getElementById('steparrow-gen-info-title-input');
+                const image = document.getElementById('program_image');
+                
+                if (!title.value.trim()) {
+                    title.classList.add('is-invalid');
                     isValid = false;
+                    errorMessage = 'Program title is required.';
                 }
+                
+                if (!image.files.length) {
+                    image.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessage = errorMessage || 'Please select a program image.';
+                } else {
+                    // Validate image file type
+                    const file = image.files[0];
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        image.classList.add('is-invalid');
+                        isValid = false;
+                        errorMessage = errorMessage || 'Please select a valid image file (JPEG, PNG, GIF, or WebP).';
+                    } else if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                        image.classList.add('is-invalid');
+                        isValid = false;
+                        errorMessage = errorMessage || 'Image file size must be less than 5MB.';
+                    }
+                }
+                
             } else if (tabId === 'steparrow-description-info') {
-                // Validate second tab - Required fields
-                const requiredFields = currentTabContent.querySelectorAll('input[required]');
-                requiredFields.forEach(function(field) {
-                    if (!field.value.trim()) {
-                        field.classList.add('is-invalid');
+                // Validate Program Details tab
+                const batchStarts = document.getElementById('batch-starts-input');
+                const availableSlots = document.getElementById('available-slots-input');
+                const duration = document.getElementById('duration-input');
+                
+                if (!batchStarts.value.trim()) {
+                    batchStarts.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessage = 'Batch start date is required.';
+                }
+                
+                if (!availableSlots.value.trim()) {
+                    availableSlots.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessage = errorMessage || 'Available slots is required.';
+                } else if (isNaN(availableSlots.value) || parseInt(availableSlots.value) <= 0) {
+                    availableSlots.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessage = errorMessage || 'Available slots must be a positive number.';
+                }
+                
+                if (!duration.value.trim()) {
+                    duration.classList.add('is-invalid');
+                    isValid = false;
+                    errorMessage = errorMessage || 'Duration is required.';
+                }
+                
+            } else if (tabId === 'steparrow-syllabus') {
+                // Validate Syllabus tab - require at least one module with title and topic
+                const modules = currentTabContent.querySelectorAll('.module-item');
+                let hasValidModule = false;
+                let moduleErrors = [];
+                
+                if (modules.length === 0) {
+                    isValid = false;
+                    errorMessage = 'Please add at least one module to the syllabus.';
+                } else {
+                    modules.forEach(function(module, moduleIndex) {
+                        const moduleTitle = module.querySelector('.module-title');
+                        const topics = module.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+                        
+                        // Check if module title is filled
+                        if (!moduleTitle || !moduleTitle.value.trim()) {
+                            moduleTitle.classList.add('is-invalid');
+                            isValid = false;
+                            moduleErrors.push(`Module ${moduleIndex + 1} title is required.`);
+                        } else {
+                            moduleTitle.classList.remove('is-invalid');
+                            
+                            // Check if at least one topic has a title
+                            let hasValidTopic = false;
+                            topics.forEach(function(topicInput) {
+                                if (topicInput.value.trim()) {
+                                    topicInput.classList.remove('is-invalid');
+                                    hasValidTopic = true;
+                                }
+                            });
+                            
+                            // If no valid topics, mark all topic inputs as invalid
+                            if (!hasValidTopic) {
+                                topics.forEach(function(topicInput) {
+                                    topicInput.classList.add('is-invalid');
+                                });
+                                isValid = false;
+                                moduleErrors.push(`Module ${moduleIndex + 1} must have at least one topic with a title.`);
+                            } else {
+                                // Remove invalid class from empty topics if at least one is filled
+                                topics.forEach(function(topicInput) {
+                                    if (!topicInput.value.trim()) {
+                                        topicInput.classList.remove('is-invalid');
+                                    }
+                                });
+                                hasValidModule = true;
+                            }
+                        }
+                    });
+                    
+                    if (moduleErrors.length > 0) {
+                        errorMessage = moduleErrors.join(' ');
+                    } else if (!hasValidModule) {
+                        errorMessage = 'Please complete at least one module with a title and topic.';
                         isValid = false;
                     }
-                });
+                }
             }
+            
+            // Don't show alert messages, just use visual feedback
+            // The is-invalid classes and invalid-feedback divs will provide visual cues
             
             return isValid;
         }
         
-        // Function to update footer navigation buttons
-        function updateFooterButtons() {
-            const activeTab = wizardModal.querySelector('.nav-link.active');
-            const prevBtn = wizardModal.querySelector('#prevBtn');
-            const nextBtn = wizardModal.querySelector('#nextBtn');
-            const submitBtn = wizardModal.querySelector('#submitBtn');
-            
-            if (!activeTab) return;
-            
-            const activeTabId = activeTab.id;
-            
-            // Show/hide previous button
-            if (activeTabId === 'steparrow-gen-info-tab') {
-                prevBtn.style.display = 'none';
-            } else {
-                prevBtn.style.display = 'inline-block';
+        // Function to show validation errors
+        function showValidationError(message, type = 'danger') {
+            // Remove existing error alerts
+            const existingAlert = wizardModal.querySelector('.validation-alert');
+            if (existingAlert) {
+                existingAlert.remove();
             }
             
-            // Update previous button data-previous attribute
-            if (activeTabId === 'steparrow-description-info-tab') {
-                prevBtn.setAttribute('data-previous', 'steparrow-gen-info-tab');
-            } else if (activeTabId === 'steparrow-syllabus-tab') {
-                prevBtn.setAttribute('data-previous', 'steparrow-description-info-tab');
-            } else if (activeTabId === 'pills-experience-tab') {
-                prevBtn.setAttribute('data-previous', 'steparrow-syllabus-tab');
+            // Determine icon based on type
+            let icon = 'ri-error-warning-line';
+            if (type === 'success') {
+                icon = 'ri-check-line';
+            } else if (type === 'warning') {
+                icon = 'ri-alert-line';
+            } else if (type === 'info') {
+                icon = 'ri-information-line';
             }
             
-            // Update next button or show submit button
-            if (activeTabId === 'steparrow-gen-info-tab') {
-                nextBtn.setAttribute('data-nexttab', 'steparrow-description-info-tab');
-                nextBtn.style.display = 'inline-block';
-                submitBtn.style.display = 'none';
-            } else if (activeTabId === 'steparrow-description-info-tab') {
-                nextBtn.setAttribute('data-nexttab', 'steparrow-syllabus-tab');
-                nextBtn.style.display = 'inline-block';
-                submitBtn.style.display = 'none';
-            } else if (activeTabId === 'steparrow-syllabus-tab') {
-                nextBtn.setAttribute('data-nexttab', 'pills-experience-tab');
-                nextBtn.style.display = 'inline-block';
-                submitBtn.style.display = 'none';
-            } else if (activeTabId === 'pills-experience-tab') {
-                nextBtn.style.display = 'none';
-                submitBtn.style.display = 'inline-block';
+            // Create new alert
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible validation-alert" role="alert">
+                    <i class="${icon} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // Insert alert at the top of modal body
+            const modalBody = wizardModal.querySelector('.modal-body');
+            modalBody.insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto-remove alert after 5 seconds (except for success messages during form submission)
+            if (type !== 'success') {
+                setTimeout(function() {
+                    const alert = wizardModal.querySelector('.validation-alert');
+                    if (alert) {
+                        alert.remove();
+                    }
+                }, 5000);
             }
         }
         
         // Function to update review section
         function updateReviewSection() {
-            const titleField = wizardModal.querySelector('input[name="advance_program_title"]');
-            const subtitleField = wizardModal.querySelector('input[name="advance_program_subtitle"]');
-            const batchField = wizardModal.querySelector('input[name="advance_batch_starts"]');
-            const durationField = wizardModal.querySelector('input[name="advance_duration"]');
-            const priceField = wizardModal.querySelector('input[name="advance_price"]');
-            const slotsField = wizardModal.querySelector('input[name="advance_available_slots"]');
-            const discountField = wizardModal.querySelector('input[name="advance_discount_percentage"]');
-            const ratingField = wizardModal.querySelector('input[name="advance_program_rating"]');
+            const title = document.getElementById('steparrow-gen-info-title-input').value || '-';
+            const batchStarts = document.getElementById('batch-starts-input').value || '-';
+            const duration = document.getElementById('duration-input').value || '-';
+            const slots = document.getElementById('available-slots-input').value || '-';
             
-            document.getElementById('review-title').textContent = titleField?.value || '-';
-            document.getElementById('review-subtitle').textContent = subtitleField?.value || '-';
-            document.getElementById('review-batch').textContent = batchField?.value || '-';
-            document.getElementById('review-duration').textContent = durationField?.value || '-';
-            document.getElementById('review-price').textContent = priceField?.value ? '₹' + priceField.value : '-';
-            document.getElementById('review-slots').textContent = slotsField?.value || '-';
-            document.getElementById('review-discount').textContent = discountField?.value ? discountField.value + '%' : '-';
-            document.getElementById('review-rating').textContent = ratingField?.value || '-';
+            // Update review fields
+            document.getElementById('review-title').textContent = title;
+            document.getElementById('review-category').textContent = categoryText;
+            document.getElementById('review-batch').textContent = batchStarts;
+            document.getElementById('review-duration').textContent = duration;
+            document.getElementById('review-slots').textContent = slots;
         }
         
-        // Initialize footer buttons
-        updateFooterButtons();
+        // Add form submission validation
+        const programForm = document.getElementById('programWizardForm');
+        const submitBtn = document.getElementById('submitProgramBtn');
         
-        // Handle modal close/reset
-        wizardModal.addEventListener('hidden.bs.modal', function () {
-            resetWizardModal();
-        });
-        
-        // Reset wizard modal function
-        function resetWizardModal() {
-            // Reset form
-            const form = wizardModal.querySelector('#advanceProgramWizardForm');
-            if (form) {
-                form.reset();
-            }
-            
-            // Clear image preview
-            const imagePreview = document.getElementById('advanceImagePreview');
-            if (imagePreview) {
-                imagePreview.style.display = 'none';
-                imagePreview.src = '#';
-            }
-            
-            // Reset to first tab
-            // Hide all tab contents
-            wizardModal.querySelectorAll('.tab-pane').forEach(function(pane) {
-                pane.classList.remove('show', 'active');
-            });
-            
-            // Remove active class from all tab buttons
-            wizardModal.querySelectorAll('.nav-link').forEach(function(link) {
-                link.classList.remove('active');
-                link.setAttribute('aria-selected', 'false');
-            });
-            
-            // Activate first tab
-            const firstTab = document.getElementById('steparrow-gen-info-tab');
-            const firstTabContent = document.getElementById('steparrow-gen-info');
-            
-            if (firstTab && firstTabContent) {
-                firstTab.classList.add('active');
-                firstTab.setAttribute('aria-selected', 'true');
-                firstTabContent.classList.add('show', 'active');
-            }
-            
-            // Reset syllabus to initial state
-            const syllabusContainer = document.getElementById('syllabusContainer');
-            if (syllabusContainer) {
-                // Remove all modules except the first one
-                const modules = syllabusContainer.querySelectorAll('.module-item');
-                modules.forEach(function(module, index) {
-                    if (index > 0) {
-                        module.remove();
+        if (programForm) {
+            programForm.addEventListener('submit', function(e) {
+                // Validate all tabs before submission
+                const allTabs = wizardModal.querySelectorAll('.tab-pane');
+                let allValid = true;
+                
+                allTabs.forEach(function(tab) {
+                    if (tab.id !== 'pills-experience') { // Skip review tab
+                        if (!validateCurrentTab(tab)) {
+                            allValid = false;
+                        }
                     }
                 });
                 
-                // Reset the first module
-                const firstModule = syllabusContainer.querySelector('.module-item');
-                if (firstModule) {
-                    // Reset module title
-                    const moduleTitle = firstModule.querySelector('input[name*="[title]"]');
-                    if (moduleTitle) {
-                        moduleTitle.value = '';
-                        moduleTitle.name = 'advance_modules[0][title]';
-                    }
+                if (!allValid) {
+                    e.preventDefault();
                     
-                    // Reset topics to just one
-                    const topicsContainer = firstModule.querySelector('.topics-container');
-                    if (topicsContainer) {
-                        // Remove all topics except first
-                        const topics = topicsContainer.querySelectorAll('.topic-item');
-                        topics.forEach(function(topic, index) {
-                            if (index > 0) {
-                                topic.remove();
-                            }
-                        });
+                    // Go back to first invalid tab
+                    const firstInvalidTab = wizardModal.querySelector('.tab-pane .is-invalid');
+                    if (firstInvalidTab) {
+                        const invalidTabPane = firstInvalidTab.closest('.tab-pane');
+                        const invalidTabId = invalidTabPane.id;
+                        const invalidTabButton = wizardModal.querySelector(`[aria-controls="${invalidTabId}"]`);
                         
-                        // Reset first topic
-                        const firstTopic = topicsContainer.querySelector('.topic-item');
-                        if (firstTopic) {
-                            const topicInputs = firstTopic.querySelectorAll('input, textarea');
-                            topicInputs.forEach(function(input) {
-                                input.value = '';
-                                if (input.type === 'checkbox') {
-                                    input.checked = false;
-                                }
+                        if (invalidTabButton) {
+                            // Switch to the invalid tab
+                            wizardModal.querySelectorAll('.tab-pane').forEach(function(pane) {
+                                pane.classList.remove('show', 'active');
+                            });
+                            wizardModal.querySelectorAll('.nav-link').forEach(function(link) {
+                                link.classList.remove('active');
+                                link.setAttribute('aria-selected', 'false');
                             });
                             
-                            // Reset field names
-                            firstTopic.querySelector('input[name*="[title]"]').name = 'advance_modules[0][topics][0][title]';
-                            firstTopic.querySelector('textarea[name*="[description]"]').name = 'advance_modules[0][topics][0][description]';
-                            firstTopic.querySelector('input[type="file"]').name = 'advance_modules[0][topics][0][video_file]';
-                            firstTopic.querySelector('input[type="checkbox"]').name = 'advance_modules[0][topics][0][is_intro]';
+                            invalidTabButton.classList.add('active');
+                            invalidTabButton.setAttribute('aria-selected', 'true');
+                            invalidTabPane.classList.add('show', 'active');
                         }
                     }
-                    
-                    // Reset module index
-                    firstModule.setAttribute('data-module-index', '0');
-                    firstModule.querySelector('h6').textContent = 'Module 1';
-                    
-                    // Hide remove button
-                    const removeButton = firstModule.querySelector('.btn-outline-danger');
-                    if (removeButton) {
-                        removeButton.style.display = 'none';
+                    return false;
+                } else {
+                    // Show loading state
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating Program...';
                     }
+                }
+            });
+        }
+        
+        // Reset wizard when modal is closed
+        wizardModal.addEventListener('hidden.bs.modal', function() {
+            // Reset to first tab
+            const firstTab = document.getElementById('steparrow-gen-info-tab');
+            if (firstTab) {
+                // Hide all tab contents
+                wizardModal.querySelectorAll('.tab-pane').forEach(function(tabPane) {
+                    tabPane.classList.remove('show', 'active');
+                });
+                
+                // Remove active from all tab buttons
+                wizardModal.querySelectorAll('.nav-link').forEach(function(tabButton) {
+                    tabButton.classList.remove('active');
+                    tabButton.setAttribute('aria-selected', 'false');
+                });
+                
+                // Activate first tab
+                firstTab.classList.add('active');
+                firstTab.setAttribute('aria-selected', 'true');
+                
+                // Show first tab content
+                const firstTabContent = document.getElementById('steparrow-gen-info');
+                if (firstTabContent) {
+                    firstTabContent.classList.add('show', 'active');
                 }
             }
             
-            // Reset module counter
-            moduleCounter = 0;
-            
-            // Clear all validation states
-            wizardModal.querySelectorAll('.is-invalid').forEach(function(field) {
-                field.classList.remove('is-invalid');
+            // Clear form
+            const form = wizardModal.querySelector('form');
+            if (form) {
+                form.reset();
+                // Hide image preview
+                const imagePreview = document.getElementById('imagePreview');
+                if (imagePreview) {
+                    imagePreview.style.display = 'none';
+                }
+                // Clear validation states
+                form.querySelectorAll('.is-invalid').forEach(function(field) {
+                    field.classList.remove('is-invalid');
+                });
+                // Remove any validation alerts
+                const validationAlert = wizardModal.querySelector('.validation-alert');
+                if (validationAlert) {
+                    validationAlert.remove();
+                }
+                // Reset syllabus to initial state
+                resetSyllabusToInitialState();
+            }
+        });
+        
+        // Add real-time validation feedback
+        addRealTimeValidation();
+        
+        // Initialize footer buttons
+        updateFooterButtons();
+    }
+    
+    // Handle Edit Program Wizard navigation
+    const editWizardModal = document.getElementById('editProgramWizardModal');
+    if (editWizardModal) {
+        // Handle next/previous buttons for edit wizard
+        editWizardModal.querySelectorAll('.nexttab').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const nextTabId = this.getAttribute('data-nexttab');
+                const currentTabContent = editWizardModal.querySelector('.tab-pane.active');
+                
+                // Validate current tab before proceeding
+                if (!validateEditCurrentTab(currentTabContent)) {
+                    return false;
+                }
+                
+                if (nextTabId) {
+                    // Activate next tab
+                    const nextTab = document.getElementById(nextTabId);
+                    if (nextTab) {
+                        // Hide current active tab content
+                        if (currentTabContent) {
+                            currentTabContent.classList.remove('show', 'active');
+                        }
+                        
+                        // Remove active class from current tab button
+                        const currentTabButton = editWizardModal.querySelector('.nav-link.active');
+                        if (currentTabButton) {
+                            currentTabButton.classList.remove('active');
+                            currentTabButton.setAttribute('aria-selected', 'false');
+                        }
+                        
+                        // Activate next tab button
+                        nextTab.classList.add('active');
+                        nextTab.setAttribute('aria-selected', 'true');
+                        
+                        // Show next tab content
+                        const nextTabContentId = nextTab.getAttribute('aria-controls');
+                        const nextTabContent = document.getElementById(nextTabContentId);
+                        if (nextTabContent) {
+                            nextTabContent.classList.add('show', 'active');
+                        }
+                        
+                        // Update review section when going to final step
+                        if (nextTabId === 'edit-pills-experience-tab') {
+                            updateEditReviewSection();
+                        }
+                        
+                        // Update footer navigation buttons
+                        updateEditFooterButtons();
+                    }
+                }
+            });
+        });
+        
+        editWizardModal.querySelectorAll('.previestab').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const prevTabId = this.getAttribute('data-previous');
+                if (prevTabId) {
+                    // Activate previous tab
+                    const prevTab = document.getElementById(prevTabId);
+                    if (prevTab) {
+                        // Hide current active tab content
+                        const currentTabContent = editWizardModal.querySelector('.tab-pane.active');
+                        if (currentTabContent) {
+                            currentTabContent.classList.remove('show', 'active');
+                        }
+                        
+                        // Remove active class from current tab button
+                        const currentTabButton = editWizardModal.querySelector('.nav-link.active');
+                        if (currentTabButton) {
+                            currentTabButton.classList.remove('active');
+                            currentTabButton.setAttribute('aria-selected', 'false');
+                        }
+                        
+                        // Activate previous tab button
+                        prevTab.classList.add('active');
+                        prevTab.setAttribute('aria-selected', 'true');
+                        
+                        // Show previous tab content
+                        const prevTabContentId = prevTab.getAttribute('aria-controls');
+                        const prevTabContent = document.getElementById(prevTabContentId);
+                        if (prevTabContent) {
+                            prevTabContent.classList.add('show', 'active');
+                        }
+                        
+                        // Update footer navigation buttons
+                        updateEditFooterButtons();
+                    }
+                }
+            });
+        });
+        
+        // Add form submission validation for edit wizard
+        const editProgramForm = document.getElementById('editProgramWizardForm');
+        const editSubmitBtn = document.getElementById('editSubmitProgramBtn');
+        
+        if (editProgramForm) {
+            editProgramForm.addEventListener('submit', function(e) {
+                // Validate all tabs before submission
+                const allTabs = editWizardModal.querySelectorAll('.tab-pane');
+                let allValid = true;
+                
+                allTabs.forEach(function(tab) {
+                    if (tab.id !== 'edit-pills-experience') { // Skip review tab
+                        if (!validateEditCurrentTab(tab)) {
+                            allValid = false;
+                        }
+                    }
+                });
+                
+                if (!allValid) {
+                    e.preventDefault();
+                    
+                    // Go back to first invalid tab
+                    const firstInvalidTab = editWizardModal.querySelector('.tab-pane .is-invalid');
+                    if (firstInvalidTab) {
+                        const invalidTabPane = firstInvalidTab.closest('.tab-pane');
+                        const invalidTabId = invalidTabPane.id;
+                        const invalidTabButton = editWizardModal.querySelector(`[aria-controls="${invalidTabId}"]`);
+                        
+                        if (invalidTabButton) {
+                            // Switch to the invalid tab
+                            editWizardModal.querySelectorAll('.tab-pane').forEach(function(pane) {
+                                pane.classList.remove('show', 'active');
+                            });
+                            editWizardModal.querySelectorAll('.nav-link').forEach(function(link) {
+                                link.classList.remove('active');
+                                link.setAttribute('aria-selected', 'false');
+                            });
+                            
+                            invalidTabButton.classList.add('active');
+                            invalidTabButton.setAttribute('aria-selected', 'true');
+                            invalidTabPane.classList.add('show', 'active');
+                        }
+                    }
+                    return false;
+                } else {
+                    // Show loading state
+                    if (editSubmitBtn) {
+                        editSubmitBtn.disabled = true;
+                        editSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating Program...';
+                    }
+                }
+            });
+        }
+        
+        // Add real-time validation for edit wizard
+        addEditRealTimeValidation();
+        
+        // Initialize footer buttons
+        updateEditFooterButtons();
+    }
+});
+
+// Function to add real-time validation
+function addRealTimeValidation() {
+    const wizardModal = document.getElementById('addProgramWizardModal');
+    if (!wizardModal) return;
+    
+    // Title validation
+    const titleInput = document.getElementById('steparrow-gen-info-title-input');
+    if (titleInput) {
+        titleInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        titleInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Category validation
+    const categorySelect = document.getElementById('program_category');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            if (!this.value) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Image validation
+    const imageInput = document.getElementById('program_image');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (!this.files.length) {
+                this.classList.add('is-invalid');
+            } else {
+                const file = this.files[0];
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.classList.add('is-invalid');
+                } else if (file.size > 5 * 1024 * 1024) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            }
+        });
+    }
+    
+    // Batch starts validation
+    const batchStartsInput = document.getElementById('batch-starts-input');
+    if (batchStartsInput) {
+        batchStartsInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        batchStartsInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Available slots validation
+    const slotsInput = document.getElementById('available-slots-input');
+    if (slotsInput) {
+        slotsInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else if (isNaN(this.value) || parseInt(this.value) <= 0) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        slotsInput.addEventListener('input', function() {
+            if (this.value.trim() && !isNaN(this.value) && parseInt(this.value) > 0) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Duration validation
+    const durationInput = document.getElementById('duration-input');
+    if (durationInput) {
+        durationInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        durationInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Add validation for existing module and topic inputs
+    addSyllabusValidation();
+}
+
+// Function to add validation to syllabus inputs
+function addSyllabusValidation() {
+    const wizardModal = document.getElementById('addProgramWizardModal');
+    if (!wizardModal) return;
+    
+    // Add validation to existing module titles
+    const moduleInputs = wizardModal.querySelectorAll('.module-title');
+    moduleInputs.forEach(function(input) {
+        addModuleTitleValidation(input);
+    });
+    
+    // Add validation to existing topic inputs
+    const topicInputs = wizardModal.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+    topicInputs.forEach(function(input) {
+        addTopicTitleValidation(input);
+    });
+}
+
+// Function to add validation to a module title input
+function addModuleTitleValidation(input) {
+    if (!input) return;
+    
+    input.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    input.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+        }
+    });
+}
+
+// Function to add validation to a topic title input
+function addTopicTitleValidation(input) {
+    if (!input) return;
+    
+    input.addEventListener('blur', function() {
+        const moduleItem = this.closest('.module-item');
+        const topicInputs = moduleItem.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+        let hasValidTopic = false;
+        
+        // Check if at least one topic in this module has a title
+        topicInputs.forEach(function(topicInput) {
+            if (topicInput.value.trim()) {
+                hasValidTopic = true;
+            }
+        });
+        
+        // If no topics have titles, mark all as invalid
+        if (!hasValidTopic) {
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.add('is-invalid');
+            });
+        } else {
+            // Remove invalid class from all topics if at least one is filled
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.remove('is-invalid');
+            });
+        }
+    });
+    
+    input.addEventListener('input', function() {
+        const moduleItem = this.closest('.module-item');
+        const topicInputs = moduleItem.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+        
+        // If this input now has a value, remove invalid class from all topics in this module
+        if (this.value.trim()) {
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.remove('is-invalid');
+            });
+        } else {
+            // Check if any other topic in this module has a value
+            let hasValidTopic = false;
+            topicInputs.forEach(function(topicInput) {
+                if (topicInput.value.trim()) {
+                    hasValidTopic = true;
+                }
             });
             
-            // Reset footer buttons
-            updateFooterButtons();
-            
-            // Clear review data
-            document.getElementById('review-title').textContent = '-';
-            document.getElementById('review-subtitle').textContent = '-';
-            document.getElementById('review-batch').textContent = '-';
-            document.getElementById('review-duration').textContent = '-';
-            document.getElementById('review-price').textContent = '-';
-            document.getElementById('review-slots').textContent = '-';
-            document.getElementById('review-discount').textContent = '-';
-            document.getElementById('review-rating').textContent = '-';
+            // If no topics have values, mark all as invalid
+            if (!hasValidTopic) {
+                topicInputs.forEach(function(topicInput) {
+                    topicInput.classList.add('is-invalid');
+                });
+            }
+        }
+    });
+}
+
+// Function to validate edit wizard current tab
+function validateEditCurrentTab(currentTabContent) {
+    if (!currentTabContent) return false;
+    
+    const tabId = currentTabContent.id;
+    let isValid = true;
+    
+    // Clear previous validation states
+    currentTabContent.querySelectorAll('.is-invalid').forEach(function(field) {
+        field.classList.remove('is-invalid');
+    });
+    
+    if (tabId === 'edit-steparrow-gen-info') {
+        // Validate Program tab
+        const title = document.getElementById('edit-steparrow-gen-info-title-input');
+        const category = document.getElementById('edit_program_category');
+        
+        if (!title.value.trim()) {
+            title.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!category.value) {
+            category.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+    } else if (tabId === 'edit-steparrow-description-info') {
+        // Validate Program Details tab
+        const batchStarts = document.getElementById('edit-batch-starts-input');
+        const availableSlots = document.getElementById('edit-available-slots-input');
+        const duration = document.getElementById('edit-duration-input');
+        
+        if (!batchStarts.value.trim()) {
+            batchStarts.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!availableSlots.value.trim()) {
+            availableSlots.classList.add('is-invalid');
+            isValid = false;
+        } else if (isNaN(availableSlots.value) || parseInt(availableSlots.value) <= 0) {
+            availableSlots.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!duration.value.trim()) {
+            duration.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+    } else if (tabId === 'edit-steparrow-syllabus') {
+        // Validate Syllabus tab - require at least one module with title and topic
+        const modules = currentTabContent.querySelectorAll('.module-item');
+        let hasValidModule = false;
+        let moduleErrors = [];
+        
+        if (modules.length === 0) {
+            isValid = false;
+        } else {
+            modules.forEach(function(module, moduleIndex) {
+                const moduleTitle = module.querySelector('.module-title');
+                const topics = module.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+                
+                // Check if module title is filled
+                if (!moduleTitle || !moduleTitle.value.trim()) {
+                    moduleTitle.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    moduleTitle.classList.remove('is-invalid');
+                    
+                    // Check if at least one topic has a title
+                    let hasValidTopic = false;
+                    topics.forEach(function(topicInput) {
+                        if (topicInput.value.trim()) {
+                            topicInput.classList.remove('is-invalid');
+                            hasValidTopic = true;
+                        }
+                    });
+                    
+                    // If no valid topics, mark all topic inputs as invalid
+                    if (!hasValidTopic) {
+                        topics.forEach(function(topicInput) {
+                            topicInput.classList.add('is-invalid');
+                        });
+                        isValid = false;
+                    } else {
+                        // Remove invalid class from empty topics if at least one is filled
+                        topics.forEach(function(topicInput) {
+                            if (!topicInput.value.trim()) {
+                                topicInput.classList.remove('is-invalid');
+                            }
+                        });
+                        hasValidModule = true;
+                    }
+                }
+            });
         }
     }
     
-});
-
-// Delete advance program functionality
-function setDeleteAdvanceProgram(programId, programName) {
-    document.getElementById('delete-program-id').value = programId;
-    document.getElementById('delete-program-name').textContent = programName;
+    return isValid;
 }
 
-// Global variables for syllabus management
-let moduleCounter = 0;
-
-// Add Module Function
-function addModule() {
-    moduleCounter++;
-    const syllabusContainer = document.getElementById('syllabusContainer');
+// Function to update edit review section
+function updateEditReviewSection() {
+    const title = document.getElementById('edit-steparrow-gen-info-title-input').value || '-';
+    const category = document.getElementById('edit_program_category');
+    const categoryText = category.options[category.selectedIndex]?.text || '-';
+    const batchStarts = document.getElementById('edit-batch-starts-input').value || '-';
+    const duration = document.getElementById('edit-duration-input').value || '-';
+    const slots = document.getElementById('edit-available-slots-input').value || '-';
     
+    // Update review fields
+    document.getElementById('edit-review-title').textContent = title;
+    document.getElementById('edit-review-category').textContent = categoryText;
+    document.getElementById('edit-review-batch').textContent = batchStarts;
+    document.getElementById('edit-review-duration').textContent = duration;
+    document.getElementById('edit-review-slots').textContent = slots;
+}
+
+// Function to add real-time validation for edit wizard
+function addEditRealTimeValidation() {
+    const editWizardModal = document.getElementById('editProgramWizardModal');
+    if (!editWizardModal) return;
+    
+    // Title validation
+    const titleInput = document.getElementById('edit-steparrow-gen-info-title-input');
+    if (titleInput) {
+        titleInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        titleInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Category validation
+    const categorySelect = document.getElementById('edit_program_category');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            if (!this.value) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Batch starts validation
+    const batchStartsInput = document.getElementById('edit-batch-starts-input');
+    if (batchStartsInput) {
+        batchStartsInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        batchStartsInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Available slots validation
+    const slotsInput = document.getElementById('edit-available-slots-input');
+    if (slotsInput) {
+        slotsInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else if (isNaN(this.value) || parseInt(this.value) <= 0) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        slotsInput.addEventListener('input', function() {
+            if (this.value.trim() && !isNaN(this.value) && parseInt(this.value) > 0) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+    
+    // Duration validation
+    const durationInput = document.getElementById('edit-duration-input');
+    if (durationInput) {
+        durationInput.addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+        
+        durationInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('is-invalid');
+            }
+        });
+    }
+}
+
+// Function to update footer navigation buttons for add program
+function updateFooterButtons() {
+    const wizardModal = document.getElementById('addProgramWizardModal');
+    if (!wizardModal) return;
+    
+    const activeTab = wizardModal.querySelector('.nav-link.active');
+    if (!activeTab) return;
+    
+    const activeTabId = activeTab.id;
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitProgramBtn');
+    const prevBtnText = document.getElementById('prevBtnText');
+    const nextBtnText = document.getElementById('nextBtnText');
+    
+    // Reset button states
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    submitBtn.style.display = 'none';
+    
+    if (activeTabId === 'steparrow-gen-info-tab') {
+        // First tab - only show next
+        prevBtn.style.display = 'none';
+        nextBtn.setAttribute('data-nexttab', 'steparrow-description-info-tab');
+        nextBtnText.textContent = 'Next';
+        
+    } else if (activeTabId === 'steparrow-description-info-tab') {
+        // Second tab - show both prev and next
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'steparrow-gen-info-tab');
+        prevBtnText.textContent = 'Back to Program';
+        
+        nextBtn.setAttribute('data-nexttab', 'steparrow-syllabus-tab');
+        nextBtnText.textContent = 'Go to Syllabus';
+        
+    } else if (activeTabId === 'steparrow-syllabus-tab') {
+        // Third tab - show both prev and next
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'steparrow-description-info-tab');
+        prevBtnText.textContent = 'Back to Details';
+        
+        nextBtn.setAttribute('data-nexttab', 'pills-experience-tab');
+        nextBtnText.textContent = 'Go to Review';
+        
+    } else if (activeTabId === 'pills-experience-tab') {
+        // Last tab - show prev and submit
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'steparrow-syllabus-tab');
+        prevBtnText.textContent = 'Back to Syllabus';
+        
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+    }
+}
+
+// Function to update edit footer navigation buttons
+function updateEditFooterButtons() {
+    const editWizardModal = document.getElementById('editProgramWizardModal');
+    if (!editWizardModal) return;
+    
+    const activeTab = editWizardModal.querySelector('.nav-link.active');
+    if (!activeTab) return;
+    
+    const activeTabId = activeTab.id;
+    const prevBtn = document.getElementById('editPrevBtn');
+    const nextBtn = document.getElementById('editNextBtn');
+    const submitBtn = document.getElementById('editSubmitProgramBtn');
+    const prevBtnText = document.getElementById('editPrevBtnText');
+    const nextBtnText = document.getElementById('editNextBtnText');
+    
+    // Reset button states
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'inline-block';
+    submitBtn.style.display = 'none';
+    
+    if (activeTabId === 'edit-steparrow-gen-info-tab') {
+        // First tab - only show next
+        prevBtn.style.display = 'none';
+        nextBtn.setAttribute('data-nexttab', 'edit-steparrow-description-info-tab');
+        nextBtnText.textContent = 'Go to Program Details';
+        
+    } else if (activeTabId === 'edit-steparrow-description-info-tab') {
+        // Second tab - show both prev and next
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'edit-steparrow-gen-info-tab');
+        prevBtnText.textContent = 'Back to Program';
+        
+        nextBtn.setAttribute('data-nexttab', 'edit-steparrow-syllabus-tab');
+        nextBtnText.textContent = 'Go to Syllabus';
+        
+    } else if (activeTabId === 'edit-steparrow-syllabus-tab') {
+        // Third tab - show both prev and next
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'edit-steparrow-description-info-tab');
+        prevBtnText.textContent = 'Back to Details';
+        
+        nextBtn.setAttribute('data-nexttab', 'edit-pills-experience-tab');
+        nextBtnText.textContent = 'Go to Review';
+        
+    } else if (activeTabId === 'edit-pills-experience-tab') {
+        // Last tab - show prev and submit
+        prevBtn.style.display = 'inline-block';
+        prevBtn.setAttribute('data-previous', 'edit-steparrow-syllabus-tab');
+        prevBtnText.textContent = 'Back to Syllabus';
+        
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'inline-block';
+    }
+}
+
+// Syllabus Management Functions
+let moduleIndex = 0;
+
+function addModule() {
+    moduleIndex++;
+    const container = document.getElementById('syllabusContainer');
     const moduleHtml = `
-        <div class="module-item border rounded p-3 mb-3" data-module-index="${moduleCounter}">
+        <div class="module-item border rounded p-3 mb-3" data-module-index="${moduleIndex}">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="text-primary mb-0">Module ${moduleCounter + 1}</h6>
+                <h6 class="text-primary mb-0">Module ${moduleIndex + 1}</h6>
                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeModule(this)">
                     <i class="ri-delete-bin-line"></i>
                 </button>
@@ -844,7 +2012,7 @@ function addModule() {
             <div class="row mb-3">
                 <div class="col-12">
                     <label class="form-label">Module Title <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control module-title" name="advance_modules[${moduleCounter}][title]" placeholder="e.g., Introduction to Programming" required>
+                    <input type="text" class="form-control module-title" name="modules[${moduleIndex}][title]" placeholder="e.g., Advanced Programming Concepts" required>
                     <div class="invalid-feedback">Please enter a module title</div>
                 </div>
             </div>
@@ -861,8 +2029,8 @@ function addModule() {
                     <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
                         <div class="row align-items-start">
                             <div class="col">
-                                <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[${moduleCounter}][topics][0][title]" placeholder="Topic title *" required>
-                                <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                                <input type="text" class="form-control form-control-sm mb-2" name="modules[${moduleIndex}][topics][0][title]" placeholder="Topic title *" required>
+                                <div class="invalid-feedback">At least one topic title is required per module</div>
                             </div>
                             <div class="col-auto">
                                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTopic(this)" style="display: none;">
@@ -872,20 +2040,25 @@ function addModule() {
                         </div>
                         <div class="row">
                             <div class="col-12">
-                                <textarea class="form-control form-control-sm" name="advance_modules[${moduleCounter}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                                <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
                             </div>
                         </div>
                         <div class="row mt-2">
                             <div class="col-12">
-                                <label class="form-label form-label-sm">Video File:</label>
-                                <input type="file" class="form-control form-control-sm" name="advance_modules[${moduleCounter}][topics][0][video_file]" accept="video/*">
+                                <input type="url" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][0][video_url]" placeholder="Video URL (optional)">
                             </div>
                         </div>
                         <div class="row mt-2">
-                            <div class="col-12">
+                            <div class="col-6">
                                 <div class="form-check form-check-sm">
-                                    <input class="form-check-input" type="checkbox" name="advance_modules[${moduleCounter}][topics][0][is_intro]" id="topic-${moduleCounter}-0-intro">
-                                    <label class="form-check-label" for="topic-${moduleCounter}-0-intro">Intro Video</label>
+                                    <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][0][is_free_trail]" id="topic-${moduleIndex}-0-free-trail">
+                                    <label class="form-check-label" for="topic-${moduleIndex}-0-free-trail">Free Trial</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][0][is_intro]" id="topic-${moduleIndex}-0-intro">
+                                    <label class="form-check-label" for="topic-${moduleIndex}-0-intro">Intro Video</label>
                                 </div>
                             </div>
                         </div>
@@ -895,31 +2068,42 @@ function addModule() {
         </div>
     `;
     
-    syllabusContainer.insertAdjacentHTML('beforeend', moduleHtml);
-    updateModuleVisibility();
+    container.insertAdjacentHTML('beforeend', moduleHtml);
+    updateModuleNumbers();
+    updateRemoveButtons();
+    
+    // Add validation to the new module
+    const newModule = container.lastElementChild;
+    const newModuleTitle = newModule.querySelector('.module-title');
+    const newTopicInput = newModule.querySelector('.topic-item input[placeholder*="Topic title"]');
+    
+    if (newModuleTitle) {
+        addModuleTitleValidation(newModuleTitle);
+    }
+    if (newTopicInput) {
+        addTopicTitleValidation(newTopicInput);
+    }
 }
 
-// Remove Module Function
 function removeModule(button) {
     const moduleItem = button.closest('.module-item');
     moduleItem.remove();
     updateModuleNumbers();
-    updateModuleVisibility();
+    updateRemoveButtons();
 }
 
-// Add Topic Function
 function addTopic(button) {
     const moduleItem = button.closest('.module-item');
-    const topicsContainer = moduleItem.querySelector('.topics-container');
     const moduleIndex = moduleItem.getAttribute('data-module-index');
-    const topicIndex = topicsContainer.children.length;
+    const topicsContainer = moduleItem.querySelector('.topics-container');
+    const topicCount = topicsContainer.children.length;
     
     const topicHtml = `
-        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicIndex}">
+        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicCount}">
             <div class="row align-items-start">
                 <div class="col">
-                    <input type="text" class="form-control form-control-sm mb-2" name="advance_modules[${moduleIndex}][topics][${topicIndex}][title]" placeholder="Topic title *" required>
-                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                    <input type="text" class="form-control form-control-sm mb-2" name="modules[${moduleIndex}][topics][${topicCount}][title]" placeholder="Topic title *" required>
+                    <div class="invalid-feedback">At least one topic title is required per module</div>
                 </div>
                 <div class="col-auto">
                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeTopic(this)">
@@ -929,20 +2113,20 @@ function addTopic(button) {
             </div>
             <div class="row">
                 <div class="col-12">
-                    <textarea class="form-control form-control-sm" name="advance_modules[${moduleIndex}][topics][${topicIndex}][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                    <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][description]" rows="2" placeholder="Topic description (optional)"></textarea>
                 </div>
             </div>
             <div class="row mt-2">
                 <div class="col-12">
                     <label class="form-label form-label-sm">Video File:</label>
-                    <input type="file" class="form-control form-control-sm" name="advance_modules[${moduleIndex}][topics][${topicIndex}][video_file]" accept="video/*">
+                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][video_file]" accept="video/*">
                 </div>
             </div>
             <div class="row mt-2">
                 <div class="col-12">
                     <div class="form-check form-check-sm">
-                        <input class="form-check-input" type="checkbox" name="advance_modules[${moduleIndex}][topics][${topicIndex}][is_intro]" id="topic-${moduleIndex}-${topicIndex}-intro">
-                        <label class="form-check-label" for="topic-${moduleIndex}-${topicIndex}-intro">Intro Video</label>
+                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicCount}][is_intro]" id="topic-${moduleIndex}-${topicCount}-intro">
+                        <label class="form-check-label" for="topic-${moduleIndex}-${topicCount}-intro">Intro Video</label>
                     </div>
                 </div>
             </div>
@@ -950,30 +2134,76 @@ function addTopic(button) {
     `;
     
     topicsContainer.insertAdjacentHTML('beforeend', topicHtml);
-    updateTopicVisibility(moduleItem);
+    updateTopicRemoveButtons(moduleItem);
+    
+    // Add validation to the new topic input
+    const newTopic = topicsContainer.lastElementChild;
+    const newTopicInput = newTopic.querySelector('input[placeholder*="Topic title"]');
+    
+    if (newTopicInput) {
+        addTopicTitleValidation(newTopicInput);
+    }
 }
 
-// Remove Topic Function
 function removeTopic(button) {
     const topicItem = button.closest('.topic-item');
-    const moduleItem = topicItem.closest('.module-item');
+    const moduleItem = button.closest('.module-item');
     topicItem.remove();
-    updateTopicVisibility(moduleItem);
+    updateTopicRemoveButtons(moduleItem);
+    reindexTopics(moduleItem);
 }
 
-// Update Module Numbers
 function updateModuleNumbers() {
-    const modules = document.querySelectorAll('#syllabusContainer .module-item');
+    const modules = document.querySelectorAll('.module-item');
     modules.forEach((module, index) => {
         const title = module.querySelector('h6');
         title.textContent = `Module ${index + 1}`;
         module.setAttribute('data-module-index', index);
+        
+        // Update form field names
+        const moduleTitle = module.querySelector('.module-title');
+        moduleTitle.name = `modules[${index}][title]`;
+        
+        // Update topic names
+        reindexTopics(module);
     });
 }
 
-// Update Module Visibility
-function updateModuleVisibility() {
-    const modules = document.querySelectorAll('#syllabusContainer .module-item');
+function reindexTopics(moduleItem) {
+    const moduleIndex = moduleItem.getAttribute('data-module-index');
+    const topics = moduleItem.querySelectorAll('.topic-item');
+    
+    topics.forEach((topic, topicIndex) => {
+        topic.setAttribute('data-topic-index', topicIndex);
+        
+        const titleInput = topic.querySelector('input[placeholder="Topic title"]');
+        const descriptionTextarea = topic.querySelector('textarea');
+        const videoUrlInput = topic.querySelector('input[type="url"]');
+        const freeTrailCheckbox = topic.querySelector('input[name*="is_free_trail"]');
+        const introCheckbox = topic.querySelector('input[name*="is_intro"]');
+        
+        if (titleInput) titleInput.name = `modules[${moduleIndex}][topics][${topicIndex}][title]`;
+        if (descriptionTextarea) descriptionTextarea.name = `modules[${moduleIndex}][topics][${topicIndex}][description]`;
+        const videoFileInput = topic.querySelector('input[type="file"]');
+        if (videoUrlInput) videoUrlInput.name = `modules[${moduleIndex}][topics][${topicIndex}][video_url]`;
+        if (videoFileInput) videoFileInput.name = `modules[${moduleIndex}][topics][${topicIndex}][video_file]`;
+        if (freeTrailCheckbox) {
+            freeTrailCheckbox.name = `modules[${moduleIndex}][topics][${topicIndex}][is_free_trail]`;
+            freeTrailCheckbox.id = `topic-${moduleIndex}-${topicIndex}-free-trail`;
+            const freeTrailLabel = topic.querySelector(`label[for*="free-trail"]`);
+            if (freeTrailLabel) freeTrailLabel.setAttribute('for', `topic-${moduleIndex}-${topicIndex}-free-trail`);
+        }
+        if (introCheckbox) {
+            introCheckbox.name = `modules[${moduleIndex}][topics][${topicIndex}][is_intro]`;
+            introCheckbox.id = `topic-${moduleIndex}-${topicIndex}-intro`;
+            const introLabel = topic.querySelector(`label[for*="intro"]`);
+            if (introLabel) introLabel.setAttribute('for', `topic-${moduleIndex}-${topicIndex}-intro`);
+        }
+    });
+}
+
+function updateRemoveButtons() {
+    const modules = document.querySelectorAll('.module-item');
     modules.forEach((module, index) => {
         const removeButton = module.querySelector('.btn-outline-danger');
         if (modules.length > 1) {
@@ -984,8 +2214,7 @@ function updateModuleVisibility() {
     });
 }
 
-// Update Topic Visibility
-function updateTopicVisibility(moduleItem) {
+function updateTopicRemoveButtons(moduleItem) {
     const topics = moduleItem.querySelectorAll('.topic-item');
     topics.forEach((topic, index) => {
         const removeButton = topic.querySelector('.btn-outline-danger');
@@ -997,5 +2226,701 @@ function updateTopicVisibility(moduleItem) {
     });
 }
 
+// Function to reset syllabus to initial state
+function resetSyllabusToInitialState() {
+    const container = document.getElementById('syllabusContainer');
+    if (container) {
+        // Remove all modules except the first one
+        const modules = container.querySelectorAll('.module-item');
+        modules.forEach(function(module, index) {
+            if (index > 0) {
+                module.remove();
+            }
+        });
+        
+        // Reset the first module
+        const firstModule = container.querySelector('.module-item');
+        if (firstModule) {
+            firstModule.setAttribute('data-module-index', '0');
+            const moduleTitle = firstModule.querySelector('h6');
+            if (moduleTitle) {
+                moduleTitle.textContent = 'Module 1';
+            }
+            
+            // Clear module title input
+            const moduleTitleInput = firstModule.querySelector('.module-title');
+            if (moduleTitleInput) {
+                moduleTitleInput.value = '';
+                moduleTitleInput.name = 'modules[0][title]';
+            }
+            
+            // Reset topics to just one
+            const topicsContainer = firstModule.querySelector('.topics-container');
+            if (topicsContainer) {
+                const topics = topicsContainer.querySelectorAll('.topic-item');
+                topics.forEach(function(topic, index) {
+                    if (index > 0) {
+                        topic.remove();
+                    }
+                });
+                
+                // Reset the first topic
+                const firstTopic = topicsContainer.querySelector('.topic-item');
+                if (firstTopic) {
+                    firstTopic.setAttribute('data-topic-index', '0');
+                    const titleInput = firstTopic.querySelector('input[placeholder="Topic title"]');
+                    const descriptionTextarea = firstTopic.querySelector('textarea');
+                    
+                    if (titleInput) {
+                        titleInput.value = '';
+                        titleInput.name = 'modules[0][topics][0][title]';
+                    }
+                    if (descriptionTextarea) {
+                        descriptionTextarea.value = '';
+                        descriptionTextarea.name = 'modules[0][topics][0][description]';
+                    }
+                    
+                    // Reset other topic fields
+                    const videoUrlInput = firstTopic.querySelector('input[type="url"]');
+                    const freeTrailCheckbox = firstTopic.querySelector('input[name*="is_free_trail"]');
+                    const introCheckbox = firstTopic.querySelector('input[name*="is_intro"]');
+                    
+                    if (videoUrlInput) {
+                        videoUrlInput.value = '';
+                        videoUrlInput.name = 'modules[0][topics][0][video_url]';
+                    }
+                    if (freeTrailCheckbox) {
+                        freeTrailCheckbox.checked = false;
+                        freeTrailCheckbox.name = 'modules[0][topics][0][is_free_trail]';
+                        freeTrailCheckbox.id = 'topic-0-0-free-trail';
+                    }
+                    if (introCheckbox) {
+                        introCheckbox.checked = false;
+                        introCheckbox.name = 'modules[0][topics][0][is_intro]';
+                        introCheckbox.id = 'topic-0-0-intro';
+                    }
+                }
+            }
+        }
+        
+        // Reset module index counter
+        moduleIndex = 0;
+        updateRemoveButtons();
+        updateTopicRemoveButtons(firstModule);
+    }
+}
+
+// Edit Syllabus Management Functions
+let editModuleIndex = 0;
+
+function addEditModule() {
+    const container = document.getElementById('editSyllabusContainer');
+    const existingModules = container.querySelectorAll('.module-item');
+    editModuleIndex = existingModules.length;
+    
+    const moduleHtml = `
+        <div class="module-item border rounded p-3 mb-3" data-module-index="${editModuleIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary mb-0">Module ${editModuleIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control module-title" name="modules[${editModuleIndex}][title]" placeholder="e.g., Advanced Programming Concepts" required>
+                    <div class="invalid-feedback">Please enter a module title</div>
+                </div>
+            </div>
+            
+            <div class="topics-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Topics</label>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditTopic(this)">
+                        <i class="ri-add-line me-1"></i>Add Topic
+                    </button>
+                </div>
+                
+                <div class="topics-container">
+                    <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="0">
+                        <div class="row align-items-start">
+                            <div class="col">
+                                <input type="text" class="form-control form-control-sm mb-2" name="modules[${editModuleIndex}][topics][0][title]" placeholder="Topic title *" required>
+                                <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)" style="display: none;">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <textarea class="form-control form-control-sm" name="modules[${editModuleIndex}][topics][0][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <input type="url" class="form-control form-control-sm" name="modules[${editModuleIndex}][topics][0][video_url]" placeholder="Video URL (optional)">
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${editModuleIndex}][topics][0][is_free_trail]" id="edit-topic-${editModuleIndex}-0-free-trail">
+                                    <label class="form-check-label" for="edit-topic-${editModuleIndex}-0-free-trail">Free Trial</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check form-check-sm">
+                                    <input class="form-check-input" type="checkbox" name="modules[${editModuleIndex}][topics][0][is_intro]" id="edit-topic-${editModuleIndex}-0-intro">
+                                    <label class="form-check-label" for="edit-topic-${editModuleIndex}-0-intro">Intro Video</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', moduleHtml);
+    updateEditModuleNumbers();
+    updateEditRemoveButtons();
+    
+    // Add validation to the new module
+    const newModule = container.lastElementChild;
+    const newModuleTitle = newModule.querySelector('.module-title');
+    const newTopicInput = newModule.querySelector('.topic-item input[placeholder*="Topic title"]');
+    
+    if (newModuleTitle) {
+        addEditModuleTitleValidation(newModuleTitle);
+    }
+    if (newTopicInput) {
+        addEditTopicTitleValidation(newTopicInput);
+    }
+}
+
+function removeEditModule(button) {
+    const moduleItem = button.closest('.module-item');
+    moduleItem.remove();
+    updateEditModuleNumbers();
+    updateEditRemoveButtons();
+}
+
+function addEditTopic(button) {
+    const moduleItem = button.closest('.module-item');
+    const moduleIndex = moduleItem.getAttribute('data-module-index');
+    const topicsContainer = moduleItem.querySelector('.topics-container');
+    const topicCount = topicsContainer.children.length;
+    
+    const topicHtml = `
+        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicCount}">
+            <div class="row align-items-start">
+                <div class="col">
+                    <input type="text" class="form-control form-control-sm mb-2" name="modules[${moduleIndex}][topics][${topicCount}][title]" placeholder="Topic title *" required>
+                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][description]" rows="2" placeholder="Topic description (optional)"></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    topicsContainer.insertAdjacentHTML('beforeend', topicHtml);
+    updateEditTopicRemoveButtons(moduleItem);
+    
+    // Add validation to the new topic input
+    const newTopic = topicsContainer.lastElementChild;
+    const newTopicInput = newTopic.querySelector('input[placeholder*="Topic title"]');
+    
+    if (newTopicInput) {
+        addEditTopicTitleValidation(newTopicInput);
+    }
+}
+
+function removeEditTopic(button) {
+    const topicItem = button.closest('.topic-item');
+    const moduleItem = button.closest('.module-item');
+    topicItem.remove();
+    updateEditTopicRemoveButtons(moduleItem);
+    reindexEditTopics(moduleItem);
+}
+
+function updateEditModuleNumbers() {
+    const container = document.getElementById('editSyllabusContainer');
+    const modules = container.querySelectorAll('.module-item');
+    modules.forEach((module, index) => {
+        const title = module.querySelector('h6');
+        title.textContent = `Module ${index + 1}`;
+        module.setAttribute('data-module-index', index);
+        
+        // Update form field names
+        const moduleTitle = module.querySelector('.module-title');
+        if (moduleTitle) {
+            moduleTitle.name = `modules[${index}][title]`;
+        }
+        
+        // Update topic names
+        reindexEditTopics(module);
+    });
+}
+
+function reindexEditTopics(moduleItem) {
+    const moduleIndex = moduleItem.getAttribute('data-module-index');
+    const topics = moduleItem.querySelectorAll('.topic-item');
+    
+    topics.forEach((topic, topicIndex) => {
+        topic.setAttribute('data-topic-index', topicIndex);
+        
+        const titleInput = topic.querySelector('input[placeholder*="Topic title"]');
+        const descriptionTextarea = topic.querySelector('textarea');
+        
+        if (titleInput) titleInput.name = `modules[${moduleIndex}][topics][${topicIndex}][title]`;
+        if (descriptionTextarea) descriptionTextarea.name = `modules[${moduleIndex}][topics][${topicIndex}][description]`;
+    });
+}
+
+function updateEditRemoveButtons() {
+    const container = document.getElementById('editSyllabusContainer');
+    const modules = container.querySelectorAll('.module-item');
+    modules.forEach((module, index) => {
+        const removeButton = module.querySelector('.btn-outline-danger');
+        if (removeButton && modules.length > 1) {
+            removeButton.style.display = 'inline-block';
+        } else if (removeButton) {
+            removeButton.style.display = 'none';
+        }
+    });
+}
+
+function updateEditTopicRemoveButtons(moduleItem) {
+    const topics = moduleItem.querySelectorAll('.topic-item');
+    topics.forEach((topic, index) => {
+        const removeButton = topic.querySelector('.btn-outline-danger');
+        if (removeButton && topics.length > 1) {
+            removeButton.style.display = 'inline-block';
+        } else if (removeButton) {
+            removeButton.style.display = 'none';
+        }
+    });
+}
+
+// Function to add validation to edit module title input
+function addEditModuleTitleValidation(input) {
+    if (!input) return;
+    
+    input.addEventListener('blur', function() {
+        if (!this.value.trim()) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    input.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+        }
+    });
+}
+
+// Function to add validation to edit topic title input
+function addEditTopicTitleValidation(input) {
+    if (!input) return;
+    
+    input.addEventListener('blur', function() {
+        const moduleItem = this.closest('.module-item');
+        const topicInputs = moduleItem.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+        let hasValidTopic = false;
+        
+        // Check if at least one topic in this module has a title
+        topicInputs.forEach(function(topicInput) {
+            if (topicInput.value.trim()) {
+                hasValidTopic = true;
+            }
+        });
+        
+        // If no topics have titles, mark all as invalid
+        if (!hasValidTopic) {
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.add('is-invalid');
+            });
+        } else {
+            // Remove invalid class from all topics if at least one is filled
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.remove('is-invalid');
+            });
+        }
+    });
+    
+    input.addEventListener('input', function() {
+        const moduleItem = this.closest('.module-item');
+        const topicInputs = moduleItem.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+        
+        // If this input now has a value, remove invalid class from all topics in this module
+        if (this.value.trim()) {
+            topicInputs.forEach(function(topicInput) {
+                topicInput.classList.remove('is-invalid');
+            });
+        } else {
+            // Check if any other topic in this module has a value
+            let hasValidTopic = false;
+            topicInputs.forEach(function(topicInput) {
+                if (topicInput.value.trim()) {
+                    hasValidTopic = true;
+                }
+            });
+            
+            // If no topics have values, mark all as invalid
+            if (!hasValidTopic) {
+                topicInputs.forEach(function(topicInput) {
+                    topicInput.classList.add('is-invalid');
+                });
+            }
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateRemoveButtons();
+    document.querySelectorAll('.module-item').forEach(updateTopicRemoveButtons);
+    
+    // Initialize edit syllabus validation and buttons
+    const editContainer = document.getElementById('editSyllabusContainer');
+    if (editContainer) {
+        updateEditRemoveButtons();
+        editContainer.querySelectorAll('.module-item').forEach(function(module) {
+            updateEditTopicRemoveButtons(module);
+            
+            // Add validation to existing edit module inputs
+            const moduleTitle = module.querySelector('.module-title');
+            if (moduleTitle) {
+                addEditModuleTitleValidation(moduleTitle);
+            }
+            
+            // Add validation to existing edit topic inputs
+            const topicInputs = module.querySelectorAll('.topic-item input[placeholder*="Topic title"]');
+            topicInputs.forEach(function(input) {
+                addEditTopicTitleValidation(input);
+            });
+        });
+    }
+});
+
+// Function to open edit modal with program data
+function openEditModal(programId) {
+    // Find the program data from the page
+    const programs = [
+        {% for program in programs %}
+        {
+            id: {{ program.id }},
+            title: "{{ program.title|escapejs }}",
+            subtitle: "{{ program.subtitle|escapejs }}",
+            description: "{{ program.description|escapejs }}",
+            category_id: {{ program.category.id }},
+            batch_starts: "{{ program.batch_starts|escapejs }}",
+            available_slots: {{ program.available_slots }},
+            duration: "{{ program.duration|escapejs }}",
+            job_openings: "{{ program.job_openings|escapejs }}",
+            global_market_size: "{{ program.global_market_size|escapejs }}",
+            avg_annual_salary: "{{ program.avg_annual_salary|escapejs }}",
+            program_rating: {{ program.program_rating }},
+            is_best_seller: {{ program.is_best_seller|yesno:"true,false" }},
+            icon: "{{ program.icon|escapejs }}",
+            price: {{ program.price }},
+            discount_percentage: {{ program.discount_percentage }},
+            image_url: "{% if program.image %}{{ program.image.url }}{% endif %}",
+            syllabuses: [
+                {% for syllabus in program.syllabuses.all %}
+                {
+                    module_title: "{{ syllabus.module_title|escapejs }}",
+                    topics: [
+                        {% for topic in syllabus.topics.all %}
+                        {
+                            topic_title: "{{ topic.topic_title|escapejs }}",
+                            description: "{{ topic.description|escapejs }}",
+                            video_file: "{{ topic.video_file.name|default:''|escapejs }}",
+                            is_intro: {{ topic.is_intro|yesno:"true,false" }}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ]
+        },
+        {% endfor %}
+    ];
+    
+    const program = programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    // Update form action URL
+    const form = document.getElementById('editProgramWizardForm');
+    form.action = `{% url 'dashboard:edit_program' 0 %}`.replace('0', programId);
+    
+    // Populate form fields
+    document.getElementById('edit-steparrow-gen-info-title-input').value = program.title;
+    document.getElementById('edit-steparrow-gen-info-subtitle-input').value = program.subtitle;
+    document.getElementById('edit-steparrow-gen-info-description-input').value = program.description;
+    
+    // Set category selection
+    const categorySelect = document.getElementById('edit_program_category');
+    if (categorySelect) {
+        categorySelect.value = program.category_id;
+    }
+    
+    document.getElementById('edit-batch-starts-input').value = program.batch_starts;
+    document.getElementById('edit-available-slots-input').value = program.available_slots;
+    document.getElementById('edit-duration-input').value = program.duration;
+    document.getElementById('edit-job-openings-input').value = program.job_openings;
+    document.getElementById('edit-market-size-input').value = program.global_market_size;
+    document.getElementById('edit-avg-salary-input').value = program.avg_annual_salary;
+    document.getElementById('edit-program-rating-input').value = program.program_rating;
+    document.getElementById('edit-is-best-seller-input').checked = program.is_best_seller;
+    document.getElementById('edit-program-icon').value = program.icon;
+    document.getElementById('edit-price-input').value = program.price;
+    document.getElementById('edit-discount-input').value = program.discount_percentage;
+    
+    // Update image preview if exists
+    const imagePreview = document.getElementById('editImagePreview');
+    if (program.image_url && imagePreview) {
+        imagePreview.src = program.image_url;
+        imagePreview.style.display = 'block';
+    }
+    
+    // Populate syllabus data
+    populateEditSyllabus(program.syllabuses);
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('editProgramWizardModal'));
+    modal.show();
+}
+
+// Function to populate edit syllabus with existing data
+function populateEditSyllabus(syllabuses) {
+    const container = document.getElementById('editSyllabusContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (syllabuses.length === 0) {
+        // Add default empty module if no syllabuses exist
+        addEditModuleHTML(0, '', []);
+    } else {
+        // Add existing modules
+        syllabuses.forEach((syllabus, moduleIndex) => {
+            addEditModuleHTML(moduleIndex, syllabus.module_title, syllabus.topics);
+        });
+    }
+    
+    // Update delete button visibility
+    updateEditDeleteButtonVisibility();
+}
+
+// Function to add a module HTML to edit modal
+function addEditModuleHTML(moduleIndex, moduleTitle = '', topics = []) {
+    const container = document.getElementById('editSyllabusContainer');
+    if (!container) return;
+    
+    const moduleHTML = `
+        <div class="module-item border rounded p-3 mb-3" data-module-index="${moduleIndex}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary mb-0">Module ${moduleIndex + 1}</h6>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditModule(this)">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="form-label">Module Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control module-title" name="modules[${moduleIndex}][title]" value="${moduleTitle}" placeholder="e.g., Introduction to Programming" required>
+                    <div class="invalid-feedback">Please enter a module title</div>
+                </div>
+            </div>
+            
+            <div class="topics-section">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0">Topics</label>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addEditTopic(this)">
+                        <i class="ri-add-line me-1"></i>Add Topic
+                    </button>
+                </div>
+                
+                <div class="topics-container">
+                    ${topics.length === 0 ? getEditTopicHTML(moduleIndex, 0, '', '', '', false) : topics.map((topic, topicIndex) => getEditTopicHTML(moduleIndex, topicIndex, topic.topic_title, topic.description, topic.video_file, topic.is_intro)).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', moduleHTML);
+}
+
+// Function to get topic HTML for edit modal
+function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescription = '', topicVideoFile = '', topicIntro = false) {
+    return `
+        <div class="topic-item border-start border-3 border-info ps-3 mb-2" data-topic-index="${topicIndex}">
+            <div class="row align-items-start">
+                <div class="col">
+                    <input type="text" class="form-control form-control-sm mb-2" name="modules[${moduleIndex}][topics][${topicIndex}][title]" value="${topicTitle}" placeholder="Topic title *" required>
+                    <div class="invalid-feedback mb-2">At least one topic title is required per module</div>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeEditTopic(this)">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <textarea class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][description]" rows="2" placeholder="Topic description (optional)">${topicDescription}</textarea>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <label class="form-label form-label-sm">Video File:</label>
+                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][video_file]" accept="video/*">
+                    ${topicVideoFile ? `<small class="text-muted">Current: ${topicVideoFile}</small>` : ''}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input" type="checkbox" name="modules[${moduleIndex}][topics][${topicIndex}][is_intro]" id="edit-topic-${moduleIndex}-${topicIndex}-intro" ${topicIntro ? 'checked' : ''}>
+                        <label class="form-check-label" for="edit-topic-${moduleIndex}-${topicIndex}-intro">Intro Video</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Function to add new module in edit modal
+function addEditModule() {
+    const container = document.getElementById('editSyllabusContainer');
+    if (!container) return;
+    
+    const moduleCount = container.querySelectorAll('.module-item').length;
+    addEditModuleHTML(moduleCount, '', []);
+    updateEditDeleteButtonVisibility();
+}
+
+// Function to remove module in edit modal
+function removeEditModule(button) {
+    const moduleItem = button.closest('.module-item');
+    moduleItem.remove();
+    updateEditModuleIndexes();
+    updateEditDeleteButtonVisibility();
+}
+
+// Function to add topic in edit modal
+function addEditTopic(button) {
+    const moduleItem = button.closest('.module-item');
+    const topicsContainer = moduleItem.querySelector('.topics-container');
+    const moduleIndex = parseInt(moduleItem.getAttribute('data-module-index'));
+    const topicCount = topicsContainer.querySelectorAll('.topic-item').length;
+    
+    const topicHTML = getEditTopicHTML(moduleIndex, topicCount, '', '');
+    topicsContainer.insertAdjacentHTML('beforeend', topicHTML);
+    updateEditTopicIndexes(moduleItem);
+    updateEditDeleteButtonVisibility();
+}
+
+// Function to remove topic in edit modal
+function removeEditTopic(button) {
+    const topicItem = button.closest('.topic-item');
+    const moduleItem = button.closest('.module-item');
+    topicItem.remove();
+    updateEditTopicIndexes(moduleItem);
+    updateEditDeleteButtonVisibility();
+}
+
+// Function to update module indexes in edit modal
+function updateEditModuleIndexes() {
+    const container = document.getElementById('editSyllabusContainer');
+    if (!container) return;
+    
+    const modules = container.querySelectorAll('.module-item');
+    
+    modules.forEach((module, index) => {
+        module.setAttribute('data-module-index', index);
+        module.querySelector('h6').textContent = `Module ${index + 1}`;
+        
+        // Update all input names in this module
+        const inputs = module.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/modules\[\d+\]/, `modules[${index}]`);
+                input.setAttribute('name', newName);
+            }
+        });
+        
+        // Update topic indexes within this module
+        updateEditTopicIndexes(module);
+    });
+}
+
+// Function to update topic indexes within a module in edit modal
+function updateEditTopicIndexes(moduleItem) {
+    const topics = moduleItem.querySelectorAll('.topic-item');
+    const moduleIndex = parseInt(moduleItem.getAttribute('data-module-index'));
+    
+    topics.forEach((topic, index) => {
+        topic.setAttribute('data-topic-index', index);
+        
+        // Update input names
+        const inputs = topic.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/\[topics\]\[\d+\]/, `[topics][${index}]`);
+                input.setAttribute('name', newName);
+            }
+        });
+    });
+}
+
+// Function to update delete button visibility in edit modal
+function updateEditDeleteButtonVisibility() {
+    const container = document.getElementById('editSyllabusContainer');
+    if (!container) return;
+    
+    const modules = container.querySelectorAll('.module-item');
+    
+    // Show/hide module delete buttons
+    modules.forEach((module, index) => {
+        const deleteBtn = module.querySelector('.btn-outline-danger');
+        if (modules.length === 1) {
+            deleteBtn.style.display = 'none';
+        } else {
+            deleteBtn.style.display = 'inline-block';
+        }
+        
+        // Show/hide topic delete buttons
+        const topics = module.querySelectorAll('.topic-item');
+        topics.forEach(topic => {
+            const topicDeleteBtn = topic.querySelector('.btn-outline-danger');
+            if (topics.length === 1) {
+                topicDeleteBtn.style.display = 'none';
+            } else {
+                topicDeleteBtn.style.display = 'inline-block';
+            }
+        });
+    });
+}
 </script>
 {% endblock %}

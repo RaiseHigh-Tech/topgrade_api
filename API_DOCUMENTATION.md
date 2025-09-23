@@ -1,4 +1,4 @@
-# TopGrade API Documentation
+# Top Grade API Documentation
 
 This document provides comprehensive documentation for the TopGrade API endpoints.
 
