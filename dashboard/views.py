@@ -493,10 +493,7 @@ def edit_program_view(request, id):
                 program.discount_percentage = float(discount_percentage) if discount_percentage else 0.0
                 program.save()
                 
-                # Handle syllabus and topics update
-                # First, delete existing syllabus and topics
-                program.syllabuses.all().delete()
-                
+                # Handle syllabus and topics update WITHOUT deleting existing data
                 # Parse modules and topics from POST data
                 modules_data = {}
                 
@@ -525,34 +522,72 @@ def edit_program_view(request, id):
                                 
                                 modules_data[module_index]['topics'][topic_index][topic_field] = value
                 
-                # Create syllabus modules and topics
+                # Get existing syllabuses
+                existing_syllabuses = list(program.syllabuses.all())
+                
+                # Update or create syllabus modules and topics
                 for module_index, module_data in modules_data.items():
                     if module_data['title']:
-                        # Create syllabus module
-                        syllabus = Syllabus.objects.create(
-                            program=program,
-                            module_title=module_data['title']
-                        )
+                        # Update existing syllabus or create new one
+                        if module_index < len(existing_syllabuses):
+                            syllabus = existing_syllabuses[module_index]
+                            syllabus.module_title = module_data['title']
+                            syllabus.save()
+                        else:
+                            # Create new syllabus module
+                            syllabus = Syllabus.objects.create(
+                                program=program,
+                                module_title=module_data['title']
+                            )
                         
-                        # Create topics for this module
-                        for topic_index, topic_data in module_data['topics'].items():
+                        # Get existing topics for this syllabus
+                        existing_topics = list(syllabus.topics.all())
+                        
+                        # Update or create topics for this module
+                        topic_indices = list(module_data['topics'].keys())
+                        for topic_index in topic_indices:
+                            topic_data = module_data['topics'][topic_index]
                             if topic_data.get('title'):
-                                # Handle video file upload and duration calculation
-                                video_file = None
-                                video_duration = None
-                                if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
-                                    video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
-                                    # Calculate video duration
-                                    video_duration = calculate_video_duration(video_file)
-                                
-                                Topic.objects.create(
-                                    syllabus=syllabus,
-                                    topic_title=topic_data['title'],
-                                    description=topic_data.get('description', ''),
-                                    video_file=video_file,
-                                    video_duration=video_duration,
-                                    is_intro=topic_data.get('is_intro') == 'on'
-                                )
+                                # Update existing topic or create new one
+                                if topic_index < len(existing_topics):
+                                    topic = existing_topics[topic_index]
+                                    topic.topic_title = topic_data['title']
+                                    topic.description = topic_data.get('description', '')
+                                    topic.is_intro = topic_data.get('is_intro') == 'on'
+                                    
+                                    # Only update video if new one is uploaded
+                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        topic.video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                        topic.video_duration = calculate_video_duration(topic.video_file)
+                                    
+                                    topic.save()
+                                else:
+                                    # Create new topic
+                                    video_file = None
+                                    video_duration = None
+                                    
+                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
+                                        video_duration = calculate_video_duration(video_file)
+                                    
+                                    Topic.objects.create(
+                                        syllabus=syllabus,
+                                        topic_title=topic_data['title'],
+                                        description=topic_data.get('description', ''),
+                                        video_file=video_file,
+                                        video_duration=video_duration,
+                                        is_intro=topic_data.get('is_intro') == 'on'
+                                    )
+                        
+                        # Remove extra topics if there are fewer topics now
+                        if len(topic_indices) < len(existing_topics):
+                            for i in range(len(topic_indices), len(existing_topics)):
+                                existing_topics[i].delete()
+                
+                # Remove extra syllabuses if there are fewer modules now
+                if len(modules_data) < len(existing_syllabuses):
+                    for i in range(len(modules_data), len(existing_syllabuses)):
+                        existing_syllabuses[i].delete()
                 
                 messages.success(request, 'Program updated successfully')
             except Category.DoesNotExist:
@@ -780,10 +815,7 @@ def adv_program_view(request):
                         advance_program.is_best_seller = is_best_seller
                         advance_program.save()
                         
-                        # Handle syllabus and topics update
-                        # First, delete existing syllabus and topics
-                        advance_program.syllabuses.all().delete()
-                        
+                        # Handle syllabus and topics update WITHOUT deleting existing data
                         # Parse modules and topics from POST data
                         modules_data = {}
                         
@@ -812,33 +844,72 @@ def adv_program_view(request):
                                         
                                         modules_data[module_index]['topics'][topic_index][topic_field] = value
                         
-                        # Create syllabus modules and topics
+                        # Get existing syllabuses
+                        existing_syllabuses = list(advance_program.syllabuses.all())
+                        
+                        # Update or create syllabus modules and topics
                         for module_index, module_data in modules_data.items():
                             if module_data['title']:
-                                # Create syllabus module
-                                syllabus = AdvanceSyllabus.objects.create(
-                                    advance_program=advance_program,
-                                    module_title=module_data['title']
-                                )
+                                # Update existing syllabus or create new one
+                                if module_index < len(existing_syllabuses):
+                                    syllabus = existing_syllabuses[module_index]
+                                    syllabus.module_title = module_data['title']
+                                    syllabus.save()
+                                else:
+                                    # Create new syllabus module
+                                    syllabus = AdvanceSyllabus.objects.create(
+                                        advance_program=advance_program,
+                                        module_title=module_data['title']
+                                    )
                                 
-                                # Create topics for this module
-                                for topic_index, topic_data in module_data['topics'].items():
+                                # Get existing topics for this syllabus
+                                existing_topics = list(syllabus.topics.all())
+                                
+                                # Update or create topics for this module
+                                topic_indices = list(module_data['topics'].keys())
+                                for topic_index in topic_indices:
+                                    topic_data = module_data['topics'][topic_index]
                                     if topic_data.get('title'):
-                                        # Handle video file upload and duration calculation
-                                        video_file = None
-                                        video_duration = None
-                                        if f'advance_modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
-                                            video_file = request.FILES[f'advance_modules[{module_index}][topics][{topic_index}][video_file]']
-                                            # Calculate video duration
-                                            video_duration = calculate_video_duration(video_file)
-                                        
-                                        AdvanceTopic.objects.create(
-                                            advance_syllabus=syllabus,
-                                            topic_title=topic_data['title'],
-                                            description=topic_data.get('description', ''),
-                                            video_file=video_file,
-                                            video_duration=video_duration
-                                        )
+                                        # Update existing topic or create new one
+                                        if topic_index < len(existing_topics):
+                                            topic = existing_topics[topic_index]
+                                            topic.topic_title = topic_data['title']
+                                            topic.description = topic_data.get('description', '')
+                                            topic.is_intro = topic_data.get('is_intro') == 'on'
+                                            
+                                            # Only update video if new one is uploaded
+                                            if f'advance_modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                                topic.video_file = request.FILES[f'advance_modules[{module_index}][topics][{topic_index}][video_file]']
+                                                topic.video_duration = calculate_video_duration(topic.video_file)
+                                            
+                                            topic.save()
+                                        else:
+                                            # Create new topic
+                                            video_file = None
+                                            video_duration = None
+                                            
+                                            if f'advance_modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                                video_file = request.FILES[f'advance_modules[{module_index}][topics][{topic_index}][video_file]']
+                                                video_duration = calculate_video_duration(video_file)
+                                            
+                                            AdvanceTopic.objects.create(
+                                                advance_syllabus=syllabus,
+                                                topic_title=topic_data['title'],
+                                                description=topic_data.get('description', ''),
+                                                video_file=video_file,
+                                                video_duration=video_duration,
+                                                is_intro=topic_data.get('is_intro') == 'on'
+                                            )
+                                
+                                # Remove extra topics if there are fewer topics now
+                                if len(topic_indices) < len(existing_topics):
+                                    for i in range(len(topic_indices), len(existing_topics)):
+                                        existing_topics[i].delete()
+                        
+                        # Remove extra syllabuses if there are fewer modules now
+                        if len(modules_data) < len(existing_syllabuses):
+                            for i in range(len(modules_data), len(existing_syllabuses)):
+                                existing_syllabuses[i].delete()
                         
                         messages.success(request, f'Advance Program "{title}" has been updated successfully.')
                     else:

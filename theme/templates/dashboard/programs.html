@@ -917,9 +917,27 @@
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    <input type="file" class="form-control form-control-sm"  name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    
+                                                    <!-- Hidden input to preserve existing video file -->
                                                     {% if topic.video_file %}
-                                                        <small class="text-muted">Current: {{ topic.video_file.name }}</small>
+                                                        <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][existing_video_file]" value="{{ topic.video_file.name }}">
+                                                        <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][topic_id]" value="{{ topic.id }}">
+                                                        <div class="mt-1">
+                                                            <small class="text-muted d-block">
+                                                                <i class="ri-video-line me-1 text-success"></i>
+                                                                <strong>Current video:</strong> {{ topic.video_file.name }}
+                                                            </small>
+                                                            <small class="text-info d-block">
+                                                                <i class="ri-information-line me-1"></i>
+                                                                Leave empty to keep current video, or choose a new file to replace it
+                                                            </small>
+                                                        </div>
+                                                    {% else %}
+                                                        <small class="text-muted d-block mt-1">
+                                                            <i class="ri-upload-line me-1"></i>
+                                                            No video file uploaded for this topic
+                                                        </small>
                                                     {% endif %}
                                                 </div>
                                             </div>
