@@ -108,6 +108,32 @@ class Category(models.Model):
 
     class Meta:
         verbose_name_plural = "Categories"
+    
+    @classmethod
+    def create_default_categories(cls):
+        """Create default categories if they don't exist"""
+        defaults = [
+            {
+                'name': 'Advanced Program',
+                'description': 'Advanced level programs for professional development and career growth',
+                'icon': 'fas fa-graduation-cap'
+            },
+            # Add more default categories here if needed
+        ]
+        
+        created_categories = []
+        for category_data in defaults:
+            category, created = cls.objects.get_or_create(
+                name=category_data['name'],
+                defaults={
+                    'description': category_data['description'],
+                    'icon': category_data['icon']
+                }
+            )
+            if created:
+                created_categories.append(category.name)
+        
+        return created_categories
 
 class Program(models.Model):
     title = models.CharField(max_length=200)
