@@ -13,10 +13,16 @@
   <div class="row">
     <div class="col-8">
       <div class="card">
-        <div class="card-header align-items-center d-flex">
-          <h4 class="card-title mb-0 flex-grow-1">Programs</h4>
-          <div class="flex-shrink-0">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramWizardModal">Add Program</button>
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h4 class="card-title mb-0">Programs</h4>
+            </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramWizardModal">
+                <i class="ri-add-line align-bottom me-1"></i>Add Program
+              </button>
+            </div>
           </div>
         </div>
         <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
@@ -62,7 +68,7 @@
                   <div class="card-footer d-flex gap-1">
                     <a href="{% url 'dashboard:delete_program' program.id %}?programs_page={{ programs_current_page }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this program?')"><i class="bx bx-trash fs-18"></i></a>
                     <button type="button" class="btn btn-icon btn-warning" onclick="openEditModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
-                    <a href="javascript:void(0);" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
+                    <a href=" {% url 'dashboard:program_details' program.id %}" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
                   </div>
                 </div>
               </div>
