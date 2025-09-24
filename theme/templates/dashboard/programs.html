@@ -23,7 +23,16 @@
           <div class="row">
             {% for program in programs %}
               <div class="col-4 mb-3">
-                <div class="card" style="box-shadow: none; border: 1px solid var(--vz-border-color)">
+                <div class="card position-relative" style="box-shadow: none; border: 1px solid var(--vz-border-color)">
+                  {% if program.category.name == 'Advanced Program' %}
+                    <!-- Crown Badge for Advanced Programs -->
+                    <div class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                      <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 0.75rem;">
+                        <i class="fas fa-crown"></i>
+                      </span>
+                    </div>
+                  {% endif %}
+                  
                   {% if program.image %}
                     <img class="card-img-top img-fluid" src="{{ program.image.url }}" alt="{{ program.title }}" style="height: 200px; object-fit: cover;" />
                   {% else %}
@@ -34,7 +43,14 @@
                       <h6 class="card-title mb-2">{{ program.subtitle }}</h6>
                     {% endif %}
                     <small class="text-muted">
-                      <strong>Category:</strong> {{ program.category.name }}<br />
+                      <strong>Category:</strong> 
+                      {% if program.category.name == 'Advanced Program' %}
+                        <span class="text-dark bg-warning text-center px-1" style="border-radius: 5px;">
+                          {{ program.category.name }}
+                        </span>
+                      {% else %}
+                        {{ program.category.name }}
+                      {% endif %}<br />
                       <strong>Duration:</strong> {{ program.duration }}<br />
                       <strong>Slots:</strong> {{ program.available_slots }}<br />
                       <strong>Price:</strong> ₹{{ program.price }}
@@ -128,28 +144,70 @@
         </div>
         <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
           <ul class="list-group">
+            <!-- Always show Advanced Program at the top -->
             {% for category in categories %}
-              <li class="list-group-item">
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0 btn btn-icon btn-soft-primary">
-                    {% if category.icon %}
-                      <i class="{{ category.icon }} ml-auto text-xs"></i>
-                    {% else %}
-                      <i class="fas fa-chevron-right ml-auto text-xs"></i>
-                    {% endif %}
+              {% if category.name == 'Advanced Program' %}
+                <!-- Advanced Program Category with Special Styling -->
+                <li class="list-group-item position-relative" style="
+                  border: 1px solid #ffc107;
+                  border-radius: 8px;
+                  margin-bottom: 15px;
+                  
+                ">
+                  <!-- Premium Badge -->
+                  <div class="position-absolute top-0 end-0 m-1">
+                    <span class="badge bg-warning text-dark px-2 py-1" style="font-size: 0.7rem; font-weight: 600;">
+                      <i class="fas fa-crown me-1"></i>
+                    </span>
                   </div>
-                  <div class="flex-grow-1 ms-2">
-                    <div>
-                      {{ category.name|title }}
+                  
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 btn btn-icon" style="border: 1px solid #ffc107;">
+                      {% if category.icon %}
+                        <i class="{{ category.icon }} text-warning" style="font-size: 1.1rem;"></i>
+                      {% else %}
+                        <i class="fas fa-graduation-cap text-warning" style="font-size: 1.1rem;"></i>
+                      {% endif %}
                     </div>
-                    <small class="text-muted">{{ category.programs.count }} program{{ category.programs.count|pluralize }}</small>
+                    <div class="flex-grow-1 ms-2">
+                      <div style="color: #856404; font-weight: 600; font-size: 1.05rem;">
+                        {{ category.name|title }}
+                      </div>
+                      <small style="color: #856404;">
+                        <i class="fas fa-star me-1"></i>{{ category.programs.count }} premium program{{ category.programs.count|pluralize }}
+                      </small>
+                    </div>
                   </div>
-                  <div class="flex-shrink-0">
-                    <a href="{% url 'dashboard:delete_category' category.id %}?categories_page={{ categories_current_page }}{% if programs_current_page %}&programs_page={{ programs_current_page }}{% endif %}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this category?')"><i class="bx bx-trash fs-18"></i></a>
-                    <a href="{% url 'dashboard:edit_category' category.id %}?categories_page={{ categories_current_page }}{% if programs_current_page %}&programs_page={{ programs_current_page }}{% endif %}" class="btn btn-icon btn-warning"><i class="bx bx-edit fs-18"></i></a>
+                </li>
+              {% endif %}
+            {% endfor %}
+            
+            <!-- Then show all other categories -->
+            {% for category in categories %}
+              {% if category.name != 'Advanced Program' %}
+                <!-- Regular Category -->
+                <li class="list-group-item">
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 btn btn-icon btn-soft-primary">
+                      {% if category.icon %}
+                        <i class="{{ category.icon }} ml-auto text-xs"></i>
+                      {% else %}
+                        <i class="fas fa-chevron-right ml-auto text-xs"></i>
+                      {% endif %}
+                    </div>
+                    <div class="flex-grow-1 ms-2">
+                      <div>
+                        {{ category.name|title }}
+                      </div>
+                      <small class="text-muted">{{ category.programs.count }} program{{ category.programs.count|pluralize }}</small>
+                    </div>
+                    <div class="flex-shrink-0">
+                      <a href="{% url 'dashboard:delete_category' category.id %}?categories_page={{ categories_current_page }}{% if programs_current_page %}&programs_page={{ programs_current_page }}{% endif %}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this category?')"><i class="bx bx-trash fs-18"></i></a>
+                      <a href="{% url 'dashboard:edit_category' category.id %}?categories_page={{ categories_current_page }}{% if programs_current_page %}&programs_page={{ programs_current_page }}{% endif %}" class="btn btn-icon btn-warning"><i class="bx bx-edit fs-18"></i></a>
+                    </div>
                   </div>
-                </div>
-              </li>
+                </li>
+              {% endif %}
             {% endfor %}
           </ul>
           

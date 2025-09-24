@@ -2,8 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
-    Category, Program, Syllabus, Topic, AdvanceProgram, 
-    AdvanceSyllabus, AdvanceTopic, UserPurchase, UserBookmark,
+    Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress
 )
 
@@ -164,70 +163,50 @@ class TopicAdmin(admin.ModelAdmin):
     search_fields = ['topic_title']
 
 
-@admin.register(AdvanceProgram)
-class AdvanceProgramAdmin(admin.ModelAdmin):
-    list_display = ['title', 'price', 'discount_percentage', 'batch_starts', 'available_slots', 'is_best_seller']
-    list_filter = ['is_best_seller', 'batch_starts']
-    search_fields = ['title', 'subtitle']
-    ordering = ['title']
-
-
-@admin.register(AdvanceSyllabus)
-class AdvanceSyllabusAdmin(admin.ModelAdmin):
-    list_display = ['module_title', 'advance_program']
-    list_filter = ['advance_program']
-    search_fields = ['module_title']
-
-
-@admin.register(AdvanceTopic)
-class AdvanceTopicAdmin(admin.ModelAdmin):
-    list_display = ['topic_title', 'advance_syllabus']
-    list_filter = ['advance_syllabus__advance_program']
-    search_fields = ['topic_title']
 
 
 @admin.register(UserPurchase)
 class UserPurchaseAdmin(admin.ModelAdmin):
-    list_display = ['user', 'program_type', 'get_program_title', 'purchase_date', 'status']
-    list_filter = ['program_type', 'status', 'purchase_date']
-    search_fields = ['user__email', 'program__title', 'advanced_program__title']
+    list_display = ['user', 'get_program_title', 'get_program_type', 'purchase_date', 'status', 'amount_paid']
+    list_filter = ['status', 'purchase_date', 'program__category']
+    search_fields = ['user__email', 'program__title']
     ordering = ['-purchase_date']
     
     def get_program_title(self, obj):
-        if obj.program_type == 'program' and obj.program:
-            return obj.program.title
-        elif obj.program_type == 'advanced_program' and obj.advanced_program:
-            return obj.advanced_program.title
-        return "N/A"
+        return obj.program.title if obj.program else "N/A"
     get_program_title.short_description = 'Program Title'
+    
+    def get_program_type(self, obj):
+        return 'Advanced' if obj.program and obj.program.is_advanced else 'Regular'
+    get_program_type.short_description = 'Program Type'
 
 
 @admin.register(UserBookmark)
 class UserBookmarkAdmin(admin.ModelAdmin):
-    list_display = ['user', 'program_type', 'get_program_title', 'bookmarked_date']
-    list_filter = ['program_type', 'bookmarked_date']
-    search_fields = ['user__email', 'program__title', 'advanced_program__title']
+    list_display = ['user', 'get_program_title', 'get_program_type', 'bookmarked_date']
+    list_filter = ['bookmarked_date', 'program__category']
+    search_fields = ['user__email', 'program__title']
     ordering = ['-bookmarked_date']
     
     def get_program_title(self, obj):
-        if obj.program_type == 'program' and obj.program:
-            return obj.program.title
-        elif obj.program_type == 'advanced_program' and obj.advanced_program:
-            return obj.advanced_program.title
-        return "N/A"
+        return obj.program.title if obj.program else "N/A"
     get_program_title.short_description = 'Bookmarked Program'
+    
+    def get_program_type(self, obj):
+        return 'Advanced' if obj.program and obj.program.is_advanced else 'Regular'
+    get_program_type.short_description = 'Program Type'
 
 
 @admin.register(UserTopicProgress)
 class UserTopicProgressAdmin(admin.ModelAdmin):
     list_display = ['user', 'get_topic_title', 'status', 'completion_percentage', 'watch_time_formatted', 'last_watched_at']
-    list_filter = ['status', 'purchase__program_type', 'last_watched_at']
-    search_fields = ['user__email', 'topic__topic_title', 'advance_topic__topic_title']
+    list_filter = ['status', 'last_watched_at', 'topic__syllabus__program__category']
+    search_fields = ['user__email', 'topic__topic_title']
     ordering = ['-last_watched_at']
     readonly_fields = ['completion_percentage', 'watch_percentage']
     
     def get_topic_title(self, obj):
-        return obj.topic.topic_title if obj.topic else obj.advance_topic.topic_title
+        return obj.topic.topic_title if obj.topic else "N/A"
     get_topic_title.short_description = 'Topic'
     
     def watch_time_formatted(self, obj):
@@ -241,8 +220,8 @@ class UserTopicProgressAdmin(admin.ModelAdmin):
 @admin.register(UserCourseProgress)
 class UserCourseProgressAdmin(admin.ModelAdmin):
     list_display = ['user', 'get_program_title', 'completion_percentage', 'completed_topics', 'total_topics', 'is_completed', 'last_activity_at']
-    list_filter = ['is_completed', 'purchase__program_type', 'last_activity_at']
-    search_fields = ['user__email', 'purchase__program__title', 'purchase__advanced_program__title']
+    list_filter = ['is_completed', 'last_activity_at', 'purchase__program__category']
+    search_fields = ['user__email', 'purchase__program__title']
     ordering = ['-last_activity_at']
     readonly_fields = ['total_topics', 'completed_topics', 'in_progress_topics', 'completion_percentage', 'total_watch_time_formatted']
     

@@ -13,6 +13,19 @@ Most endpoints require JWT token authentication. Include the token in the Author
 Authorization: Bearer <your-jwt-token>
 ```
 
+## 🚀 **Unified Program Model Architecture**
+
+**Key Changes:**
+- **Single Program Model**: Unified `Program` model handles both regular and advanced programs
+- **Category-Based Distinction**: Programs are differentiated by their `category` field
+- **Simplified API**: Removed `program_type` parameters from all endpoints
+- **Enhanced Progress Tracking**: Real-time progress tracking with comprehensive statistics
+- **Automatic Type Detection**: System automatically determines program type from category
+
+**Program Types:**
+- **Regular Programs**: All categories except "Advanced Program"
+- **Advanced Programs**: Programs with category "Advanced Program"
+
 ## Endpoints
 
 ### 1. Add Area of Interest
@@ -74,6 +87,8 @@ Get landing page data with different program groups. Returns top courses, recent
 
 **Authentication Required:** Yes
 
+**🔄 Updated:** Removed `type` field from response. Program type is determined by category.
+
 **Response:**
 ```json
 {
@@ -82,7 +97,6 @@ Get landing page data with different program groups. Returns top courses, recent
     "top_course": [
       {
         "id": 1,
-        "type": "program",
         "title": "Full Stack Web Development Bootcamp",
         "subtitle": "Master MERN Stack Development",
         "description": "Complete full-stack web development course...",
@@ -107,7 +121,6 @@ Get landing page data with different program groups. Returns top courses, recent
     "recently_added": [
       {
         "id": 3,
-        "type": "program",
         "title": "React Native Mobile Development",
         "subtitle": "Build iOS & Android Apps",
         "description": "Learn to build cross-platform mobile applications using React Native...",
@@ -130,11 +143,13 @@ Get landing page data with different program groups. Returns top courses, recent
       },
       {
         "id": 4,
-        "type": "advanced_program",
         "title": "Blockchain & Web3 Development",
         "subtitle": "Smart Contracts & DeFi Applications",
         "description": "Advanced blockchain development covering Ethereum, Solidity...",
-        "category": null,
+        "category": {
+          "id": 2,
+          "name": "Advanced Program"
+        },
         "image": "/media/advance_program_images/blockchain.jpg",
         "duration": "18 weeks",
         "program_rating": 4.7,
@@ -197,7 +212,6 @@ Get landing page data with different program groups. Returns top courses, recent
     "programs": [
       {
         "id": 1,
-        "type": "program",
         "title": "Full Stack Web Development Bootcamp",
         "subtitle": "Master MERN Stack Development",
         "description": "Complete full-stack web development course covering HTML, CSS, JavaScript, React...",
@@ -220,7 +234,6 @@ Get landing page data with different program groups. Returns top courses, recent
       },
       {
         "id": 6,
-        "type": "program",
         "title": "DevOps Engineering Complete Course",
         "subtitle": "Master CI/CD and Cloud Technologies",
         "description": "Complete DevOps course covering Git, Docker, Kubernetes, Jenkins, AWS...",
@@ -245,11 +258,13 @@ Get landing page data with different program groups. Returns top courses, recent
     "advanced_programs": [
       {
         "id": 7,
-        "type": "advanced_program",
         "title": "Enterprise Architecture & System Design",
         "subtitle": "Scalable Systems for Senior Engineers",
         "description": "Advanced system design course for senior engineers. Learn to design scalable...",
-        "category": null,
+        "category": {
+          "id": 2,
+          "name": "Advanced Program"
+        },
         "image": "/media/advance_program_images/architecture.jpg",
         "duration": "20 weeks",
         "program_rating": 4.8,
@@ -265,11 +280,13 @@ Get landing page data with different program groups. Returns top courses, recent
       },
       {
         "id": 8,
-        "type": "advanced_program",
         "title": "Cloud Security & DevSecOps",
         "subtitle": "Advanced Security for Cloud Environments",
         "description": "Master cloud security, DevSecOps practices, and advanced cybersecurity...",
-        "category": null,
+        "category": {
+          "id": 2,
+          "name": "Advanced Program"
+        },
         "image": "/media/advance_program_images/cloud_security.jpg",
         "duration": "16 weeks",
         "program_rating": 4.6,
@@ -287,7 +304,6 @@ Get landing page data with different program groups. Returns top courses, recent
     "continue_watching": [
       {
         "id": 1,
-        "type": "program",
         "title": "Python Data Science Masterclass",
         "is_bookmarked": false,
         "progress": {
@@ -322,13 +338,18 @@ Get landing page data with different program groups. Returns top courses, recent
 ### 4. Filter Programs
 **GET** `/programs/filter`
 
-Get all programs (regular and advanced) with comprehensive filtering options.
+Get all programs with comprehensive filtering options using unified Program model.
 
 **Authentication Required:** Yes
 
+**🔄 Updated:** `program_type` now filters by category automatically:
+- `program_type=program` → Excludes "Advanced Program" category
+- `program_type=advanced_program` → Only "Advanced Program" category
+- `program_type=all` or omitted → All programs
+
 **Query Parameters:**
 - `program_type` (string, optional): Filter by type ('program', 'advanced_program', 'all')
-- `category_id` (int, optional): Filter by category ID
+- `category_id` (int, optional): Filter by specific category ID
 - `is_best_seller` (bool, optional): Filter best sellers
 - `min_price` (float, optional): Minimum price filter
 - `max_price` (float, optional): Maximum price filter
@@ -365,7 +386,6 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
   "programs": [
     {
       "id": 1,
-      "type": "program",
       "title": "Full Stack Web Development Bootcamp",
       "subtitle": "Master MERN Stack Development",
       "description": "Complete full-stack web development course covering HTML, CSS, JavaScript, React, Node.js, Express, and MongoDB.",
@@ -388,7 +408,6 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
     },
     {
       "id": 2,
-      "type": "program",
       "title": "Python Data Science Masterclass",
       "subtitle": "From Beginner to Data Scientist",
       "description": "Comprehensive data science course covering Python, NumPy, Pandas, Matplotlib, Seaborn, Scikit-learn, and machine learning algorithms.",
@@ -416,19 +435,20 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
 ---
 
 ### 5. Get Program Details
-**GET** `/program/{program_type}/{program_id}/details`
+**GET** `/program/{program_id}/details`
 
 Get detailed information about a specific program including syllabus and topics.
 
 **Authentication Required:** Yes
 
+**🔄 Updated:** Simplified URL - removed `program_type` parameter. System automatically handles both regular and advanced programs.
+
 **Path Parameters:**
-- `program_type`: 'program' or 'advanced-program'
 - `program_id`: Program ID
 
 **Example Request:**
 ```
-GET /api/program/program/1/details
+GET /api/program/1/details
 ```
 
 **Response:**

@@ -117,8 +117,7 @@ class Category(models.Model):
                 'name': 'Advanced Program',
                 'description': 'Advanced level programs for professional development and career growth',
                 'icon': 'fas fa-graduation-cap'
-            },
-            # Add more default categories here if needed
+            }
         ]
         
         created_categories = []
@@ -145,81 +144,83 @@ class Program(models.Model):
     available_slots = models.IntegerField()
     duration = models.CharField(max_length=50)
     program_rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
-    job_openings = models.CharField(max_length=50)
-    global_market_size = models.CharField(max_length=50)
-    avg_annual_salary = models.CharField(max_length=50)
+    job_openings = models.CharField(max_length=50, blank=True, null=True)
+    global_market_size = models.CharField(max_length=50, blank=True, null=True)
+    avg_annual_salary = models.CharField(max_length=50, blank=True, null=True)
     is_best_seller = models.BooleanField(default=False)
     icon = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Program price")
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Discount percentage (0-100)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.title
+    
+    @property
+    def is_advanced(self):
+        """Check if this is an advanced program based on category"""
+        return self.category and self.category.name == 'Advanced Program'
+    
+    @property 
+    def discounted_price(self):
+        """Calculate discounted price"""
+        if self.discount_percentage > 0:
+            discount_amount = (self.price * self.discount_percentage) / 100
+            return self.price - discount_amount
+        return self.price
+    
+    @classmethod
+    def get_regular_programs(cls):
+        """Get all regular programs (not Advanced Program category)"""
+        return cls.objects.exclude(category__name='Advanced Program')
+    
+    @classmethod
+    def get_advanced_programs(cls):
+        """Get all advanced programs (Advanced Program category)"""
+        return cls.objects.filter(category__name='Advanced Program')
 
 class Syllabus(models.Model):
     program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='syllabuses')
     module_title = models.CharField(max_length=200)
+    order = models.PositiveIntegerField(default=0, help_text="Display order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name_plural = "Syllabuses"
 
     def __str__(self):
-        return self.module_title
+        return f"{self.program.title} - {self.module_title}"
 
 def get_topic_video_path(instance, filename):
     """Generate upload path for topic videos"""
-    program_subtitle = instance.syllabus.program.subtitle.replace(' ', '_').replace('/', '_') if instance.syllabus.program.subtitle else instance.syllabus.program.title.replace(' ', '_').replace('/', '_')
-    return f'program/{program_subtitle}/{filename}'
+    program_type = "advanced" if instance.syllabus.program.is_advanced else "regular"
+    program_name = instance.syllabus.program.title.replace(' ', '_').replace('/', '_')
+    return f'programs/{program_type}/{program_name}/{filename}'
 
 class Topic(models.Model):
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
     video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, help_text="Upload video file")
     video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
-    description = models.TextField(blank=True, null=True)
-    is_intro = models.BooleanField(default=False)
+    is_intro = models.BooleanField(default=False, help_text="Mark as intro video")
+    is_free_trial = models.BooleanField(default=False, help_text="Available in free trial")
+    order = models.PositiveIntegerField(default=0, help_text="Display order")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'id']
 
     def __str__(self):
-        return self.topic_title
+        return f"{self.syllabus.program.title} - {self.topic_title}"
 
-class AdvanceProgram(models.Model):
-    title = models.CharField(max_length=200)
-    subtitle = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to='advance_program_images/', blank=True, null=True)
-    batch_starts = models.CharField(max_length=50)
-    available_slots = models.IntegerField()
-    duration = models.CharField(max_length=50)
-    program_rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
-    job_openings = models.CharField(max_length=50)
-    global_market_size = models.CharField(max_length=50)
-    avg_annual_salary = models.CharField(max_length=50)
-    is_best_seller = models.BooleanField(default=False)
-    icon = models.TextField(blank=True, null=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Advanced program price")
-    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Discount percentage (0-100)")
-
-    def __str__(self):
-        return self.title
-
-class AdvanceSyllabus(models.Model):
-    advance_program = models.ForeignKey(AdvanceProgram, on_delete=models.CASCADE, related_name='syllabuses')
-    module_title = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.module_title
-
-def get_advance_topic_video_path(instance, filename):
-    """Generate upload path for advance topic videos"""
-    program_subtitle = instance.advance_syllabus.advance_program.subtitle.replace(' ', '_').replace('/', '_') if instance.advance_syllabus.advance_program.subtitle else instance.advance_syllabus.advance_program.title.replace(' ', '_').replace('/', '_')
-    return f'advance_program/{program_subtitle}/{filename}'
-
-class AdvanceTopic(models.Model):
-    advance_syllabus = models.ForeignKey(AdvanceSyllabus, on_delete=models.CASCADE, related_name='topics')
-    topic_title = models.CharField(max_length=200)
-    video_file = models.FileField(upload_to=get_advance_topic_video_path, blank=True, null=True, help_text="Upload video file")
-    video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
-    description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.topic_title
 
 
 class UserPurchase(models.Model):
@@ -232,62 +233,39 @@ class UserPurchase(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    PROGRAM_TYPE_CHOICES = [
-        ('program', 'Program'),
-        ('advanced_program', 'Advanced Program'),
-    ]
-
     user = models.ForeignKey(
         CustomUser, 
         on_delete=models.CASCADE,
         related_name='purchases'
     )
-    program_type = models.CharField(max_length=20, choices=PROGRAM_TYPE_CHOICES)
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True, blank=True)
-    advanced_program = models.ForeignKey(AdvanceProgram, on_delete=models.CASCADE, null=True, blank=True)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='purchases')
     purchase_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=PURCHASE_STATUS_CHOICES, default='pending')
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Amount actually paid after discounts")
     
     class Meta:
         ordering = ['-purchase_date']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'program'],
-                condition=models.Q(program__isnull=False),
-                name='unique_user_program'
-            ),
-            models.UniqueConstraint(
-                fields=['user', 'advanced_program'],
-                condition=models.Q(advanced_program__isnull=False),
-                name='unique_user_advanced_program'
+                name='unique_user_program_purchase'
             )
         ]
 
     def __str__(self):
-        if self.program_type == 'program' and self.program:
-            return f"{self.user.email} - {self.program.title}"
-        elif self.program_type == 'advanced_program' and self.advanced_program:
-            return f"{self.user.email} - {self.advanced_program.title}"
-        return f"{self.user.email} - Purchase #{self.id}"
+        return f"{self.user.email} - {self.program.title}"
 
 
 class UserBookmark(models.Model):
     """
-    Model to track user bookmarks for programs and advanced programs
+    Model to track user bookmarks for programs
     """
-    PROGRAM_TYPE_CHOICES = [
-        ('program', 'Program'),
-        ('advanced_program', 'Advanced Program'),
-    ]
-
     user = models.ForeignKey(
         CustomUser, 
         on_delete=models.CASCADE,
         related_name='bookmarks'
     )
-    program_type = models.CharField(max_length=20, choices=PROGRAM_TYPE_CHOICES)
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True, blank=True)
-    advanced_program = models.ForeignKey(AdvanceProgram, on_delete=models.CASCADE, null=True, blank=True)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name='bookmarks')
     bookmarked_date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -295,22 +273,12 @@ class UserBookmark(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'program'],
-                condition=models.Q(program__isnull=False),
                 name='unique_user_bookmark_program'
-            ),
-            models.UniqueConstraint(
-                fields=['user', 'advanced_program'],
-                condition=models.Q(advanced_program__isnull=False),
-                name='unique_user_bookmark_advanced_program'
             )
         ]
 
     def __str__(self):
-        if self.program_type == 'program' and self.program:
-            return f"{self.user.email} - Bookmarked {self.program.title}"
-        elif self.program_type == 'advanced_program' and self.advanced_program:
-            return f"{self.user.email} - Bookmarked {self.advanced_program.title}"
-        return f"{self.user.email} - Bookmark #{self.id}"
+        return f"{self.user.email} - Bookmarked {self.program.title}"
 
 
 class UserTopicProgress(models.Model):
@@ -333,20 +301,10 @@ class UserTopicProgress(models.Model):
         on_delete=models.CASCADE,
         related_name='topic_progress'
     )
-    # For regular programs
+    # Unified topic reference
     topic = models.ForeignKey(
         Topic,
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='user_progress'
-    )
-    # For advanced programs
-    advance_topic = models.ForeignKey(
-        AdvanceTopic,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
         related_name='user_progress'
     )
     
@@ -382,13 +340,7 @@ class UserTopicProgress(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'topic'],
-                condition=models.Q(topic__isnull=False),
                 name='unique_user_topic_progress'
-            ),
-            models.UniqueConstraint(
-                fields=['user', 'advance_topic'],
-                condition=models.Q(advance_topic__isnull=False),
-                name='unique_user_advance_topic_progress'
             )
         ]
         indexes = [
@@ -397,8 +349,7 @@ class UserTopicProgress(models.Model):
         ]
 
     def __str__(self):
-        topic_name = self.topic.topic_title if self.topic else self.advance_topic.topic_title
-        return f"{self.user.email} - {topic_name} ({self.status})"
+        return f"{self.user.email} - {self.topic.topic_title} ({self.status})"
 
     @property
     def is_completed(self):
@@ -481,11 +432,7 @@ class UserCourseProgress(models.Model):
 
     def get_program_title(self):
         """Get the title of the purchased program"""
-        if self.purchase.program_type == 'program' and self.purchase.program:
-            return self.purchase.program.title
-        elif self.purchase.program_type == 'advanced_program' and self.purchase.advanced_program:
-            return self.purchase.advanced_program.title
-        return "Unknown Program"
+        return self.purchase.program.title if self.purchase.program else "Unknown Program"
 
     def update_progress(self):
         """Recalculate progress based on topic progress"""
