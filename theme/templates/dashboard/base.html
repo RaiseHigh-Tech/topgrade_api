@@ -128,12 +128,12 @@
                         <li class="menu-title"><i class="ri-more-fill"></i> <span data-key="t-pages">Course</span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:programs' %}active{% endif %}" href="{% url 'dashboard:programs' %}" role="button">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:programs' or request.resolver_match.view_name == 'dashboard:program_details' %}active{% endif %}" href="{% url 'dashboard:programs' %}" role="button">
                                 <i class="ri-book-open-line"></i> Programs
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:students' %}active{% endif %}" href="{% url 'dashboard:students' %}" role="button">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:students' or request.resolver_match.view_name == 'dashboard:student_details' %}active{% endif %}" href="{% url 'dashboard:students' %}" role="button">
                                 <i class="ri-user-line"></i> Students
                             </a>
                         </li>

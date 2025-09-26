@@ -196,10 +196,14 @@
                       <td>
                         <div class="d-flex gap-2">
                           <div class="view">
-                            <button class="btn btn-sm btn-primary view-item-btn"><i class="ri-eye-line align-bottom"></i></button>
+                            <a href="{% url 'dashboard:student_details' student.id %}" class="btn btn-sm btn-primary" title="View Details">
+                              <i class="ri-eye-line align-bottom"></i>
+                            </a>
                           </div>
                           <div class="remove">
-                            <button class="btn btn-sm btn-danger remove-item-btn" data-bs-toggle="modal" data-bs-target="#deleteRecordModal" onclick="setDeleteStudent({{ student.id }}, '{{ student.fullname|default:student.username|default:student.email }}')"><i class="ri-delete-bin-fill align-bottom"></i></button>
+                            <button class="btn btn-sm btn-danger remove-item-btn" data-bs-toggle="modal" data-bs-target="#deleteRecordModal" onclick="setDeleteStudent({{ student.id }}, '{{ student.fullname|default:student.username|default:student.email }}')" title="Delete Student">
+                              <i class="ri-delete-bin-fill align-bottom"></i>
+                            </button>
                           </div>
                         </div>
                       </td>

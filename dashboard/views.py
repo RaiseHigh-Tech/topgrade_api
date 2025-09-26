@@ -1139,3 +1139,104 @@ def assign_programs_view(request):
     }
     
     return render(request, 'dashboard/assign_programs.html', context)
+
+@admin_required
+def student_details_view(request, student_id):
+    """View for displaying detailed information about a specific student"""
+    from django.shortcuts import get_object_or_404
+    from django.db.models import Count, Sum, Avg, Q
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    try:
+        student = get_object_or_404(CustomUser, id=student_id, role='student')
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Student not found')
+        return redirect('dashboard:students')
+    
+    # Get student's program enrollments
+    enrollments = UserPurchase.objects.filter(user=student).select_related('program').order_by('-purchase_date')
+    
+    # Calculate basic stats
+    total_enrollments = enrollments.count()
+    active_enrollments = enrollments.filter(status='completed').count()
+    pending_enrollments = enrollments.filter(status='pending').count()
+    
+    # Calculate total amount spent
+    total_spent = enrollments.filter(status='completed').aggregate(
+        total=Sum('amount_paid')
+    )['total'] or 0
+    
+    # Get course progress data
+    from topgrade_api.models import UserCourseProgress, UserTopicProgress
+    
+    course_progress = UserCourseProgress.objects.filter(user=student).select_related('purchase__program')
+    total_courses = course_progress.count()
+    completed_courses = course_progress.filter(is_completed=True).count()
+    
+    # Calculate overall progress percentage
+    if total_courses > 0:
+        overall_progress = sum(cp.completion_percentage for cp in course_progress) / total_courses
+    else:
+        overall_progress = 0
+    
+    # Get recent activity (last 30 days)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    recent_topic_progress = UserTopicProgress.objects.filter(
+        user=student,
+        last_watched_at__gte=thirty_days_ago
+    ).select_related('topic', 'purchase__program').order_by('-last_watched_at')[:10]
+    
+    # Get student's bookmarks
+    bookmarks = UserBookmark.objects.filter(user=student).select_related('program').order_by('-bookmarked_date')[:5]
+    
+    # Calculate learning streak (days with activity)
+    learning_days = UserTopicProgress.objects.filter(
+        user=student,
+        last_watched_at__gte=thirty_days_ago
+    ).dates('last_watched_at', 'day').count()
+    
+    # Get program categories the student is interested in
+    enrolled_categories = enrollments.filter(status='completed').values(
+        'program__category__name'
+    ).annotate(count=Count('id')).order_by('-count')
+    
+    # Recent enrollments (last 5)
+    recent_enrollments = enrollments[:5]
+    
+    # Calculate average rating of enrolled programs
+    avg_program_rating = enrollments.filter(status='completed').aggregate(
+        avg_rating=Avg('program__program_rating')
+    )['avg_rating'] or 0
+    
+    # Time spent learning (approximate)
+    total_watch_time = UserTopicProgress.objects.filter(user=student).aggregate(
+        total_time=Sum('watch_time_seconds')
+    )['total_time'] or 0
+    
+    # Convert seconds to hours and minutes
+    hours = total_watch_time // 3600
+    minutes = (total_watch_time % 3600) // 60
+    
+    context = {
+        'user': request.user,
+        'student': student,
+        'total_enrollments': total_enrollments,
+        'active_enrollments': active_enrollments,
+        'pending_enrollments': pending_enrollments,
+        'total_spent': total_spent,
+        'total_courses': total_courses,
+        'completed_courses': completed_courses,
+        'overall_progress': round(overall_progress, 1),
+        'recent_activity': recent_topic_progress,
+        'bookmarks': bookmarks,
+        'learning_days': learning_days,
+        'enrolled_categories': enrolled_categories,
+        'recent_enrollments': recent_enrollments,
+        'avg_program_rating': round(avg_program_rating, 1),
+        'course_progress': course_progress,
+        'total_watch_hours': hours,
+        'total_watch_minutes': minutes,
+    }
+    
+    return render(request, 'dashboard/student_details.html', context)
