@@ -23,8 +23,8 @@
     }
     
     .chat-wrapper {
-      height: calc(100vh - 140px);
-      max-height: calc(100vh - 140px);
+      height: calc(100vh - 150px);
+      max-height: calc(100vh - 150px);
       background: white;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -467,115 +467,127 @@
     <div class="row mx-0">
       <div class="col-12 px-0">
         <div class="chat-wrapper">
-        <div class="chat-container">
-          <!-- Sidebar -->
-          <div class="chat-sidebar" id="chatSidebar">
-            <div class="sidebar-header">
-              <input type="text" class="search-box" placeholder="Search conversations..." id="searchConversations" />
-            </div>
-
-            <div class="conversations-list">
-              {% for conversation in conversations %}
-                <div class="conversation-item {% if conversation.id == selected_conversation.id %}active{% endif %}" onclick="selectConversation({{ conversation.id }}, '{{ conversation.student_name|escapejs }}')">
-                  <div class="conversation-avatar position-relative">
-                    {{ conversation.avatar }}
-                    {% if conversation.is_online %}
-                      <div class="online-indicator"></div>
-                    {% endif %}
-                  </div>
-                  <div class="conversation-info">
-                    <div class="conversation-name">{{ conversation.student_name }}</div>
-                    <div class="conversation-preview">{{ conversation.last_message|truncatechars:40 }}</div>
-                  </div>
-                  <div class="conversation-meta">
-                    <div>{{ conversation.last_message_time|timesince|slice:':10' }}</div>
-                    {% if conversation.unread_count > 0 %}
-                      <div class="unread-count">{{ conversation.unread_count }}</div>
-                    {% endif %}
-                  </div>
-                </div>
-              {% empty %}
-                <div class="text-center p-4 text-muted">
-                  <p>No conversations yet</p>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- Main Chat Area -->
-          <div class="chat-main">
-            <!-- Chat Header -->
-            <div class="chat-header">
-              <button class="menu-btn d-md-none" onclick="toggleSidebar()"><i class="ri-menu-line"></i></button>
-              <div class="chat-avatar">{{ selected_conversation.avatar|default:'?' }}</div>
-              <div class="chat-info">
-                <h5>{{ selected_conversation.student_name|default:'Select a conversation' }}</h5>
-                {% if selected_conversation.is_online %}
-                  <div class="chat-status">
-                    <div class="status-dot"></div>
-                    <span>Online</span>
-                  </div>
-                {% else %}
-                  <div class="chat-status" style="color: #6c757d;">
-                    <span>Offline</span>
-                  </div>
-                {% endif %}
+          <div class="chat-container">
+            <!-- Sidebar -->
+            <div class="chat-sidebar" id="chatSidebar">
+              <div class="sidebar-header">
+                <input type="text" class="search-box" placeholder="Search conversations..." id="searchConversations" />
               </div>
-            </div>
 
-            <!-- Messages -->
-            <div class="chat-messages" id="chatMessages">
-              {% for message in messages %}
-                <div class="message {% if message.sender == 'admin' %}
-                    
-                    sent
-
-                  {% else %}
-                    
-                    received
-
-                  {% endif %}">
-                  <div class="message-content">
-                    {{ message.message }}
-                    <div class="message-time">
-                      {{ message.timestamp|date:'M d, H:i' }}
-                      {% if message.sender == 'admin' %}
-                        {% if message.is_read %}
-                          <i class="ri-check-double-line text-info read-indicator"></i>
-                        {% else %}
-                          <i class="ri-check-line read-indicator"></i>
-                        {% endif %}
+              <div class="conversations-list">
+                {% for conversation in conversations %}
+                  <div class="conversation-item {% if conversation.id == selected_conversation.id %}active{% endif %}" onclick="selectConversation({{ conversation.id }}, '{{ conversation.student_name|escapejs }}')">
+                    <div class="conversation-avatar position-relative">
+                      {{ conversation.avatar }}
+                      {% if conversation.is_online %}
+                        <div class="online-indicator"></div>
+                      {% endif %}
+                    </div>
+                    <div class="conversation-info">
+                      <div class="conversation-name">{{ conversation.student_name }}</div>
+                      <div class="conversation-preview">{{ conversation.last_message|truncatechars:40 }}</div>
+                    </div>
+                    <div class="conversation-meta">
+                      <div>{{ conversation.last_message_time|timesince|slice:':10' }}</div>
+                      {% if conversation.unread_count > 0 %}
+                        <div class="unread-count">{{ conversation.unread_count }}</div>
                       {% endif %}
                     </div>
                   </div>
-                </div>
-              {% empty %}
-                {% if selected_conversation %}
-                  <div class="text-center text-muted p-4">
-                    <p>Start a conversation with {{ selected_conversation.student_name }}</p>
+                {% empty %}
+                  <div class="text-center p-4 text-muted">
+                    <p>No conversations yet</p>
                   </div>
-                {% endif %}
-              {% endfor %}
-
-              <!-- Typing Indicator -->
-              <div class="typing-indicator" id="typingIndicator">
-                Student is typing<span class="typing-dots"><span></span><span></span><span></span></span>
+                {% endfor %}
               </div>
             </div>
 
-            <!-- Message Input -->
-            {% if selected_conversation %}
-              <div class="chat-input">
-                <form id="messageForm" onsubmit="sendMessage(event)">
-                  <div class="input-group">
-                    <textarea class="form-control" id="messageInput" placeholder="Type a message..." rows="1" autocomplete="off"></textarea>
-                    <button type="submit" class="btn-send" id="sendButton" disabled><i class="ri-send-plane-2-line"></i></button>
-                  </div>
-                </form>
+            <!-- Main Chat Area -->
+            <div class="chat-main">
+              <!-- Chat Header -->
+              <div class="chat-header">
+                <button class="menu-btn d-md-none" onclick="toggleSidebar()"><i class="ri-menu-line"></i></button>
+                <div class="chat-avatar">{{ selected_conversation.avatar|default:'?' }}</div>
+                <div class="chat-info">
+                  <h5>{{ selected_conversation.student_name|default:'Select a conversation' }}</h5>
+                  {% if selected_conversation.is_online %}
+                    <div class="chat-status">
+                      <div class="status-dot"></div>
+                      <span>Online</span>
+                    </div>
+                  {% else %}
+                    <div class="chat-status" style="color: #6c757d;">
+                      <span>Offline</span>
+                    </div>
+                  {% endif %}
+                </div>
               </div>
-            {% endif %}
+
+              <!-- Messages -->
+              <div class="chat-messages" id="chatMessages">
+                {% for message in messages %}
+                  <div class="message {% if message.sender == 'admin' %}
+                      
+                      
+                      
+                    
+                    sent
+
+
+
+
+                    {% else %}
+                      
+                      
+                      
+                    
+                    received
+
+
+
+
+                    {% endif %}">
+                    <div class="message-content">
+                      {{ message.message }}
+                      <div class="message-time">
+                        {{ message.timestamp|date:'M d, H:i' }}
+                        {% if message.sender == 'admin' %}
+                          {% if message.is_read %}
+                            <i class="ri-check-double-line text-info read-indicator"></i>
+                          {% else %}
+                            <i class="ri-check-line read-indicator"></i>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                {% empty %}
+                  {% if selected_conversation %}
+                    <div class="text-center text-muted p-4">
+                      <p>Start a conversation with {{ selected_conversation.student_name }}</p>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                  Student is typing<span class="typing-dots"><span></span><span></span><span></span></span>
+                </div>
+              </div>
+
+              <!-- Message Input -->
+              {% if selected_conversation %}
+                <div class="chat-input">
+                  <form id="messageForm" onsubmit="sendMessage(event)">
+                    <div class="input-group">
+                      <textarea class="form-control" id="messageInput" placeholder="Type a message..." rows="1" autocomplete="off"></textarea>
+                      <button type="submit" class="btn-send" id="sendButton" disabled><i class="ri-send-plane-2-line"></i></button>
+                    </div>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </div>
