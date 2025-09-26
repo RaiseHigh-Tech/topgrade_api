@@ -1240,3 +1240,144 @@ def student_details_view(request, student_id):
     }
     
     return render(request, 'dashboard/student_details.html', context)
+
+@admin_required
+def chat_view(request):
+    """Chat interface for admin to communicate with students"""
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Dummy chat data - replace with real data later
+    dummy_conversations = [
+        {
+            'id': 1,
+            'student_name': 'John Doe',
+            'student_email': 'john.doe@example.com',
+            'last_message': 'Thank you for helping me with the assignment!',
+            'last_message_time': timezone.now() - timedelta(minutes=5),
+            'unread_count': 2,
+            'is_online': True,
+            'avatar': 'JD'
+        },
+        {
+            'id': 2,
+            'student_name': 'Sarah Wilson',
+            'student_email': 'sarah.wilson@example.com',
+            'last_message': 'When is the next batch starting?',
+            'last_message_time': timezone.now() - timedelta(hours=2),
+            'unread_count': 0,
+            'is_online': False,
+            'avatar': 'SW'
+        },
+        {
+            'id': 3,
+            'student_name': 'Mike Johnson',
+            'student_email': 'mike.johnson@example.com',
+            'last_message': 'I need help with the JavaScript module',
+            'last_message_time': timezone.now() - timedelta(hours=5),
+            'unread_count': 1,
+            'is_online': True,
+            'avatar': 'MJ'
+        },
+        {
+            'id': 4,
+            'student_name': 'Emily Chen',
+            'student_email': 'emily.chen@example.com',
+            'last_message': 'Can you review my project submission?',
+            'last_message_time': timezone.now() - timedelta(days=1),
+            'unread_count': 0,
+            'is_online': False,
+            'avatar': 'EC'
+        },
+        {
+            'id': 5,
+            'student_name': 'David Rodriguez',
+            'student_email': 'david.rodriguez@example.com',
+            'last_message': 'Great explanation in today\'s session!',
+            'last_message_time': timezone.now() - timedelta(days=2),
+            'unread_count': 0,
+            'is_online': True,
+            'avatar': 'DR'
+        }
+    ]
+    
+    # Dummy messages for selected conversation
+    dummy_messages = [
+        {
+            'id': 1,
+            'sender': 'student',
+            'sender_name': 'John Doe',
+            'message': 'Hello! I have a question about the React component assignment.',
+            'timestamp': timezone.now() - timedelta(hours=3),
+            'is_read': True
+        },
+        {
+            'id': 2,
+            'sender': 'admin',
+            'sender_name': 'Admin',
+            'message': 'Hi John! I\'d be happy to help. What specific part are you having trouble with?',
+            'timestamp': timezone.now() - timedelta(hours=2, minutes=45),
+            'is_read': True
+        },
+        {
+            'id': 3,
+            'sender': 'student',
+            'sender_name': 'John Doe',
+            'message': 'I\'m struggling with the state management part. The component isn\'t updating when I change the state.',
+            'timestamp': timezone.now() - timedelta(hours=2, minutes=30),
+            'is_read': True
+        },
+        {
+            'id': 4,
+            'sender': 'admin',
+            'sender_name': 'Admin',
+            'message': 'That\'s a common issue! Make sure you\'re using the setState function properly. Are you directly modifying the state object?',
+            'timestamp': timezone.now() - timedelta(hours=2, minutes=15),
+            'is_read': True
+        },
+        {
+            'id': 5,
+            'sender': 'student',
+            'sender_name': 'John Doe',
+            'message': 'Oh! I think I was directly modifying it. Let me try using setState properly.',
+            'timestamp': timezone.now() - timedelta(hours=2, minutes=10),
+            'is_read': True
+        },
+        {
+            'id': 6,
+            'sender': 'student',
+            'sender_name': 'John Doe',
+            'message': 'It worked! Thank you so much for the guidance.',
+            'timestamp': timezone.now() - timedelta(minutes=10),
+            'is_read': True
+        },
+        {
+            'id': 7,
+            'sender': 'student',
+            'sender_name': 'John Doe',
+            'message': 'Thank you for helping me with the assignment!',
+            'timestamp': timezone.now() - timedelta(minutes=5),
+            'is_read': False
+        }
+    ]
+    
+    # Get selected conversation ID
+    selected_conversation_id = request.GET.get('conversation', 1)
+    selected_conversation = next((conv for conv in dummy_conversations if conv['id'] == int(selected_conversation_id)), dummy_conversations[0])
+    
+    # Chat statistics
+    total_conversations = len(dummy_conversations)
+    unread_messages = sum(conv['unread_count'] for conv in dummy_conversations)
+    online_students = sum(1 for conv in dummy_conversations if conv['is_online'])
+    
+    context = {
+        'user': request.user,
+        'conversations': dummy_conversations,
+        'selected_conversation': selected_conversation,
+        'messages': dummy_messages,
+        'total_conversations': total_conversations,
+        'unread_messages': unread_messages,
+        'online_students': online_students,
+    }
+    
+    return render(request, 'dashboard/chat.html', context)
