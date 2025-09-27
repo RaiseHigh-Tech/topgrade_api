@@ -231,7 +231,6 @@ def get_landing_data(request):
 @api.get("/programs/filter", auth=AuthBearer())
 def get_all_programs_with_filters(
     request,
-    program_type: str = None,
     category_id: int = None,
     is_best_seller: bool = None,
     min_price: float = None,
@@ -251,15 +250,6 @@ def get_all_programs_with_filters(
         
         # Start with all programs
         programs_query = Program.objects.all().select_related('category')
-        
-        # Apply program type filter based on category
-        if program_type == 'program':
-            # Regular programs (not Advanced Program category)
-            programs_query = programs_query.exclude(category__name='Advanced Program')
-        elif program_type == 'advanced_program':
-            # Advanced programs (Advanced Program category)
-            programs_query = programs_query.filter(category__name='Advanced Program')
-        # If program_type is None or 'all', include all programs
         
         # Apply category filter
         if category_id is not None:
@@ -359,7 +349,6 @@ def get_all_programs_with_filters(
         return {
             "success": True,
             "filters_applied": {
-                "program_type": program_type or 'all',
                 "category_id": category_id,
                 "is_best_seller": is_best_seller,
                 "min_price": min_price,

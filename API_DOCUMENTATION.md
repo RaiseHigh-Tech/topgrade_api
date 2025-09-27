@@ -342,13 +342,8 @@ Get all programs with comprehensive filtering options using unified Program mode
 
 **Authentication Required:** Yes
 
-**🔄 Updated:** `program_type` now filters by category automatically:
-- `program_type=program` → Excludes "Advanced Program" category
-- `program_type=advanced_program` → Only "Advanced Program" category
-- `program_type=all` or omitted → All programs
-
+**🔄 Updated:**
 **Query Parameters:**
-- `program_type` (string, optional): Filter by type ('program', 'advanced_program', 'all')
 - `category_id` (int, optional): Filter by specific category ID
 - `is_best_seller` (bool, optional): Filter best sellers
 - `min_price` (float, optional): Minimum price filter
@@ -360,7 +355,7 @@ Get all programs with comprehensive filtering options using unified Program mode
 
 **Example Request:**
 ```
-GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_by=most_relevant
+GET /api/programs/filter?category_id=1&min_rating=4.0&sort_by=most_relevant
 ```
 
 **Response:**
@@ -368,7 +363,6 @@ GET /api/programs/filter?program_type=program&category_id=1&min_rating=4.0&sort_
 {
   "success": true,
   "filters_applied": {
-    "program_type": "program",
     "category_id": "1",
     "is_best_seller": null,
     "min_price": null,
