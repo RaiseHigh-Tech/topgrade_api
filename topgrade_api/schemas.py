@@ -38,7 +38,7 @@ class AreaOfInterestSchema(Schema):
 class PurchaseSchema(Schema):
     program_id: int
     payment_method: str = 'card'  # optional, defaults to 'card'
-
+ 
 class BookmarkSchema(Schema):
     program_id: int
 

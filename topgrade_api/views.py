@@ -986,7 +986,6 @@ def update_learning_progress(request, data: UpdateProgressSchema):
                 'total_duration_seconds': total_duration,
                 'watch_time_seconds': 0,
                 'completion_percentage': 0.0,
-                'watch_percentage': 0.0,
                 'last_watched_at': timezone.now(),
                 'created_at': timezone.now()
             }
@@ -1000,7 +999,6 @@ def update_learning_progress(request, data: UpdateProgressSchema):
         # Calculate completion percentage
         completion_percentage = min(100.0, (topic_progress.watch_time_seconds / total_duration) * 100)
         topic_progress.completion_percentage = completion_percentage
-        topic_progress.watch_percentage = completion_percentage
         
         # Update status based on completion
         if completion_percentage >= 90:  # Consider 90% as completed
