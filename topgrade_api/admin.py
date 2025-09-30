@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
-    UserTopicProgress, UserCourseProgress
+    UserTopicProgress, UserCourseProgress, Carousel
 )
 
 # Restrict admin access to superusers only
@@ -234,3 +234,23 @@ class UserCourseProgressAdmin(admin.ModelAdmin):
         minutes = (obj.total_watch_time_seconds % 3600) // 60
         return f"{hours:02d}:{minutes:02d}"
     total_watch_time_formatted.short_description = 'Total Watch Time'
+
+
+# Carousel Admin
+@admin.register(Carousel)
+class CarouselAdmin(admin.ModelAdmin):
+    list_display = ('id', 'image', 'is_active', 'order', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    ordering = ('order', 'created_at')
+    list_editable = ('is_active', 'order')
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('image', 'is_active', 'order')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

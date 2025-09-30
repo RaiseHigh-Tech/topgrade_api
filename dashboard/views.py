@@ -1447,3 +1447,80 @@ def chat_view(request):
     }
     
     return render(request, 'dashboard/chat.html', context)
+
+
+def carousel_view(request):
+    """
+    Carousel management view for uploading, managing, and organizing carousel images
+    """
+    from topgrade_api.models import Carousel
+    from django.contrib import messages
+    from django.http import JsonResponse
+    import json
+    
+    # Handle AJAX requests for carousel operations
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'upload':
+            # Handle image upload
+            image = request.FILES.get('image')
+            
+            if image:
+                try:
+                    carousel_slide = Carousel.objects.create(
+                        image=image,
+                        order=0,
+                        is_active=True
+                    )
+                    messages.success(request, 'Image uploaded successfully!')
+                    return redirect('dashboard:carousel')
+                except Exception as e:
+                    messages.error(request, f'Error uploading image: {str(e)}')
+                    return redirect('dashboard:carousel')
+            else:
+                messages.error(request, 'Please select an image file to upload.')
+                return redirect('dashboard:carousel')
+        
+        elif action == 'toggle_active':
+            # Handle toggle active status
+            slide_id = request.POST.get('slide_id')
+            try:
+                slide = Carousel.objects.get(id=slide_id)
+                slide.is_active = not slide.is_active
+                slide.save()
+                status = "activated" if slide.is_active else "deactivated"
+                messages.success(request, f'Image {status} successfully!')
+                return redirect('dashboard:carousel')
+            except Carousel.DoesNotExist:
+                messages.error(request, 'Image not found.')
+                return redirect('dashboard:carousel')
+        
+        elif action == 'delete':
+            # Handle delete slide
+            slide_id = request.POST.get('slide_id')
+            try:
+                slide = Carousel.objects.get(id=slide_id)
+                slide.delete()
+                messages.success(request, 'Image deleted successfully!')
+                return redirect('dashboard:carousel')
+            except Carousel.DoesNotExist:
+                messages.error(request, 'Image not found.')
+                return redirect('dashboard:carousel')
+        
+    
+    # Get all carousel slides for display (latest first)
+    carousel_slides = Carousel.objects.all().order_by('-created_at')
+    
+    total_slides = carousel_slides.count()
+    active_slides = carousel_slides.filter(is_active=True).count()
+    inactive_slides = total_slides - active_slides
+    
+    context = {
+        'carousel_slides': carousel_slides,
+        'total_slides': total_slides,
+        'active_slides': active_slides,
+        'inactive_slides': inactive_slides,
+    }
+    
+    return render(request, 'dashboard/carousel.html', context)

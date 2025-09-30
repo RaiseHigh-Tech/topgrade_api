@@ -1084,3 +1084,321 @@ def update_learning_progress(request, data: UpdateProgressSchema):
         
     except Exception as e:
         return JsonResponse({"success": False, "message": f"Error updating progress: {str(e)}"}, status=500)
+
+@api.get("/purchase/{purchase_id}/details", auth=AuthBearer())
+def get_purchase_program_details(request, purchase_id: int):
+    """
+    Get detailed information about a purchased program including purchase info, 
+    progress tracking, syllabus, and video access
+    """
+    try:
+        user = request.auth
+        
+        # Get and validate purchase
+        try:
+            purchase = UserPurchase.objects.select_related(
+                'program__category'
+            ).prefetch_related(
+                'program__syllabuses__topics'
+            ).get(
+                id=purchase_id,
+                user=user,
+                status='completed'
+            )
+        except UserPurchase.DoesNotExist:
+            return JsonResponse({
+                "success": False,
+                "message": "Purchase not found or access denied"
+            }, status=404)
+        
+        program = purchase.program
+        
+        # Get course progress
+        course_progress = UserCourseProgress.objects.filter(
+            user=user,
+            purchase=purchase
+        ).first()
+        
+        # Get all topic progress for this purchase
+        topic_progress_dict = {}
+        topic_progress_list = UserTopicProgress.objects.filter(
+            user=user,
+            purchase=purchase
+        ).select_related('topic')
+        
+        for progress in topic_progress_list:
+            topic_progress_dict[progress.topic.id] = progress
+        
+        # Check if user has bookmarked this program
+        is_bookmarked = UserBookmark.objects.filter(
+            user=user,
+            program=program
+        ).exists()
+        
+        # Build syllabus with topics and progress
+        syllabus_list = []
+        syllabi = program.syllabuses.all().order_by('order', 'id')
+        
+        total_accessible_topics = 0
+        total_completed_topics = 0
+        total_in_progress_topics = 0
+        
+        for syllabus in syllabi:
+            topics_list = []
+            topics = syllabus.topics.all().order_by('order', 'id')
+            
+            syllabus_completed_topics = 0
+            syllabus_total_topics = 0
+            
+            for topic in topics:
+                syllabus_total_topics += 1
+                
+                # Get topic progress
+                topic_progress = topic_progress_dict.get(topic.id)
+                
+                # All videos are accessible for purchased programs
+                video_url = topic.video_file.url if topic.video_file else ""
+                is_accessible = bool(topic.video_file)
+                
+                if is_accessible:
+                    total_accessible_topics += 1
+                
+                # Progress information
+                progress_info = {
+                    "status": "not_started",
+                    "completion_percentage": 0.0,
+                    "watch_time_seconds": 0,
+                    "total_duration_seconds": 0,
+                    "is_completed": False,
+                    "last_watched_at": None,
+                    "started_at": None,
+                    "completed_at": None
+                }
+                
+                if topic_progress:
+                    progress_info.update({
+                        "status": topic_progress.status,
+                        "completion_percentage": float(topic_progress.completion_percentage),
+                        "watch_time_seconds": topic_progress.watch_time_seconds,
+                        "total_duration_seconds": topic_progress.total_duration_seconds,
+                        "is_completed": topic_progress.status == 'completed',
+                        "last_watched_at": topic_progress.last_watched_at.isoformat() if topic_progress.last_watched_at else None,
+                        "started_at": topic_progress.started_at.isoformat() if topic_progress.started_at else None,
+                        "completed_at": topic_progress.completed_at.isoformat() if topic_progress.completed_at else None
+                    })
+                    
+                    if topic_progress.status == 'completed':
+                        syllabus_completed_topics += 1
+                        total_completed_topics += 1
+                    elif topic_progress.status == 'in_progress':
+                        total_in_progress_topics += 1
+                
+                topic_data = {
+                    "id": topic.id,
+                    "topic_title": topic.topic_title,
+                    "description": topic.description,
+                    "video_url": video_url,
+                    "video_duration": topic.video_duration,
+                    "is_intro": topic.is_intro,
+                    "is_free_trial": topic.is_free_trial,
+                    "is_accessible": is_accessible,
+                    "progress": progress_info
+                }
+                
+                topics_list.append(topic_data)
+            
+            # Calculate syllabus completion percentage
+            syllabus_completion = (syllabus_completed_topics / syllabus_total_topics * 100) if syllabus_total_topics > 0 else 0
+            
+            syllabus_data = {
+                "id": syllabus.id,
+                "module_title": syllabus.module_title,
+                "topics_count": len(topics_list),
+                "completed_topics": syllabus_completed_topics,
+                "completion_percentage": round(syllabus_completion, 2),
+                "topics": topics_list
+            }
+            syllabus_list.append(syllabus_data)
+        
+        # Count enrolled students
+        enrolled_students = UserPurchase.objects.filter(
+            program=program,
+            status='completed'
+        ).count()
+        
+        # Calculate overall course progress if not available
+        if course_progress:
+            overall_completion = float(course_progress.completion_percentage)
+            total_watch_time = course_progress.total_watch_time_seconds
+            last_activity = course_progress.last_activity_at
+            is_course_completed = course_progress.is_completed
+        else:
+            overall_completion = (total_completed_topics / total_accessible_topics * 100) if total_accessible_topics > 0 else 0
+            total_watch_time = sum(tp.watch_time_seconds for tp in topic_progress_list)
+            last_activity = purchase.purchase_date
+            is_course_completed = overall_completion >= 100
+        
+        # Calculate estimated time remaining (rough estimate)
+        total_video_duration_seconds = 0
+        for topic_progress in topic_progress_list:
+            if topic_progress.total_duration_seconds > 0:
+                total_video_duration_seconds += topic_progress.total_duration_seconds
+        
+        estimated_remaining_time = max(0, total_video_duration_seconds - total_watch_time)
+        
+        # Build response
+        purchase_details = {
+            "purchase_info": {
+                "purchase_id": purchase.id,
+                "purchase_date": purchase.purchase_date.isoformat(),
+                "status": purchase.status,
+                "amount_paid": float(purchase.amount_paid),
+                "original_price": float(program.price),
+                "discount_applied": float(program.discount_percentage),
+                "savings": float(program.price - purchase.amount_paid)
+            },
+            "program": {
+                "id": program.id,
+                "title": program.title,
+                "subtitle": program.subtitle,
+                "category": {
+                    "id": program.category.id,
+                    "name": program.category.name,
+                } if program.category else None,
+                "description": program.description,
+                "image": program.image.url if program.image else None,
+                "icon": program.icon,
+                "duration": program.duration,
+                "batch_starts": program.batch_starts,
+                "available_slots": program.available_slots,
+                "job_openings": program.job_openings,
+                "global_market_size": program.global_market_size,
+                "avg_annual_salary": program.avg_annual_salary,
+                "program_rating": float(program.program_rating),
+                "is_best_seller": program.is_best_seller,
+                "is_bookmarked": is_bookmarked,
+                "enrolled_students": enrolled_students
+            },
+            "progress_overview": {
+                "overall_completion_percentage": round(overall_completion, 2),
+                "is_completed": is_course_completed,
+                "total_topics": total_accessible_topics,
+                "completed_topics": total_completed_topics,
+                "in_progress_topics": total_in_progress_topics,
+                "not_started_topics": total_accessible_topics - total_completed_topics - total_in_progress_topics,
+                "total_modules": len(syllabus_list),
+                "completed_modules": len([s for s in syllabus_list if s['completion_percentage'] >= 100]),
+                "total_watch_time_seconds": total_watch_time,
+                "estimated_remaining_time_seconds": estimated_remaining_time,
+                "last_activity_at": last_activity.isoformat() if last_activity else None,
+                "started_at": course_progress.started_at.isoformat() if course_progress and course_progress.started_at else purchase.purchase_date.isoformat(),
+                "completed_at": course_progress.completed_at.isoformat() if course_progress and course_progress.completed_at else None
+            },
+            "learning_path": {
+                "current_topic": None,  # Will be set below
+                "next_recommended_topic": None,  # Will be set below
+                "recently_watched": []  # Will be set below
+            },
+            "syllabus": {
+                "total_modules": len(syllabus_list),
+                "total_topics": sum(len(s["topics"]) for s in syllabus_list),
+                "modules": syllabus_list
+            }
+        }
+        
+        # Find current and next recommended topics
+        current_topic = None
+        next_topic = None
+        recently_watched = []
+        
+        # Get recently watched topics (last 5)
+        recent_progress = UserTopicProgress.objects.filter(
+            user=user,
+            purchase=purchase,
+            status__in=['in_progress', 'completed']
+        ).order_by('-last_watched_at')[:5]
+        
+        for progress in recent_progress:
+            recently_watched.append({
+                "topic_id": progress.topic.id,
+                "topic_title": progress.topic.topic_title,
+                "completion_percentage": float(progress.completion_percentage),
+                "last_watched_at": progress.last_watched_at.isoformat()
+            })
+        
+        # Find current topic (last watched incomplete topic) and next topic
+        all_topics_ordered = []
+        for syllabus in syllabi:
+            for topic in syllabus.topics.all().order_by('order', 'id'):
+                all_topics_ordered.append(topic)
+        
+        for i, topic in enumerate(all_topics_ordered):
+            topic_prog = topic_progress_dict.get(topic.id)
+            
+            if topic_prog and topic_prog.status == 'in_progress':
+                current_topic = {
+                    "topic_id": topic.id,
+                    "topic_title": topic.topic_title,
+                    "completion_percentage": float(topic_prog.completion_percentage),
+                    "module_title": topic.syllabus.module_title
+                }
+                break
+        
+        # Find next recommended topic (first not completed)
+        for topic in all_topics_ordered:
+            topic_prog = topic_progress_dict.get(topic.id)
+            if not topic_prog or topic_prog.status != 'completed':
+                next_topic = {
+                    "topic_id": topic.id,
+                    "topic_title": topic.topic_title,
+                    "module_title": topic.syllabus.module_title,
+                    "is_accessible": bool(topic.video_file)
+                }
+                break
+        
+        purchase_details["learning_path"]["current_topic"] = current_topic
+        purchase_details["learning_path"]["next_recommended_topic"] = next_topic
+        purchase_details["learning_path"]["recently_watched"] = recently_watched
+        
+        return {
+            "success": True,
+            "data": purchase_details
+        }
+        
+    except Exception as e:
+        return JsonResponse({
+            "success": False, 
+            "message": f"Error fetching purchase details: {str(e)}"
+        }, status=500)
+
+
+# Carousel API Endpoints
+@api.get("/carousel")
+def get_carousel_slides(request):
+    """
+    Get all active carousel slides ordered by their position
+    """
+    try:
+        from topgrade_api.models import Carousel
+        
+        carousel_slides = Carousel.objects.filter(is_active=True).order_by('order', 'created_at')
+        
+        slides_data = []
+        for slide in carousel_slides:
+            slide_data = {
+                "id": slide.id,
+                "image": slide.image.url if slide.image else None,
+            }
+            slides_data.append(slide_data)
+        
+        return {
+            "success": True,
+            "data": slides_data,
+            "total_slides": len(slides_data)
+        }
+        
+    except Exception as e:
+        return JsonResponse({
+            "success": False, 
+            "message": f"Error fetching carousel slides: {str(e)}"
+        }, status=500)

@@ -148,6 +148,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:carousel' %}active{% endif %}" href="{% url 'dashboard:carousel' %}" role="button">
+                                <i class="ri-image-line"></i> Carousel
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link menu-link" role="button">
                                 <i class="ri-chat-quote-line"></i> Testimonials
                             </a>

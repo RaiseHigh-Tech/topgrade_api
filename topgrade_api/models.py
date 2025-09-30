@@ -466,3 +466,19 @@ class UserCourseProgress(models.Model):
         )
         
         self.save()
+
+
+class Carousel(models.Model):
+    image = models.ImageField(upload_to='carousel_images/', help_text="Carousel image")
+    is_active = models.BooleanField(default=True, help_text="Whether this slide is active in the carousel")
+    order = models.PositiveIntegerField(default=0, help_text="Order of the slide in carousel (lower numbers appear first)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+        verbose_name = "Carousel Slide"
+        verbose_name_plural = "Carousel Slides"
+
+    def __str__(self):
+        return f"Carousel Slide {self.id}"
