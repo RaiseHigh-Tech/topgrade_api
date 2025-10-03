@@ -153,10 +153,13 @@
                 </div>
               </li>
               <li class="py-4">
-                <a href="{% url 'about' %}" class="flex items-center hover:text-[#f07c00] transition duration-300 {% if request.path == '/about' %}text-[#f07c00]{% endif %}">About</a>
+                <a href="#" class="hover:text-[#f07c00] transition duration-300 {% if request.path == '/certificate' %}text-[#f07c00]{% endif %}">Certificate</a>
               </li>
               <li class="py-4">
                 <a href="{% url 'blog' %}" class="hover:text-[#f07c00] transition duration-300 {% if request.path == '/blog' %}text-[#f07c00]{% endif %}">Blogs</a>
+              </li>
+              <li class="py-4">
+                <a href="{% url 'about' %}" class="flex items-center hover:text-[#f07c00] transition duration-300 {% if request.path == '/about' %}text-[#f07c00]{% endif %}">About</a>
               </li>
             </ul>
           </div>
@@ -248,11 +251,15 @@
               </details>
             </li>
 
-            <!-- About -->
-            <a href="{% url 'about' %}" class="block px-6 py-3 hover:bg-orange-100 hover:text-orange-800 rounded text-base">About</a>
+            <!-- Certificate -->
+            <a href="#" class="block px-6 py-3 hover:bg-orange-100 hover:text-orange-800 rounded text-base">Certificate</a>
 
             <!-- Blogs -->
             <a href="{% url 'blog' %}" class="block px-6 py-3 hover:bg-orange-100 hover:text-orange-800 rounded text-base">Blogs</a>
+            
+            <!-- About -->
+            <a href="{% url 'about' %}" class="block px-6 py-3 hover:bg-orange-100 hover:text-orange-800 rounded text-base">About</a>
+            
             <!-- contact us -->
             <li class="flex justify-center">
               <button onclick="window.location.href = '{% url 'contact' %}';" class="bg-transparent border border-gray-300 hover:border-[#f07c00] text-gray-800 hover:text-[#f07c00] font-bold py-2 px-6 rounded-lg transition duration-300 w-full">Contact Us</button>
