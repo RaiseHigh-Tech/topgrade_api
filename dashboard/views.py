@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser, Testimonial
+from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser, Testimonial, Certificate
 
 User = get_user_model()
 
@@ -1630,3 +1630,88 @@ def toggle_testimonial_status(request, testimonial_id):
             messages.error(request, f'Error updating testimonial status: {str(e)}')
     
     return redirect('dashboard:testimonials')
+
+
+@login_required
+def certificates_view(request):
+    """View to display all certificates"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    certificates = Certificate.objects.all().order_by('-created_at')
+    programs = Program.objects.all().order_by('title')
+    
+    context = {
+        'certificates': certificates,
+        'programs': programs,
+        'total_certificates': certificates.count(),
+    }
+    
+    return render(request, 'dashboard/certificates.html', context)
+
+
+@login_required
+def add_certificate(request):
+    """Add a new certificate"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    if request.method == 'POST':
+        try:
+            program_id = request.POST.get('program')
+            program = get_object_or_404(Program, id=program_id)
+            
+            certificate = Certificate.objects.create(
+                program=program,
+                certificate_image=request.FILES.get('certificate_image')
+            )
+            messages.success(request, f'Certificate for {program.title} has been added successfully!')
+        except Exception as e:
+            messages.error(request, f'Error adding certificate: {str(e)}')
+    
+    return redirect('dashboard:certificates')
+
+
+@login_required
+def edit_certificate(request, certificate_id):
+    """Edit an existing certificate"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    
+    if request.method == 'POST':
+        try:
+            program_id = request.POST.get('program')
+            program = get_object_or_404(Program, id=program_id)
+            
+            certificate.program = program
+            
+            if 'certificate_image' in request.FILES:
+                certificate.certificate_image = request.FILES['certificate_image']
+            
+            certificate.save()
+            messages.success(request, f'Certificate for {certificate.program.title} has been updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Error updating certificate: {str(e)}')
+    
+    return redirect('dashboard:certificates')
+
+
+@login_required
+def delete_certificate(request, certificate_id):
+    """Delete a certificate"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    certificate = get_object_or_404(Certificate, id=certificate_id)
+    
+    if request.method == 'POST':
+        try:
+            program_title = certificate.program.title
+            certificate.delete()
+            messages.success(request, f'Certificate for {program_title} has been deleted successfully!')
+        except Exception as e:
+            messages.error(request, f'Error deleting certificate: {str(e)}')
+    
+    return redirect('dashboard:certificates')

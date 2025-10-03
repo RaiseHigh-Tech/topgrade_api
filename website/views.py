@@ -28,7 +28,48 @@ def blog(request):
     return render(request, 'website/blog.html')
 
 def programs(request):
-    return render(request, 'website/programs.html')
+    """Regular programs listing page with filtering and pagination"""
+    # Get query parameters
+    search_query = request.GET.get('search')
+    category_filter = request.GET.get('category')
+    sort_by = request.GET.get('sort', '-created_at')
+    
+    # Base queryset - regular programs only (exclude Advanced Program)
+    programs_queryset = Program.get_regular_programs()
+    
+    # Apply search filter
+    if search_query:
+        programs_queryset = programs_queryset.filter(
+            title__icontains=search_query
+        )
+    
+    # Apply category filter
+    if category_filter and category_filter != 'all':
+        programs_queryset = programs_queryset.filter(category_id=category_filter)
+    
+    # Apply sorting
+    valid_sort_options = ['-created_at', 'created_at', 'title', '-title', 'price', '-price', '-program_rating']
+    if sort_by in valid_sort_options:
+        programs_queryset = programs_queryset.order_by(sort_by)
+    
+    # Pagination
+    paginator = Paginator(programs_queryset, 12)  # 12 programs per page
+    page_number = request.GET.get('page')
+    programs = paginator.get_page(page_number)
+    
+    # Get all regular categories for filter dropdown
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    
+    context = {
+        'programs': programs,
+        'categories': categories,
+        'search_query': search_query,
+        'category_filter': category_filter,
+        'sort_by': sort_by,
+        'total_programs': programs_queryset.count(),
+        'is_advanced': False,  # Flag to identify this is regular programs page
+    }
+    return render(request, 'website/programs.html', context)
 
 def advance_programs(request):
     """Advanced programs listing page with filtering and pagination"""

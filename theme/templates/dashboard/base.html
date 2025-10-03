@@ -157,6 +157,11 @@
                                 <i class="ri-chat-quote-line"></i> Testimonials
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:certificates' %}active{% endif %}" href="{% url 'dashboard:certificates' %}" role="button">
+                                <i class="ri-award-line"></i> Certificates
+                            </a>
+                        </li>
                     </ul>
 
                 </div>

@@ -27,5 +27,11 @@ urlpatterns = [
     path('testimonials/add/', views.add_testimonial, name='add_testimonial'),
     path('testimonials/edit/<int:testimonial_id>/', views.edit_testimonial, name='edit_testimonial'),
     path('testimonials/delete/<int:testimonial_id>/', views.delete_testimonial, name='delete_testimonial'),
-    path('testimonials/toggle/<int:testimonial_id>/', views.toggle_testimonial_status, name='toggle_testimonial_status')
+    path('testimonials/toggle/<int:testimonial_id>/', views.toggle_testimonial_status, name='toggle_testimonial_status'),
+    
+    # Certificates management
+    path('certificates/', views.certificates_view, name='certificates'),
+    path('certificates/add/', views.add_certificate, name='add_certificate'),
+    path('certificates/edit/<int:certificate_id>/', views.edit_certificate, name='edit_certificate'),
+    path('certificates/delete/<int:certificate_id>/', views.delete_certificate, name='delete_certificate')
 ]   
