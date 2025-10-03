@@ -258,6 +258,63 @@
       scrollbar-width: none;
       /* Firefox */
     }
+    
+    /* Default scroll animation */
+    .testimonial-scroll {
+      display: flex;
+      flex-direction: column;
+      animation: scroll-up 10s linear infinite;
+    }
+    
+    .testimonial-scroll.reverse {
+      animation: scroll-down 10s linear infinite;
+    }
+    
+    @keyframes scroll-up {
+      0% {
+        transform: translateY(0);
+      }
+    
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+    
+    @keyframes scroll-down {
+      0% {
+        transform: translateY(-50%);
+      }
+    
+      100% {
+        transform: translateY(0);
+      }
+    }
+    
+    /* ✅ Mobile one-line vertical scroll */
+    @media (max-width: 768px) {
+      .grid {
+        display: block !important;
+      }
+    
+      .testimonial-column {
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+    
+      .testimonial-scroll {
+        animation: mobile-scroll-up 5s linear infinite;
+      }
+    
+      @keyframes mobile-scroll-up {
+        0% {
+          transform: translateY(0);
+        }
+    
+        100% {
+          transform: translateY(-50%);
+        }
+      }
+    }
   </style>
 
   <!-- HERO SECTION -->
@@ -799,54 +856,58 @@
   </section>
 
   <!-- WHY CHOOSE TOP GRADE SECTION -->
-  <section class="bg-orange-50/50 py-16 md:py-24">
+  <section class="bg-orange-50/50 py-12 md:py-16 lg:py-24">
     <div class="container mx-auto px-4">
       <!-- Section Title -->
-      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800">Why Choose Top Grade ?</h2>
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-8 md:mb-12">Why Choose Top Grade ?</h2>
 
       <!-- Connector Diagram -->
-      <div class="max-w-2xl mx-auto my-12 flex items-center justify-between">
-        <span class="border border-gray-400 text-gray-600 font-semibold px-4 py-2 rounded-md text-sm">LEARNING CHALLENGES</span>
-        <div class="flex-grow h-0.5 mx-4 bg-gradient-to-r from-orange-400 to-[#ef7d00] relative">
+      <div class="max-w-2xl mx-auto my-8 md:my-12 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+        <span class="border border-gray-400 text-gray-600 font-semibold px-3 md:px-4 py-2 rounded-md text-xs md:text-sm text-center">LEARNING CHALLENGES</span>
+        <div class="flex-grow h-0.5 mx-2 md:mx-4 bg-gradient-to-r from-orange-400 to-[#ef7d00] relative hidden sm:block">
           <i class="fa-solid fa-play text-[#ef7d00] absolute -right-2 top-1/2 -translate-y-1/2"></i>
         </div>
-        <span class="bg-[#ef7d00] text-white font-semibold px-4 py-2 rounded-md text-sm">HOW WE ENCOUNTER</span>
+        <!-- Mobile arrow -->
+        <div class="sm:hidden">
+          <i class="fa-solid fa-arrow-down text-[#ef7d00] text-xl"></i>
+        </div>
+        <span class="bg-[#ef7d00] text-white font-semibold px-3 md:px-4 py-2 rounded-md text-xs md:text-sm text-center">HOW WE ENCOUNTER</span>
       </div>
 
       <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center">
         <!-- Left Column: Challenges (Chat Simulation) -->
-        <div class="max-w-sm mx-auto p-4 bg-gray-200/70 rounded-3xl shadow-lg">
-          <div class="bg-gray-50 rounded-2xl p-4 space-y-4">
+        <div class="w-full max-w-md mx-auto p-3 md:p-4 bg-gray-200/70 rounded-2xl md:rounded-3xl shadow-lg">
+          <div class="bg-gray-50 rounded-xl md:rounded-2xl p-3 md:p-4 space-y-3 md:space-y-4">
             <!-- Chat Message 1 -->
-            <div class="flex items-start gap-3 chat-msg" style="--delay:0s;">
-              <img src="https://xsgames.co/randomusers/assets/avatars/male/25.jpg" alt="Avatar" class="w-8 h-8 rounded-full" />
-              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
-                <p class="text-sm text-gray-700">I'm struggling to retain what is taught.</p>
+            <div class="flex items-start gap-2 md:gap-3 chat-msg" style="--delay:0s;">
+              <img src="https://xsgames.co/randomusers/assets/avatars/male/25.jpg" alt="Avatar" class="w-6 h-6 md:w-8 md:h-8 rounded-full flex-shrink-0" />
+              <div class="bg-white p-2 md:p-3 rounded-2xl rounded-tl-none shadow-sm w-fit max-w-[calc(100%-2rem)]">
+                <p class="text-xs md:text-sm text-gray-700">I'm struggling to retain what is taught.</p>
                 <p class="text-xs text-gray-400 text-right mt-1">9:30 AM</p>
               </div>
             </div>
             <!-- Chat Message 2 -->
-            <div class="flex items-start gap-3 chat-msg" style="--delay:1s;">
-              <img src="https://xsgames.co/randomusers/assets/avatars/female/32.jpg" alt="Avatar" class="w-8 h-8 rounded-full" />
-              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
-                <p class="text-sm text-gray-700">It's all solo study without peer support.</p>
+            <div class="flex items-start gap-2 md:gap-3 chat-msg" style="--delay:1s;">
+              <img src="https://xsgames.co/randomusers/assets/avatars/female/32.jpg" alt="Avatar" class="w-6 h-6 md:w-8 md:h-8 rounded-full flex-shrink-0" />
+              <div class="bg-white p-2 md:p-3 rounded-2xl rounded-tl-none shadow-sm w-fit max-w-[calc(100%-2rem)]">
+                <p class="text-xs md:text-sm text-gray-700">It's all solo study without peer support.</p>
                 <p class="text-xs text-gray-400 text-right mt-1">11:15 AM</p>
               </div>
             </div>
             <!-- Chat Message 3 -->
-            <div class="flex items-start gap-3 chat-msg" style="--delay:2s;">
-              <img src="https://xsgames.co/randomusers/assets/avatars/male/46.jpg" alt="Avatar" class="w-8 h-8 rounded-full" />
-              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
-                <p class="text-sm text-gray-700">I am unable to find good mentors with work experience.</p>
+            <div class="flex items-start gap-2 md:gap-3 chat-msg" style="--delay:2s;">
+              <img src="https://xsgames.co/randomusers/assets/avatars/male/46.jpg" alt="Avatar" class="w-6 h-6 md:w-8 md:h-8 rounded-full flex-shrink-0" />
+              <div class="bg-white p-2 md:p-3 rounded-2xl rounded-tl-none shadow-sm w-fit max-w-[calc(100%-2rem)]">
+                <p class="text-xs md:text-sm text-gray-700">I am unable to find good mentors with work experience.</p>
                 <p class="text-xs text-gray-400 text-right mt-1">3:35 PM</p>
               </div>
             </div>
             <!-- Chat Message 4 -->
-            <div class="flex items-start gap-3 chat-msg" style="--delay:3s;">
-              <img src="https://xsgames.co/randomusers/assets/avatars/female/67.jpg" alt="Avatar" class="w-8 h-8 rounded-full" />
-              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
-                <p class="text-sm text-gray-700">I am not able to build portfolio-worthy projects.</p>
+            <div class="flex items-start gap-2 md:gap-3 chat-msg" style="--delay:3s;">
+              <img src="https://xsgames.co/randomusers/assets/avatars/female/67.jpg" alt="Avatar" class="w-6 h-6 md:w-8 md:h-8 rounded-full flex-shrink-0" />
+              <div class="bg-white p-2 md:p-3 rounded-2xl rounded-tl-none shadow-sm w-fit max-w-[calc(100%-2rem)]">
+                <p class="text-xs md:text-sm text-gray-700">I am not able to build portfolio-worthy projects.</p>
                 <p class="text-xs text-gray-400 text-right mt-1">5:12 PM</p>
               </div>
             </div>
@@ -854,43 +915,254 @@
         </div>
 
         <!-- Right Column: Solutions (Features) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mt-8 lg:mt-0">
           <!-- Features -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-video text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-video text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">LIVE Interactive Session</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">Live & interactive session</p>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-graduation-cap text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-graduation-cap text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">Industry ratified certifications</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">Industry-Recognized Certifications</p>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-user-tie text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-user-tie text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">Expert Industry Mentor</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">Expert industry mentors</p>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-briefcase text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-briefcase text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">Portfolio worthy projects</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">Hands-on, Portfolio-Ready Projects</p>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-comments text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-comments text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">Dedicated query session</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">1:1 Executive query support</p>
           </div>
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
-              <i class="fa-solid fa-users text-2xl text-[#ef7d00]"></i>
+          <div class="bg-white p-3 md:p-4 rounded-lg md:rounded-xl shadow-sm border border-gray-200 flex items-center gap-3 md:gap-4 mb-3 sm:mb-0">
+            <div class="w-10 h-10 md:w-14 md:h-14 rounded-full flex items-center justify-center bg-orange-100 flex-shrink-0">
+              <i class="fa-solid fa-users text-lg md:text-2xl text-[#ef7d00]"></i>
             </div>
-            <p class="font-semibold text-gray-700">Active Community</p>
+            <p class="font-semibold text-gray-700 text-sm md:text-base">Proven Career Outcomes</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS SECTION -->
+  <section class="bg-orange-50/50 py-12 md:py-16 lg:py-24 overflow-hidden">
+    <div class="container mx-auto px-4">
+      <!-- Section Title (fixed) -->
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">A Testimony to What We Do</h2>
+
+      <!-- Testimonial Grid Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
+        <!-- Column 1 -->
+        <div class="testimonial-column space-y-8 overflow-hidden">
+          <div class="testimonial-scroll" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 1 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
+                    <p class="text-sm text-gray-500">
+                      Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav Vidyapeeth</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
+                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with deep insights into psychological theories and practical skills.</p>
+              </div>
+              <!-- Testimonial 2 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
+                    <p class="text-sm text-gray-500">
+                      Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka University</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
+                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills and insights that I am eager to apply in my professional endeavors.</p>
+              </div>
+            </div>
+            <br />
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
+                    <p class="text-sm text-gray-500">
+                      Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav Vidyapeeth</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
+                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with deep insights into psychological theories and practical skills.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
+                    <p class="text-sm text-gray-500">
+                      Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka University</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
+                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills and insights that I am eager to apply in my professional endeavors.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="testimonial-column space-y-8 overflow-hidden">
+          <div class="testimonial-scroll reverse" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 3 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Pavan R V's</h3>
+                    <p class="text-sm text-gray-500">
+                      Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
+                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning journey. I deeply appreciate the knowledge gained.</p>
+              </div>
+              <!-- Testimonial 4 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
+                    <p class="text-sm text-gray-500">
+                      Marketing @ <span class="text-[#ef7d00] font-medium">Vellore Institute Of Technology</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
+                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks to enroll students for various courses and programs.</p>
+              </div>
+            </div>
+            <br />
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Pavan R V's</h3>
+                    <p class="text-sm text-gray-500">
+                      Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
+                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning journey. I deeply appreciate the knowledge gained.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
+                    <p class="text-sm text-gray-500">
+                      Marketing @ <span class="text-[#ef7d00] font-medium">Vellore Institute Of Technology</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
+                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks to enroll students for various courses and programs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Column 3 -->
+        <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
+          <div class="testimonial-scroll" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 5 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
+                    <p class="text-sm text-gray-500">
+                      Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
+                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various aspects. This project was the best part of my internship.</p>
+              </div>
+              <br />
+              <!-- Testimonial 6 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Prabash T</h3>
+                    <p class="text-sm text-gray-500">
+                      Web Development @ <span class="text-[#ef7d00] font-medium">GITAM Deemed University</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
+                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical skills and gaining practical experience.</p>
+              </div>
+            </div>
+            <br />
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
+                    <p class="text-sm text-gray-500">
+                      Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
+                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various aspects. This project was the best part of my internship.</p>
+              </div>
+              <br />
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Prabash T</h3>
+                    <p class="text-sm text-gray-500">
+                      Web Development @ <span class="text-[#ef7d00] font-medium">GITAM Deemed University</span>
+                    </p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
+                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical skills and gaining practical experience.</p>
+              </div>
+              <br />
+            </div>
           </div>
         </div>
       </div>
@@ -973,26 +1245,26 @@
       // Function to show loading state
       function showLoading() {
         programsContainer.innerHTML = `
-                                                                      <div class="col-span-full text-center py-12">
-                                                                          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
-                                                                          <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
-                                                                          <p class="text-gray-500">Please wait while we fetch the programs.</p>
-                                                                      </div>
-                                                                  `
+                                                                                                      <div class="col-span-full text-center py-12">
+                                                                                                          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+                                                                                                          <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
+                                                                                                          <p class="text-gray-500">Please wait while we fetch the programs.</p>
+                                                                                                      </div>
+                                                                                                  `
       }
     
       // Function to show error state
       function showError(message = 'Failed to load programs') {
         programsContainer.innerHTML = `
-                                                                    <div class="col-span-full text-center py-12">
-                                                                        <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-                                                                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
-                                                                        <p class="text-gray-500">${message}. Please try again.</p>
-                                                                        <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
-                                                                            Retry
-                                                                        </button>
-                                                                    </div>
-                                                                `
+                                                                                                    <div class="col-span-full text-center py-12">
+                                                                                                        <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                                                                                                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
+                                                                                                        <p class="text-gray-500">${message}. Please try again.</p>
+                                                                                                        <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
+                                                                                                            Retry
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                `
       }
     
       // Function to filter programs via AJAX
@@ -1104,50 +1376,50 @@
       // Add CSS for animations and loading states
       const style = document.createElement('style')
       style.textContent = `
-                                                                    .animate-fade-in {
-                                                                        animation: fadeIn 0.5s ease-in-out;
-                                                                    }
-                                                                    
-                                                                    @keyframes fadeIn {
-                                                                        from {
-                                                                            opacity: 0;
-                                                                            transform: translateY(20px);
-                                                                        }
-                                                                        to {
-                                                                            opacity: 1;
-                                                                            transform: translateY(0);
-                                                                        }
-                                                                    }
-                                                                    
-                                                                    .program-card {
-                                                                        transition: all 0.3s ease;
-                                                                    }
-                                                                    
-                                                                    .program-card:hover {
-                                                                        transform: translateY(-5px);
-                                                                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                                                                    }
-                                                                    
-                                                                    .filter-btn {
-                                                                        transition: all 0.3s ease;
-                                                                    }
-                                                                    
-                                                                    .filter-btn:disabled {
-                                                                        opacity: 0.6;
-                                                                        cursor: not-allowed;
-                                                                    }
-                                                                    
-                                                                    @keyframes spin {
-                                                                        to {
-                                                                            transform: rotate(360deg);
-                                                                        }
-                                                                    }
-                                                                    
-                                                                    .animate-spin {
-                                                                        animation: spin 1s linear infinite;
-                                                                    }
-                                                                    
-                                                                `
+                                                                                                    .animate-fade-in {
+                                                                                                        animation: fadeIn 0.5s ease-in-out;
+                                                                                                    }
+                                                                                                    
+                                                                                                    @keyframes fadeIn {
+                                                                                                        from {
+                                                                                                            opacity: 0;
+                                                                                                            transform: translateY(20px);
+                                                                                                        }
+                                                                                                        to {
+                                                                                                            opacity: 1;
+                                                                                                            transform: translateY(0);
+                                                                                                        }
+                                                                                                    }
+                                                                                                    
+                                                                                                    .program-card {
+                                                                                                        transition: all 0.3s ease;
+                                                                                                    }
+                                                                                                    
+                                                                                                    .program-card:hover {
+                                                                                                        transform: translateY(-5px);
+                                                                                                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                                                                                                    }
+                                                                                                    
+                                                                                                    .filter-btn {
+                                                                                                        transition: all 0.3s ease;
+                                                                                                    }
+                                                                                                    
+                                                                                                    .filter-btn:disabled {
+                                                                                                        opacity: 0.6;
+                                                                                                        cursor: not-allowed;
+                                                                                                    }
+                                                                                                    
+                                                                                                    @keyframes spin {
+                                                                                                        to {
+                                                                                                            transform: rotate(360deg);
+                                                                                                        }
+                                                                                                    }
+                                                                                                    
+                                                                                                    .animate-spin {
+                                                                                                        animation: spin 1s linear infinite;
+                                                                                                    }
+                                                                                                    
+                                                                                                `
       document.head.appendChild(style)
     
       // Test AJAX endpoint immediately
