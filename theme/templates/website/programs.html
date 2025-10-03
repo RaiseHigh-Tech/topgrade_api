@@ -1,0 +1,940 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block title %}
+TopGrade
+{% endblock %}
+
+{% block secondary_nav %}
+<nav class="bg-[#2c1e12]/90 backdrop-blur-sm border-t border-white/10 -z-10">
+  <div
+    class="container mx-auto flex items-center justify-center gap-6 md:gap-10 text-white/70 text-sm md:text-base py-3">
+    <a href="#overview"
+      class="hover:text-white border-b-2 border-transparent hover:border-[#ef7d00] transition-all duration-300 pb-1">Overview</a>
+    <a href="#syllabus"
+      class="hover:text-white border-b-2 border-transparent hover:border-[#ef7d00] transition-all duration-300 pb-1">Syllabus</a>
+    <a href="#certifications"
+      class="hover:text-white border-b-2 border-transparent hover:border-[#ef7d00] transition-all duration-300 pb-1">Certification</a>
+    <a href="#faq"
+      class="hover:text-white border-b-2 border-transparent hover:border-[#ef7d00] transition-all duration-300 pb-1">FAQ's</a>
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<style>
+  .hero-grid-background {
+    background-color: #1c120a;
+    background-image: linear-gradient(rgba(239, 125, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(239, 125, 0, 0.15) 1px, transparent 1px), linear-gradient(180deg, #2c1e12 0%, #1c120a 100%);
+    background-size: 50px 50px, 50px 50px, 100% 100%;
+    background-position: -1px -1px, -1px -1px, 0 0;
+  }
+
+  .curved-background-shape {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -50%;
+    width: 200%;
+    height: 300px;
+    /* Controls the height of the curve */
+    background-color: #2c1e12;
+    /* The dark, warm brown color */
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    transform: scaleX(1);
+    /* Stretches the curve horizontally */
+  }
+
+  .faq-item.is-active {
+    border-color: #ef7d00;
+    box-shadow: 0 0 15px rgba(239, 125, 0, 0.2);
+  }
+
+  .faq-item.is-active .faq-trigger {
+    color: #c2410c;
+    /* dark orange */
+  }
+
+  /* Default scroll animation */
+    .testimonial-scroll {
+      display: flex;
+      flex-direction: column;
+      animation: scroll-up 10s linear infinite;
+    }
+
+    .testimonial-scroll.reverse {
+      animation: scroll-down 10s linear infinite;
+    }
+
+    @keyframes scroll-up {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+
+    @keyframes scroll-down {
+      0% {
+        transform: translateY(-50%);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    /* ✅ Mobile one-line vertical scroll */
+    @media (max-width: 768px) {
+      .grid {
+        display: block !important;
+      }
+
+      .testimonial-column {
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+
+      .testimonial-scroll {
+        animation: mobile-scroll-up 5s linear infinite;
+      }
+
+      @keyframes mobile-scroll-up {
+        0% {
+          transform: translateY(0);
+        }
+
+        100% {
+          transform: translateY(-50%);
+        }
+      }
+    }
+</style>
+
+<section class="hero-grid-background text-white flex flex-col items-center justify-center p-4 py-24 md:py-32">
+  <div class="container mx-auto flex flex-col items-center justify-center text-center">
+    <!-- Main Heading -->
+    <h1 class="text-4xl md:text-6xl font-bold leading-tight">
+      {{ program.title|default:'The Master art of' }} <br />
+      <span class="text-[#ef7d00]">{{ program.subtitle|default:'Web Development' }}</span>
+    </h1>
+
+    <!-- Info Box -->
+    <div class="max-w-4xl w-full mt-10 bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl shadow-lg p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10">
+
+        <!-- Stat 1 -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 py-6 h-full">
+          <div class="w-16 h-16 rounded-xl flex items-center justify-center bg-white/10">
+            <i class="fa-solid fa-paw text-3xl"></i>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm text-white/70">Batch Starting</p>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+              <p class="text-xl font-bold text-[#ef7d00]">
+                {{ program.batch_starts|default:'August' }}
+              </p>
+              <span
+                class="bg-white/80 text-black font-semibold px-3 py-1 rounded-full mt-1 sm:mt-0 whitespace-nowrap text-sm">
+                {{ program.available_slots|default:'5' }} seats left
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat 2 -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 py-6 h-full">
+          <div class="w-16 h-16 rounded-xl flex items-center justify-center bg-white/10">
+            <i class="fa-solid fa-calendar-alt text-3xl"></i>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm text-white/70">Duration</p>
+            <p class="text-xl font-bold text-[#ef7d00]">
+              {{ program.duration|default:'2-3 Months' }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Stat 3 -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 py-6 h-full">
+          <div class="w-16 h-16 rounded-xl flex items-center justify-center bg-white/10">
+            <i class="fa-solid fa-user-check text-3xl"></i>
+          </div>
+          <div class="text-center md:text-left">
+            <p class="text-sm text-white/70">Program Rating</p>
+            <p class="text-xl font-bold flex items-center justify-center md:justify-start gap-1">
+              {{ program.program_rating|default:'0.0' }}
+              <i class="fa-solid fa-star text-yellow-400"></i>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW SECTION -->
+<section id="overview" class="bg-orange-50/30 py-16 md:py-24">
+  <div class="container mx-auto px-4">
+    <!-- Main Dark Container -->
+    <div class="bg-[#2c1e12] text-white rounded-2xl p-8 md:p-12 shadow-2xl">
+      <h2 class="text-4xl font-bold text-center mb-12">Overview</h2>
+
+      <!-- Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- Left Column: Program Highlights -->
+        <div class="text-white/90">
+          <h3 class="text-2xl font-bold mb-2">Program Highlight</h3>
+          <p class="mb-8">Transform Your Skills with Our Comprehensive Program</p>
+
+          <ul class="space-y-6">
+            <!-- Feature 1 -->
+            <li class="flex items-center gap-4">
+              <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white/10 rounded-xl ">
+                <i class="fa-solid fa-user-tie text-2xl text-[#ef7d00]"></i>
+              </div>
+              <span>Designed for executives, consultants, and entrepreneurs</span>
+            </li>
+            <!-- Feature 2 -->
+            <li class="flex items-center gap-4">
+              <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white/10 rounded-xl">
+                <i class="fa-solid fa-certificate text-2xl text-[#ef7d00]"></i>
+              </div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <span class="text-sm sm:text-base">Accreditation from NSDC</span>
+                <img src="https://images.seeklogo.com/logo-png/39/1/nsdl-logo-png_seeklogo-397670.png" alt="NSDC Logo"
+                  class="h-10 w-20 sm:h-8 sm:w-16 bg-white p-1 rounded-md object-contain" />
+              </div>
+
+
+            </li>
+            <!-- Feature 3 -->
+            <li class="flex items-center gap-4">
+              <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white/10 rounded-xl">
+                <i class="fa-solid fa-award text-2xl text-[#ef7d00]"></i>
+              </div>
+              <div class="flex flex-col sm:flex-row sm:items-start gap-3">
+                <span class="text-sm sm:text-base text-center sm:text-left">
+                  Accreditation from Skill India
+                </span>
+                <img src="https://images.seeklogo.com/logo-png/39/1/nsdl-logo-png_seeklogo-397670.png"
+                  alt="Skill India Logo"
+                  class="h-10 w-20 sm:h-8 sm:w-16 bg-white p-1 rounded-md object-contain" />
+              </div>
+
+            </li>
+            <!-- Feature 4 -->
+            <li class="flex items-center gap-4">
+              <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white/10 rounded-xl">
+                <i class="fa-solid fa-chart-line text-2xl text-[#ef7d00]"></i>
+              </div>
+              <span>Fosters expertise and innovation for professional growth</span>
+            </li>
+            <!-- Feature 5 -->
+            <li class="flex items-center gap-4">
+              <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center bg-white/10 rounded-xl">
+                <i class="fa-solid fa-handshake text-2xl text-[#ef7d00]"></i>
+              </div>
+              <span>100+ Internship Partners</span>
+            </li>
+          </ul>
+        </div>
+
+       <!-- Right Column: Application Form -->
+<div class="bg-orange-50 p-8 rounded-2xl shadow-lg">
+  <h3 class="text-xl font-bold text-gray-800 mb-1">Fill the form to apply for</h3>
+  <p class="text-xl font-bold text-gray-800 mb-6">{{ program.title|default:'Web Development' }} Program</p>
+
+  <form id="application-form" class="space-y-5">
+    <div>
+      <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name <span
+          class="text-[#ef7d00]">*</span></label>
+      <input type="text" id="first-name" placeholder="Name" required
+        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-[#ef7d00] focus:border-[#ef7d00] text-black" />
+    </div>
+    <div>
+      <label for="phone-number" class="block text-sm font-medium text-gray-700 mb-1">Phone number <span
+          class="text-[#ef7d00]">*</span></label>
+      <input type="tel" id="phone-number" placeholder="Phone number" required
+        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-[#ef7d00] focus:border-[#ef7d00] text-black" />
+    </div>
+    <div>
+      <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email ID <span
+          class="text-[#ef7d00]">*</span></label>
+      <input type="email" id="email" placeholder="Email Address" required
+        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-[#ef7d00] focus:border-[#ef7d00] text-black" />
+    </div>
+    <div>
+      <label for="college-name" class="block text-sm font-medium text-gray-700 mb-1">College name <span
+          class="text-[#ef7d00]">*</span></label>
+      <input type="text" id="college-name" placeholder="College name" required
+        class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-[#ef7d00] focus:border-[#ef7d00] text-black" />
+    </div>
+    <button type="submit"
+      class="w-full bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 rounded-lg hover:opacity-90 transition-opacity">Enquiry</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById("application-form").addEventListener("submit", function (e) {
+    e.preventDefault(); // stop page reload
+
+    // Collect values
+    const name = document.getElementById("first-name").value.trim();
+    const phone = document.getElementById("phone-number").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const college = document.getElementById("college-name").value.trim();
+
+    // Simple validation
+    if (!name || !phone || !email || !college) {
+      alert("⚠️ Please fill in all fields.");
+      return;
+    }
+
+    // (Optional) Send data to server with fetch / AJAX here
+    // Example:
+    // fetch("/submit-form", { method: "POST", body: JSON.stringify({ name, phone, email, college }) });
+
+    // Success message
+    alert(`✅ Thank you ${name}! Your enquiry has been submitted.`);
+
+    // Reset form
+    this.reset();
+  });
+</script>
+</div>
+</div>
+</div>
+<!-- STATS & PARTNERS SECTION -->
+<section class="bg-orange-50/30 py-16 md:py-24">
+  <div class="container mx-auto px-4">
+    <!-- Part 1: "Why You Need to Master" Stats Bar -->
+    <div class="text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Here's Why You Need to Master <br /> {{program.title|default:'Web Development' }}</h2>
+
+      <div class="max-w-4xl mx-auto mt-10 p-6 bg-white border border-orange-200 rounded-2xl shadow-lg">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <!-- Stat 1: Job Openings -->
+          <div class="text-center">
+            <p class="text-3xl font-bold text-[#ef7d00]">{{ program.job_openings|default:'24K+' }}</p>
+            <p class="text-gray-700 mt-1">Job Openings</p>
+          </div>
+          <!-- Stat 2: Market Size -->
+          <div class="text-center sm:border-x sm:border-gray-200">
+            <p class="text-3xl font-bold text-[#ef7d00]">{{ program.global_market_size|default:'$123.2 Billion' }}</p>
+            <p class="text-gray-700 mt-1">Global Market Size</p>
+          </div>
+          <!-- Stat 3: Average Salary -->
+          <div class="text-center">
+            <p class="text-3xl font-bold text-[#ef7d00]">{{ program.avg_annual_salary|default:'$11+ Lakh' }}</p>
+            <p class="text-gray-700 mt-1">Average Annual Salary</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  
+
+
+    <div class="text-center mt-24">
+  <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
+    Partnering with 50+ leading universities and <br /> institutions
+  </h2>
+
+  <div class="max-w-5xl mx-auto mt-12 grid grid-cols-2  md:grid-cols-7 lg:grid-cols-7 lg:grid-rows-2 gap-4 px-4">
+    <!-- Logos -->
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/meta.com" alt="Meta" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/similarweb.com" alt="Similarweb" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/hootsuite.com" alt="Hootsuite" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/moz.com" alt="Moz" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/analytics.google.com" alt="Google Analytics" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/sproutsocial.com" alt="Sprout Social" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/buffer.com" alt="Buffer" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/woorank.com" alt="Woorank" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/buzzsumo.com" alt="BuzzSumo" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/semrush.com" alt="SEMrush" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/bitly.com" alt="Bitly" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/mailchimp.com" alt="Mailchimp" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/getresponse.com" alt="GetResponse" class="max-h-6 w-auto" />
+    </div>
+    <div class="bg-white p-4 flex items-center justify-center rounded-xl border border-gray-200 transition-all duration-300 hover:border-orange-400 hover:shadow-md">
+      <img src="https://logo.clearbit.com/ahrefs.com" alt="Ahrefs" class="max-h-6 w-auto" />
+    </div>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<!-- SYLLABUS SECTION - IMPROVED COLORS -->
+<section id="syllabus" class="bg-orange-50/30 py-4 md:py-4">
+  <div class="container mx-auto px-4">
+    <!-- Section Title -->
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Syllabus</h2>
+
+    <!-- Accordion Container -->
+    <div class="max-w-4xl mx-auto bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-200">
+      <div id="accordion-container" class="space-y-3">
+        {% for syllabus in program.syllabuses.all %}
+        <!-- Dynamic Accordion Item -->
+        <div class="accordion-item bg-gray-50/70 border border-gray-200 rounded-2xl p-4 transition-all duration-300">
+          <button
+            class="accordion-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold">
+            <span class="text-lg">{{ forloop.counter }}. {{ syllabus.module_title }}</span>
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+            <div class="pt-4 space-y-3 text-gray-600 border-t border-gray-200 mt-3">
+              {% for topic in syllabus.topics.all %}
+              <p class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i
+                    class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> {{ topic.topic_title }}
+              </p>
+              {% empty %}
+              <p class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i
+                    class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> Content for {{ syllabus.module_title
+                }}...
+              </p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <!-- Fallback if no syllabus exists -->
+        <div class="accordion-item bg-gray-50/70 border border-gray-200 rounded-2xl p-4 transition-all duration-300">
+          <button
+            class="accordion-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold">
+            <span class="text-lg">1. {{ program.title|default:'Web Development' }} Fundamentals</span>
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </button>
+          <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+            <div class="pt-4 space-y-3 text-gray-600 border-t border-gray-200 mt-3">
+              <p class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i
+                    class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> Basic Concepts
+              </p>
+              <p class="flex items-center gap-3">
+                <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i
+                    class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> Practical Applications
+              </p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATION SECTION -->
+<section id="certifications" class="relative bg-orange-50/50 pt-16 md:pt-24 pb-32 overflow-hidden">
+  <!-- The dark curved shape at the bottom -->
+  <div class="curved-background-shape"></div>
+
+  <div class="container mx-auto px-4 relative z-10">
+    <!-- Section Title -->
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Certify your Success</h2>
+
+    <!-- Certificates Container -->
+    <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:-space-x-12">
+      <!-- Certificate 1: of Training -->
+      <div
+        class="w-full max-w-sm bg-white p-6 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300">
+        <div class="border-2 border-orange-200 p-4 rounded">
+          <div class="flex items-center justify-between pb-2 border-b-2 border-orange-500">
+            <div class="flex items-center gap-2">
+              <svg class="h-6 w-6 text-[#ef7d00]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span class="font-bold text-sm">Top Grade</span>
+            </div>
+            <h3 class="text-xl font-bold text-orange-800 tracking-widest">CERTIFICATE</h3>
+          </div>
+          <p class="text-center text-sm font-semibold text-gray-500 mt-4">OF TRAINING</p>
+          <p class="text-center text-xs text-gray-500 mt-4">Proudly Certify to</p>
+          <p class="text-center text-3xl font-serif text-gray-800 mt-1">Rishi Nair</p>
+          <p class="text-center text-xs text-gray-500 mt-4 px-4">This is to certify that the above-mentioned candidate
+            has successfully completed his/her training in {{ program.title|default:'Web Development' }}.</p>
+          <div class="mt-6 flex justify-between items-end">
+            <div>
+              <img src="https://i.imgur.com/ODyA3oG.png" alt="Signature" class="h-8" />
+              <p class="text-xs font-bold">Hemant Ingle</p>
+              <p class="text-xs text-gray-500">Academic Head</p>
+            </div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
+              alt="QR Code" class="w-16 h-16" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate 2: of Internship (on top) -->
+      <div
+        class="w-full max-w-sm bg-white p-6 rounded-lg shadow-2xl border border-gray-200 transform md:rotate-2 hover:rotate-0 hover:scale-105 transition-transform duration-300 z-10">
+        <div class="relative border-2 border-orange-200 p-4 rounded">
+          <!-- Gold Ribbon -->
+          <div class="absolute -top-1 right-4 w-12 h-16 bg-gradient-to-b from-yellow-400 to-amber-500 shadow-md"
+            style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);">
+            <i class="fa-solid fa-medal text-xl text-yellow-600 absolute top-3 left-1/2 -translate-x-1/2"></i>
+          </div>
+
+          <div class="flex items-center justify-between pb-2 border-b-2 border-orange-500">
+            <div class="flex items-center gap-2">
+              <svg class="h-6 w-6 text-[#ef7d00]" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span class="font-bold text-sm">Top Grade</span>
+            </div>
+            <h3 class="text-xl font-bold text-orange-800 tracking-widest">CERTIFICATE</h3>
+          </div>
+          <p class="text-center text-sm font-semibold text-gray-500 mt-4">OF INTERNSHIP</p>
+          <p class="text-center text-xs text-gray-500 mt-4">Proudly Certify to</p>
+          <p class="text-center text-3xl font-serif text-gray-800 mt-1">Rishi Nair</p>
+          <p class="text-center text-xs text-gray-500 mt-4 px-4">This is to certify that the above-mentioned candidate
+            has shown diligence, consistency, and determination throughout their internship period.</p>
+          <div class="mt-6 flex justify-between items-end">
+            <div>
+              <img src="https://i.imgur.com/ODyA3oG.png" alt="Signature" class="h-8" />
+              <p class="text-xs font-bold">Hemant Ingle</p>
+              <p class="text-xs text-gray-500">VP - HR</p>
+            </div>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
+              alt="QR Code" class="w-16 h-16" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- TESTIMONIALS SECTION -->
+  <section class="bg-orange-50/50 py-16 md:py-24 overflow-hidden">
+    <div class="container mx-auto px-4">
+      <!-- Section Title (fixed) -->
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+        A Testimony to What We Do
+      </h2>
+
+      <!-- Testimonial Grid Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
+
+        <!-- Column 1 -->
+        <div class="testimonial-column space-y-8 overflow-hidden">
+          <div class="testimonial-scroll" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 1 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
+                    <p class="text-sm text-gray-500">Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav
+                        Vidyapeeth</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
+                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with
+                  deep insights into psychological theories and practical skills.</p>
+              </div>
+              <!-- Testimonial 2 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
+                    <p class="text-sm text-gray-500">Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka
+                        University</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
+                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills
+                  and insights that I am eager to apply in my professional endeavors.</p>
+              </div>
+            </div>
+            <br>
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
+                    <p class="text-sm text-gray-500">Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav
+                        Vidyapeeth</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
+                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with
+                  deep insights into psychological theories and practical skills.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
+                    <p class="text-sm text-gray-500">Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka
+                        University</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
+                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills
+                  and insights that I am eager to apply in my professional endeavors.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="testimonial-column space-y-8 overflow-hidden">
+          <div class="testimonial-scroll reverse" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 3 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Pavan R V's</h3>
+                    <p class="text-sm text-gray-500">Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa
+                        Vidyapeetham</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
+                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning
+                  journey. I deeply appreciate the knowledge gained.</p>
+              </div>
+              <!-- Testimonial 4 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
+                    <p class="text-sm text-gray-500">Marketing @ <span class="text-[#ef7d00] font-medium">Vellore
+                        Institute Of Technology</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
+                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks
+                  to enroll students for various courses and programs.</p>
+              </div>
+            </div>
+            <br>
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Pavan R V's</h3>
+                    <p class="text-sm text-gray-500">Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa
+                        Vidyapeetham</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
+                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning
+                  journey. I deeply appreciate the knowledge gained.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
+                    <p class="text-sm text-gray-500">Marketing @ <span class="text-[#ef7d00] font-medium">Vellore
+                        Institute Of Technology</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
+                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks
+                  to enroll students for various courses and programs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Column 3 -->
+        <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
+          <div class="testimonial-scroll" style="animation-duration:10s;">
+            <div class="space-y-8">
+              <!-- Testimonial 5 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
+                    <p class="text-sm text-gray-500">Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita
+                        Vishwa Vidyapeetham</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
+                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various
+                  aspects. This project was the best part of my internship.</p>
+              </div>
+              <br>
+              <!-- Testimonial 6 -->
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Prabash T</h3>
+                    <p class="text-sm text-gray-500">Web Development @ <span class="text-[#ef7d00] font-medium">GITAM
+                        Deemed University</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
+                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical
+                  skills and gaining practical experience.</p>
+              </div>
+            </div>
+            <br>
+            <!-- Duplicate for infinite scroll -->
+            <div class="space-y-8" aria-hidden="true">
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
+                    <p class="text-sm text-gray-500">Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita
+                        Vishwa Vidyapeetham</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
+                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various
+                  aspects. This project was the best part of my internship.</p>
+              </div>
+              <br>
+              <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex items-center gap-4">
+                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
+                  <div>
+                    <h3 class="font-bold text-lg">Prabash T</h3>
+                    <p class="text-sm text-gray-500">Web Development @ <span class="text-[#ef7d00] font-medium">GITAM
+                        Deemed University</span></p>
+                  </div>
+                </div>
+                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
+                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical
+                  skills and gaining practical experience.</p>
+              </div>
+              <br>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+<!-- FAQ SECTION -->
+<section id="faq" class="bg-orange-50/40 py-16 md:py-24">
+  <div class="container mx-auto px-4">
+    <!-- Section Title -->
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">FAQ's</h2>
+
+    <!-- Accordion Container -->
+    <div class="max-w-4xl mx-auto space-y-4">
+      <!-- FAQ Item 1 -->
+      <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+        <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-6">
+          <span class="text-lg">Is technical support available if I encounter issues with the online platform?</span>
+          <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </div>
+        </button>
+        <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+          <div class="px-6 pb-6 text-gray-600 border-t border-gray-200 pt-4">
+            <p>Yes, absolutely. We provide dedicated technical support to all our students. If you face any issues with
+              the platform, you can reach out to our support team via email or the dedicated chat portal, and they will
+              assist you promptly.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 2 -->
+      <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+        <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-6">
+          <span class="text-lg">Are there discussion forums or community platforms for students?</span>
+          <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </div>
+        </button>
+        <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+          <div class="px-6 pb-6 text-gray-600 border-t border-gray-200 pt-4">
+            <p>Yes, we believe in peer-to-peer learning. All our courses come with access to an exclusive community
+              forum where you can interact with fellow students, ask questions, share projects, and collaborate with
+              your peers.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 3 -->
+      <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+        <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-6">
+          <span class="text-lg">Is there a pre-registration option available?</span>
+          <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </div>
+        </button>
+        <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+          <div class="px-6 pb-6 text-gray-600 border-t border-gray-200 pt-4">
+            <p>For some of our popular upcoming courses, we do offer a pre-registration option. This allows you to
+              secure your spot in the batch and often comes with an early-bird discount. Please check the specific
+              course page for availability.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 4 -->
+      <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+        <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-6">
+          <span class="text-lg">What is the refund policy?</span>
+          <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </div>
+        </button>
+        <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+          <div class="px-6 pb-6 text-gray-600 border-t border-gray-200 pt-4">
+            <p>We offer a 7-day, no-questions-asked refund policy. If you are not satisfied with the course within the
+              first 7 days of the batch starting, you can request a full refund. Please refer to our "Payment and Refund
+              Policy" page for detailed terms.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Item 5 -->
+      <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+        <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-6">
+          <span class="text-lg">How much time do I need to dedicate to the course each week?</span>
+          <div class="w-8 h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+            <i class="fa-solid fa-chevron-down transform transition-transform duration-300"></i>
+          </div>
+        </button>
+        <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+          <div class="px-6 pb-6 text-gray-600 border-t border-gray-200 pt-4">
+            <p>On average, we recommend dedicating 8-10 hours per week. This includes time for live sessions,
+              self-study, and working on assignments and projects. However, the platform is flexible, allowing you to
+              learn at your own pace.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const accordionContainer = document.getElementById('accordion-container')
+    const accordionItems = accordionContainer.querySelectorAll('.accordion-item')
+
+    const openAccordion = (item) => {
+      const content = item.querySelector('.accordion-content')
+      const icon = item.querySelector('i')
+      item.classList.add('is-active')
+      icon.classList.add('rotate-180')
+      content.style.maxHeight = content.scrollHeight + 'px'
+    }
+
+    const closeAccordion = (item) => {
+      const content = item.querySelector('.accordion-content')
+      const icon = item.querySelector('i')
+      item.classList.remove('is-active')
+      icon.classList.remove('rotate-180')
+      content.style.maxHeight = null
+    }
+
+    // Initially, open the first item
+    if (accordionItems.length > 0) {
+      openAccordion(accordionItems[0])
+    }
+
+    accordionItems.forEach((item) => {
+      const trigger = item.querySelector('.accordion-trigger')
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('is-active')
+
+        // Close all other items
+        accordionItems.forEach((otherItem) => {
+          if (otherItem !== item) {
+            closeAccordion(otherItem)
+          }
+        })
+
+        // Toggle the clicked item
+        if (!isOpen) {
+          openAccordion(item)
+        } else {
+          closeAccordion(item)
+        }
+      })
+    })
+  })
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const faqItems = document.querySelectorAll('.faq-item')
+
+    const openFaq = (item) => {
+      const content = item.querySelector('.faq-content')
+      const icon = item.querySelector('i')
+      item.classList.add('is-active')
+      icon.classList.add('rotate-180')
+      content.style.maxHeight = content.scrollHeight + 'px'
+    }
+
+    const closeFaq = (item) => {
+      const content = item.querySelector('.faq-content')
+      const icon = item.querySelector('i')
+      item.classList.remove('is-active')
+      icon.classList.remove('rotate-180')
+      content.style.maxHeight = null
+    }
+
+    faqItems.forEach((item) => {
+      const trigger = item.querySelector('.faq-trigger')
+      trigger.addEventListener('click', () => {
+        const isOpen = item.classList.contains('is-active')
+
+        // Close all other items for a clean experience
+        faqItems.forEach((otherItem) => {
+          if (otherItem !== item) {
+            closeFaq(otherItem)
+          }
+        })
+
+        // Toggle the clicked item
+        if (!isOpen) {
+          openFaq(item)
+        } else {
+          closeFaq(item)
+        }
+      })
+    })
+  })
+</script>
+{% endblock %}

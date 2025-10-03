@@ -158,6 +158,8 @@ class Program(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
+        if self.subtitle:
+            return f"{self.title} - {self.subtitle}"
         return self.title
     
     @property
@@ -507,3 +509,27 @@ class Testimonial(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.field_of_study}"
+
+
+class Certificate(models.Model):
+    """Model to store program certificate images"""
+    program = models.ForeignKey(
+        Program, 
+        on_delete=models.CASCADE, 
+        related_name='certificates',
+        help_text="Program associated with this certificate"
+    )
+    certificate_image = models.ImageField(
+        upload_to='certificates/',
+        help_text="Upload certificate image"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Certificate'
+        verbose_name_plural = 'Certificates'
+    
+    def __str__(self):
+        return f"{self.program.title} - Certificate"

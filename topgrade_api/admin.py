@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
-    UserTopicProgress, UserCourseProgress, Carousel, Testimonial
+    UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate
 )
 
 # Restrict admin access to superusers only
@@ -285,3 +285,34 @@ class TestimonialAdmin(admin.ModelAdmin):
         """Override to show active testimonials first"""
         qs = super().get_queryset(request)
         return qs.order_by('-is_active', 'created_at')
+
+
+@admin.register(Certificate)
+class CertificateAdmin(admin.ModelAdmin):
+    list_display = ('program', 'certificate_image', 'created_at')
+    list_filter = ('program', 'created_at')
+    search_fields = ('program__title', 'program__subtitle')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Certificate Information', {
+            'fields': ('program', 'certificate_image')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Customize the program dropdown to show title and subtitle"""
+        if db_field.name == "program":
+            kwargs["queryset"] = Program.objects.all().order_by('title')
+            kwargs["empty_label"] = "Select a program..."
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def get_queryset(self, request):
+        """Optimize query with program data"""
+        qs = super().get_queryset(request)
+        return qs.select_related('program')
