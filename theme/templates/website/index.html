@@ -147,8 +147,120 @@
         -webkit-transform: rotate(-405deg);
       }
     }
+    
+    /* Row scroll left */
+    @keyframes marquee-left {
+      0% {
+        transform: translateX(0);
+      }
+    
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    
+    /* Row scroll right */
+    @keyframes marquee-right {
+      0% {
+        transform: translateX(-50%);
+      }
+    
+      100% {
+        transform: translateX(0);
+      }
+    }
+    
+    .animate-marquee-left {
+      animation: marquee-left 15s linear infinite;
+      will-change: transform;
+    }
+    
+    .animate-marquee-right {
+      animation: marquee-right 15s linear infinite;
+      will-change: transform;
+    }
+    
+    /* Mobile faster animation */
+    @media (max-width: 768px) {
+      .animate-marquee-left {
+        animation-duration: 10s;
+      }
+    
+      .animate-marquee-right {
+        animation-duration: 10s;
+      }
+    }
+    
+    /* Prevent flash on load */
+    .marquee-container {
+      opacity: 0;
+      animation: fadeIn 0.5s ease-in-out 0.3s forwards;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    /* Preload animation state */
+    .animate-marquee-left,
+    .animate-marquee-right {
+      animation-fill-mode: both;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+    }
+    
+    @keyframes scroll-text {
+      0% {
+        transform: translateX(0);
+      }
+    
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    
+    .animate-scroll-text {
+      animation: scroll-text 20s linear infinite;
+    }
+    
+    /* Mobile (speed up animation) */
+    @media (max-width: 768px) {
+      .animate-scroll-text {
+        animation-duration: 7s;
+        /* faster on mobile */
+      }
+    }
+    
+    .pro-pack-background {
+      background-color: #2c1e12;
+      background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+    
+    .sparkle-effect {
+      background-image: radial-gradient(circle, rgba(255, 255, 255, 0.6) 1px, transparent 1.5px), radial-gradient(circle, rgba(255, 255, 255, 0.4) 0.5px, transparent 1px), linear-gradient(to bottom right, #facc15, #ca8a04);
+      background-size: 100px 100px, 60px 60px, 100% 100%;
+      background-position: 0 0, 30px 30px, 0 0;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
   </style>
 
+  <!-- HERO SECTION -->
   <section class="relative bg-gradient-to-br from-[#d97706] to-[#4d2c0d] overflow-hidden">
     <!-- Wavy Background -->
     <div class="absolute inset-0 overflow-hidden">
@@ -199,11 +311,314 @@
         <p class="mt-6 text-base lg:text-xl text-white/80 max-w-lg mx-auto lg:mx-0">Transform how students and educators connect, learn and succeed - anytime, anywhere</p>
         <div class="mt-10">
           <!-- MOBILE BUTTON -->
-          <a href="#ExploreMobile" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 lg:hidden">Explore Programs</a>
+          <a href="#ExploreMobile" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 lg:hidden">Enroll Now</a>
           <!-- DESKTOP BUTTON -->
-          <a href="#ExploreDesktop" class="hidden lg:inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Explore Programs</a>
+          <a href="#ExploreDesktop" class="hidden lg:inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Enroll Now</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- PLACEMENTS & STATS SECTION -->
+  <section class="bg-orange-50 py-16 md:py-24 overflow-x-hidden">
+    <div class="container mx-auto px-4">
+      <!-- Section Title -->
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-gray-800">Secure Placements with Top Brands</h2>
+
+      <!-- Logo Marquee Section -->
+      <div class="group relative w-full overflow-hidden mt-12 marquee-container">
+        <div class="flex flex-col space-y-4">
+          <!-- Row 1 (scrolls right) -->
+          <div class="flex animate-marquee-right">
+            <!-- Set 1 -->
+            <div class="flex flex-nowrap items-center space-x-4 md:space-x-6 mx-3">
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/google_logo.svg' %}" alt="Google" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/microsoft_logo.svg' %}" alt="Microsoft" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/amazon_logo.svg' %}" alt="Amazon" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/ibm_logo.svg' %}" alt="IBM" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/oracle_logo.svg' %}" alt="Oracle" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/tcs_logo.svg' %}" alt="TCS" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/hcl_logo.svg' %}" alt="HCL" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/wipro_logo.svg' %}" alt="Wipro" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/accenture_logo.svg' %}" alt="Accenture" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/capgemini_logo.svg' %}" alt="Capgemini" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+            </div>
+
+            <!-- Set 2 (Duplicate for seamless scrolling) -->
+            <div class="flex flex-nowrap items-center space-x-4 md:space-x-6 mx-3">
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/google_logo.svg' %}" alt="Google" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/microsoft_logo.svg' %}" alt="Microsoft" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/amazon_logo.svg' %}" alt="Amazon" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/ibm_logo.svg' %}" alt="IBM" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/oracle_logo.svg' %}" alt="Oracle" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/tcs_logo.svg' %}" alt="TCS" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/hcl_logo.svg' %}" alt="HCL" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/wipro_logo.svg' %}" alt="Wipro" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/accenture_logo.svg' %}" alt="Accenture" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/capgemini_logo.svg' %}" alt="Capgemini" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Row 2 (scrolls left) -->
+          <div class="flex animate-marquee-left">
+            <div class="flex flex-nowrap items-center space-x-4 md:space-x-6 mx-3">
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/deloitte_logo.svg' %}" alt="Deloitte" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/tech_mahendra_logo.svg' %}" alt="Tech Mahindra" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/siemens_logo.svg' %}" alt="Siemens" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/boschz_logo.svg' %}" alt="Bosch" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/l&t_logo.svg' %}" alt="L&T" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/biocon_logo.svg' %}" alt="Biocon" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/pfizer_logo.svg' %}" alt="Pfizer" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/adobe_logo.svg' %}" alt="Adobe" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/figma_logo.svg' %}" alt="Figma" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+            </div>
+
+            <!-- Set 2 (Duplicate for seamless scrolling) -->
+            <div class="flex flex-nowrap items-center space-x-4 md:space-x-6 mx-3">
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/deloitte_logo.svg' %}" alt="Deloitte" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/tech_mahendra_logo.svg' %}" alt="Tech Mahindra" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/siemens_logo.svg' %}" alt="Siemens" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/boschz_logo.svg' %}" alt="Bosch" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/l&t_logo.svg' %}" alt="L&T" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/biocon_logo.svg' %}" alt="Biocon" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/pfizer_logo.svg' %}" alt="Pfizer" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/adobe_logo.svg' %}" alt="Adobe" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+
+              <div class="flex items-center justify-center w-20 h-12 md:w-34 md:h-19 bg-white rounded-xl p-1 md:p-3">
+                <img src="{% static 'assets/website/brands/figma_logo.svg' %}" alt="Figma" class="max-h-8 md:max-h-12 lg:max-h-16 w-auto" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-4xl mx-auto mt-8 sm:mt-12 md:mt-24 px-4 md:p-8">
+        <div class="bg-white rounded-2xl border border-orange-200 shadow-lg p-3 md:p-8">
+          <!-- Grid for Stats -->
+          <div class="grid grid-cols-1 gap-6 md:flex md:justify-center md:space-x-16">
+            <!-- Stat 1: Google Rating -->
+            <div class="flex items-center gap-4 py-4 px-2 justify-start">
+              <!-- Icon -->
+              <div class="bg-orange-100 p-4 rounded-2xl w-fit">
+                <i class="fa-solid fa-star text-2xl text-orange-500"></i>
+              </div>
+              <!-- Text -->
+              <div class="text-left md:text-start">
+                <p class="text-2xl sm:text-3xl font-bold text-orange-800">4.8</p>
+                <p class="text-sm sm:text-base text-gray-600">Google Rating</p>
+              </div>
+            </div>
+
+            <!-- Stat 2: Mentees Trained -->
+            <div class="flex items-center gap-4 py-4 px-2 justify-start">
+              <!-- Icon -->
+              <div class="bg-orange-100 p-4 rounded-2xl w-fit">
+                <i class="fa-solid fa-user-graduate text-2xl text-orange-500"></i>
+              </div>
+              <!-- Text -->
+              <div class="text-left md:text-start">
+                <p class="text-2xl sm:text-3xl font-bold text-orange-800">50K+</p>
+                <p class="text-sm sm:text-base text-gray-600">Mentees Trained</p>
+              </div>
+            </div>
+
+            <!-- Stat 3: Hiring Partner -->
+            <div class="flex items-center gap-4 py-4 px-2 justify-start">
+              <!-- Icon -->
+              <div class="bg-orange-100 p-4 rounded-2xl w-fit">
+                <i class="fa-solid fa-briefcase text-2xl text-orange-500"></i>
+              </div>
+              <!-- Text -->
+              <div class="text-left md:text-start">
+                <p class="text-2xl sm:text-3xl font-bold text-orange-800">500+</p>
+                <p class="text-sm sm:text-base text-gray-600">Hiring Partner</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE BAR -->
+  <div class="bg-black border-y border-gray-700/50 overflow-hidden">
+    <div class="flex animate-scroll-text whitespace-nowrap py-4">
+      <!-- We need at least two identical sets of content for a seamless loop -->
+
+      <!-- Set 1 -->
+      <div class="flex items-center">
+        <span class="text-white text-lg font-semibold mx-6">Mockup Interviews</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Value Packs</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Placement Assistance</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Internship</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+      </div>
+
+      <!-- Set 2 (Duplicate for seamless animation) -->
+      <div class="flex items-center" aria-hidden="true">
+        <span class="text-white text-lg font-semibold mx-6">Mockup Interviews</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Value Packs</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Placement Assistance</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+        <span class="text-white text-lg font-semibold mx-6">Internship</span>
+        <span class="text-orange-400 text-xl mx-6">&#10022;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNIFIED PRO PACKS SECTION -->
+  <section class="pro-pack-background py-16 md:py-24">
+    <div class="container mx-auto px-4 flex flex-col items-center">
+      <!-- Main Section Title -->
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-12">Pro Packs</h2>
+
+      <!-- The Golden Ticket Component -->
+      <div class="relative max-w-4xl w-full bg-[#1c120a] rounded-2xl flex shadow-2xl">
+        <div class="flex-grow p-8 md:p-12 text-center">
+          <h3 class="text-4xl md:text-5xl font-bold text-yellow-400">Golden Pass <span class="text-2xl">🪙</span></h3>
+          <p class="text-yellow-500/80 tracking-[0.2em] mt-2 font-semibold">AN EXCLUSIVE COURSE ACCESS</p>
+          <div class="flex flex-col md:flex-row items-center justify-center gap-4 mt-8">
+            <div class="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 text-white text-center w-48">
+              <h4 class="font-bold">Tech Starter</h4>
+              <p class="text-sm opacity-80">12+ Diverse Courses</p>
+            </div>
+            <span class="text-2xl text-white/50 hidden md:block">+</span>
+            <div class="p-4 rounded-xl bg-gradient-to-br from-[#ef7d00] to-orange-600 text-white text-center w-48">
+              <h4 class="font-bold">MBA Lite</h4>
+              <p class="text-sm opacity-80">7+ Diverse Courses</p>
+            </div>
+            <span class="text-2xl text-white/50 hidden md:block">+</span>
+            <div class="p-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-700 text-white text-center w-48">
+              <h4 class="font-bold">More</h4>
+              <p class="text-sm opacity-80">2+ Diverse Courses</p>
+            </div>
+          </div>
+          <div class="relative mt-8 py-4">
+            <hr class="absolute top-1/2 left-0 w-full border-t border-yellow-400/20" />
+            <span class="relative bg-[#1c120a] px-4 text-white font-semibold">Get Premium Access To 20+ Courses</span>
+          </div>
+        </div>
+        <div class="flex-shrink-0 w-32 md:w-40 sparkle-effect rounded-r-2xl flex items-center justify-center relative">
+          <p class="text-black/70 text-2xl font-extrabold tracking-widest uppercase" style="writing-mode: vertical-rl; text-orientation: mixed;">Life - Time Access</p>
+          <div class="absolute -left-4 top-0 h-8 w-8 bg-[#2c1e12] rounded-full" style="transform: translateY(-50%);"></div>
+          <div class="absolute -left-4 bottom-0 h-8 w-8 bg-[#2c1e12] rounded-full" style="transform: translateY(50%);"></div>
+        </div>
+      </div>
+
+      <!-- "Explore Gold" Button -->
+      <button class="mt-12 bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Explore Gold</button>
     </div>
   </section>
 {% endblock %}
