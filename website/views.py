@@ -4,8 +4,8 @@ from topgrade_api.models import Category, Program, Carousel
 
 # Create your views here.
 def index(request):
-    # Get all categories except 'Advanced Program'
-    categories = Category.objects.exclude(name='Advanced Program')
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
     # Get all programs (including advanced programs)
     programs = Program.get_regular_programs()
     # Get advanced programs list
