@@ -1306,27 +1306,29 @@
     
       // Function to show loading state
       function showLoading() {
+        {# prettier-ignore #}
         programsContainer.innerHTML = `
-                                                                                                                          <div class="col-span-full text-center py-12">
-                                                                                                                              <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
-                                                                                                                              <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
-                                                                                                                              <p class="text-gray-500">Please wait while we fetch the programs.</p>
-                                                                                                                          </div>
-                                                                                                                      `
+          <div class="col-span-full text-center py-12">
+              <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+              <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
+              <p class="text-gray-500">Please wait while we fetch the programs.</p>
+          </div>
+      `
       }
     
       // Function to show error state
       function showError(message = 'Failed to load programs') {
+        {# prettier-ignore #}
         programsContainer.innerHTML = `
-                                                                                                                        <div class="col-span-full text-center py-12">
-                                                                                                                            <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-                                                                                                                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
-                                                                                                                            <p class="text-gray-500">${message}. Please try again.</p>
-                                                                                                                            <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
-                                                                                                                                Retry
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    `
+          <div class="col-span-full text-center py-12">
+              <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+              <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
+              <p class="text-gray-500">${message}. Please try again.</p>
+              <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
+                  Retry
+              </button>
+          </div>
+      `
       }
     
       // Function to filter programs via AJAX
@@ -1437,51 +1439,52 @@
     
       // Add CSS for animations and loading states
       const style = document.createElement('style')
+      {# prettier-ignore #}
       style.textContent = `
-                                                                                                                        .animate-fade-in {
-                                                                                                                            animation: fadeIn 0.5s ease-in-out;
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        @keyframes fadeIn {
-                                                                                                                            from {
-                                                                                                                                opacity: 0;
-                                                                                                                                transform: translateY(20px);
-                                                                                                                            }
-                                                                                                                            to {
-                                                                                                                                opacity: 1;
-                                                                                                                                transform: translateY(0);
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        .program-card {
-                                                                                                                            transition: all 0.3s ease;
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        .program-card:hover {
-                                                                                                                            transform: translateY(-5px);
-                                                                                                                            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        .filter-btn {
-                                                                                                                            transition: all 0.3s ease;
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        .filter-btn:disabled {
-                                                                                                                            opacity: 0.6;
-                                                                                                                            cursor: not-allowed;
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        @keyframes spin {
-                                                                                                                            to {
-                                                                                                                                transform: rotate(360deg);
-                                                                                                                            }
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                        .animate-spin {
-                                                                                                                            animation: spin 1s linear infinite;
-                                                                                                                        }
-                                                                                                                        
-                                                                                                                    `
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .program-card {
+                transition: all 0.3s ease;
+            }
+            
+            .program-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            .filter-btn {
+                transition: all 0.3s ease;
+            }
+            
+            .filter-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+            
+            .animate-spin {
+                animation: spin 1s linear infinite;
+            }
+            
+        `
       document.head.appendChild(style)
     
       // Test AJAX endpoint immediately
