@@ -87,11 +87,25 @@ def advance_programs(request):
 
 def contact(request):
     """Contact page"""
-    return render(request, 'website/contact.html')
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/contact.html', context)
 
 def program_detail(request, program_id):
     """Program detail page"""
     program = get_object_or_404(Program, id=program_id)
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
     # Get all programs (including advanced programs)
     programs = Program.get_regular_programs()
     # Get advanced programs list
@@ -101,6 +115,7 @@ def program_detail(request, program_id):
     
     context = {
         'program': program,
+        'categories': categories,
         'programs': programs,
         'advance_programs': advance_programs,
         'testimonials': testimonials,

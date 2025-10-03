@@ -255,7 +255,7 @@
     <div class="container mx-auto px-4">
       <!-- Part 1: "Why You Need to Master" Stats Bar -->
       <div class="text-center">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Here's Why You Need to Master <br /> {{ program.title|default:'Web Development' }}</h2>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Here's Why You Need to Master <br /> {{ program.subtitle|default:'Web Development' }}</h2>
 
         <div class="max-w-4xl mx-auto mt-10 p-6 bg-white border border-orange-200 rounded-2xl shadow-lg">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -349,13 +349,29 @@
               <div class="accordion-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
                 <div class="pt-4 space-y-3 text-gray-600 border-t border-gray-200 mt-3">
                   {% for topic in syllabus.topics.all %}
-                    <p class="flex items-center gap-3">
-                      <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> {{ topic.topic_title }}
-                    </p>
+                    <div class="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div class="flex items-center gap-3 flex-1">
+                        {% if topic.is_intro and topic.video_file %}
+                          <button class="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 transition-colors intro-video-btn" data-video-url="{{ topic.video_file.url }}" data-video-title="{{ topic.topic_title }}" data-video-duration="{{ topic.video_duration|default:'N/A' }}"><i class="fa-solid fa-play text-sm text-green-600"></i></button>
+                          <span class="text-green-600 font-medium cursor-pointer intro-video-btn" data-video-url="{{ topic.video_file.url }}" data-video-title="{{ topic.topic_title }}" data-video-duration="{{ topic.video_duration|default:'N/A' }}">{{ topic.topic_title }}</span>
+                          <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">FREE PREVIEW</span>
+                        {% else %}
+                          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100"><i class="fa-solid fa-lock text-sm text-gray-400"></i></span>
+                          <span class="text-gray-500">{{ topic.topic_title }}</span>
+                        {% endif %}
+                      </div>
+                      <div class="flex items-center gap-2 text-xs text-gray-400">
+                        {% if topic.video_duration %}
+                          <i class="fa-solid fa-clock"></i>
+                          <span>{{ topic.video_duration }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
                   {% empty %}
-                    <p class="flex items-center gap-3">
-                      <span class="flex items-center justify-center w-6 h-6 rounded-md bg-orange-100"><i class="fa-solid fa-play text-xs text-[#ef7d00]"></i></span> Content for {{ syllabus.module_title }}...
-                    </p>
+                    <div class="flex items-center gap-3 p-2">
+                      <span class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100"><i class="fa-solid fa-play text-sm text-[#ef7d00]"></i></span>
+                      <span>Content for {{ syllabus.module_title }}...</span>
+                    </div>
                   {% endfor %}
                 </div>
               </div>
@@ -854,6 +870,147 @@
             closeFaq(item)
           }
         })
+      })
+    })
+  </script>
+
+  <!-- Video Modal -->
+  <div id="videoModal" class="fixed inset-0 bg-black/20 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="relative bg-white rounded-2xl overflow-hidden max-w-4xl w-full mx-4 shadow-2xl">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between p-6 border-b bg-gradient-to-r from-[#ef7d00] to-[#ef7d00] text-white">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-play text-sm"></i>
+          </div>
+          <div>
+            <h3 id="videoTitle" class="text-lg font-semibold">Video Title</h3>
+            <p class="text-white/80 text-sm">
+              <i class="fa-solid fa-clock mr-1"></i>
+              <span id="videoDuration">Duration</span>
+            </p>
+          </div>
+        </div>
+        <button id="closeVideoModal" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"><i class="fa-solid fa-times text-lg"></i></button>
+      </div>
+
+      <!-- Video Container -->
+      <div class="relative bg-black">
+        <video id="videoPlayer" class="w-full h-auto max-h-[70vh]" controls preload="metadata">
+          <source id="videoSource" src="" type="video/mp4" />Your browser does not support the video tag.
+        </video>
+
+        <!-- Video Overlay when not playing -->
+        <div id="videoOverlay" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <button id="playButton" class="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"><i class="fa-solid fa-play text-3xl text-orange-600 ml-1"></i></button>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 bg-gray-50 border-t">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-600">
+              <i class="fa-solid fa-eye text-orange-500 mr-1"></i>
+              Free Preview Video
+            </span>
+          </div>
+          <div class="flex gap-3">
+            <button id="closeVideoBtn" class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const videoModal = document.getElementById('videoModal')
+      const videoPlayer = document.getElementById('videoPlayer')
+      const videoSource = document.getElementById('videoSource')
+      const videoTitle = document.getElementById('videoTitle')
+      const videoDuration = document.getElementById('videoDuration')
+      const videoOverlay = document.getElementById('videoOverlay')
+      const playButton = document.getElementById('playButton')
+      const closeVideoModal = document.getElementById('closeVideoModal')
+      const closeVideoBtn = document.getElementById('closeVideoBtn')
+    
+      // Video modal functionality
+      document.querySelectorAll('.intro-video-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const videoUrl = this.dataset.videoUrl
+          const title = this.dataset.videoTitle
+          const duration = this.dataset.videoDuration
+    
+          // Set video details
+          videoSource.src = videoUrl
+          videoTitle.textContent = title
+          videoDuration.textContent = duration
+    
+          // Load the video
+          videoPlayer.load()
+    
+          // Show modal
+          videoModal.classList.remove('hidden')
+          document.body.style.overflow = 'hidden'
+    
+          // Reset video state
+          videoPlayer.pause()
+          videoPlayer.currentTime = 0
+          videoOverlay.classList.remove('hidden')
+        })
+      })
+    
+      // Play button functionality
+      playButton.addEventListener('click', function () {
+        videoPlayer.play()
+        videoOverlay.classList.add('hidden')
+      })
+    
+      // Video player events
+      videoPlayer.addEventListener('play', function () {
+        videoOverlay.classList.add('hidden')
+      })
+    
+      videoPlayer.addEventListener('pause', function () {
+        if (videoPlayer.currentTime === 0) {
+          videoOverlay.classList.remove('hidden')
+        }
+      })
+    
+      videoPlayer.addEventListener('ended', function () {
+        videoOverlay.classList.remove('hidden')
+      })
+    
+      // Close modal functionality
+      function closeModal() {
+        videoModal.classList.add('hidden')
+        document.body.style.overflow = 'auto'
+        videoPlayer.pause()
+        videoPlayer.currentTime = 0
+        videoOverlay.classList.remove('hidden')
+      }
+    
+      closeVideoModal.addEventListener('click', closeModal)
+      closeVideoBtn.addEventListener('click', closeModal)
+    
+      // Close modal when clicking outside
+      videoModal.addEventListener('click', function (e) {
+        if (e.target === videoModal) {
+          closeModal()
+        }
+      })
+    
+      // Close modal with ESC key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !videoModal.classList.contains('hidden')) {
+          closeModal()
+        }
+      })
+    
+      // Prevent modal content click from closing modal
+      videoModal.querySelector('.relative').addEventListener('click', function (e) {
+        e.stopPropagation()
       })
     })
   </script>
