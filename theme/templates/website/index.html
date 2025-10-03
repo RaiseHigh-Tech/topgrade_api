@@ -547,6 +547,177 @@
     </div>
   </section>
 
+  <!-- MOBILE VIEW -->
+  <section id="ExploreMobile" class="overflow-hidden lg:hidden bg-[#2c1e12] py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center text-white mb-8">Explore Programs</h2>
+
+      <!-- Scrollable Filter Buttons -->
+      <div id="mobile-filters" class="flex flex-wrap gap-2 py-2">
+        <button class="filter-btn px-4 py-2 rounded-xl bg-[#f07c00] text-white hover:bg-[#d36c00] transition active" data-category="all">All Programs</button>
+        {% for category in categories %}
+          <button class="filter-btn px-4 py-2 rounded-xl bg-white/5 text-white/70 hover:bg-[#f07c00] hover:text-white transition" data-category="{{ category.name }}">{{ category.name }}</button>
+        {% endfor %}
+      </div>
+
+      <!-- Scrollable Program Cards -->
+      <div class="flex space-x-4 overflow-x-auto pb-3 no-scrollbar touch-pan-x mt-6">
+        {% for program in programs %}
+          <div class="program-card flex-shrink-0 w-72 bg-white rounded-xl shadow-lg overflow-hidden" data-category="{{ program.category.name }}">
+            <div class="relative">
+              {% if program.image %}
+                <img src="{{ program.image.url }}" alt="{{ program.title }}" class="w-full h-48 object-cover" />
+              {% else %}
+                <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                  <i class="fa-solid fa-graduation-cap text-4xl text-white"></i>
+                </div>
+              {% endif %}
+              <div class="absolute inset-0 bg-black/60 flex items-end p-4">
+                <h3 class="text-white text-lg font-bold">{{ program.subtitle }}</h3>
+              </div>
+              {% if program.is_best_seller %}
+                <span class="absolute top-3 right-3 bg-[#f07c00] text-white text-xs font-semibold px-3 py-1 rounded-full">Best Seller</span>
+              {% endif %}
+            </div>
+
+            <div class="p-4 flex flex-col">
+              <!-- Rating -->
+              <div class="flex items-center text-yellow-500">
+                {# prettier-ignore #}
+                {% for i in "12345" %}
+                  {% if forloop.counter <= program.program_rating %}
+                    <i class="fa-solid fa-star"></i>
+                  {% else %}
+                    <i class="fa-regular fa-star text-gray-300"></i>
+                  {% endif %}
+                {% endfor %}
+                <span class="ml-2 text-sm text-gray-600">({{ program.program_rating }})</span>
+              </div>
+
+              <!-- Tags -->
+              <div class="flex flex-wrap gap-2 my-4">
+                <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full flex items-center"><i class="fa-solid fa-calendar-days mr-2"></i>{{ program.duration }}</span>
+                {% if program.available_slots %}
+                  <span class="bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full flex items-center"><i class="fa-solid fa-users mr-2"></i>{{ program.available_slots }} slots</span>
+                {% endif %}
+              </div>
+
+              {% if program.batch_starts %}
+                <div class="text-sm text-gray-500 mb-2">
+                  <i class="fa-solid fa-play mr-1"></i>Batch starts: {{ program.batch_starts }}
+                </div>
+              {% endif %}
+
+              <hr class="my-2" />
+              <a href="{% url 'program_detail' program.id %}" class="mt-2 text-[#f07c00] font-semibold flex items-center hover:text-[#d36c00] transition">
+                Know More
+                <i class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DESKTOP VIEW (hidden on mobile) ================= -->
+  <section id="ExploreDesktop" class="hidden lg:block bg-[#2c1e12] py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-12">Explore Programs</h2>
+
+      <div id="Explore" class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+        <!-- Filters (desktop) -->
+        <!-- Your aside code remains the same -->
+        <aside class="lg:col-span-1">
+          <div class="flex flex-col space-y-3">
+            <button class="filter-btn w-full flex items-center justify-between p-4 rounded-xl bg-[#f07c00] text-white hover:bg-white/10 transition" data-category="all">
+              <span class="flex items-center"><i class="fa-solid fa-th-large mr-3"></i>All Programs</span>
+              <i class="fa-solid fa-play text-white/50"></i>
+            </button>
+
+            {% for category in categories %}
+              <button class="filter-btn w-full flex items-center justify-between p-4 rounded-xl bg-white/5 text-white/70 hover:bg-white/10 transition" data-category="{{ category.id }}">
+                <span class="flex items-center">
+                  {% if category.icon %}
+                    <i class="{{ category.icon }} mr-3"></i>
+                  {% else %}
+                    <i class="fa-solid fa-folder mr-3"></i>
+                  {% endif %}
+                  {{ category.name }}
+                </span>
+                <i class="fa-solid fa-play text-white/50"></i>
+              </button>
+            {% endfor %}
+          </div>
+        </aside>
+
+        <!-- Cards (desktop grid) -->
+        <main id="Explore" class="lg:col-span-3 min-h-[70vh]">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for program in programs %}
+              <div class="program-card bg-white rounded-xl shadow-lg overflow-hidden flex flex-col group" data-category="{{ program.category.id }}">
+                <div class="relative">
+                  {% if program.image %}
+                    <img src="{{ program.image.url }}" alt="{{ program.title }}" class="w-full h-48 object-cover" loading="lazy" />
+                  {% else %}
+                    <div class="w-full h-48 bg-gray-300 flex items-center justify-center">
+                      <i class="fa-solid fa-graduation-cap text-4xl text-white"></i>
+                    </div>
+                  {% endif %}
+                  <div class="absolute inset-0 bg-black/60 flex items-end p-4">
+                    <h3 class="text-white text-xl font-bold">{{ program.subtitle }}</h3>
+                  </div>
+                  {% if program.is_best_seller %}
+                    <span class="absolute top-3 right-3 bg-[#f07c00] text-white text-xs font-semibold px-3 py-1 rounded-full">Best Seller</span>
+                  {% endif %}
+                </div>
+
+                <div class="p-6 flex-grow flex flex-col">
+                  <div class="flex items-center text-yellow-500">
+                    {# prettier-ignore #}
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= program.program_rating %}
+                        <i class="fa-solid fa-star"></i>
+                      {% else %}
+                        <i class="fa-regular fa-star text-gray-300"></i>
+                      {% endif %}
+                    {% endfor %}
+                    <span class="ml-2 text-sm text-gray-600">({{ program.program_rating }})</span>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2 my-4">
+                    <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full flex items-center"><i class="fa-solid fa-calendar-days mr-2"></i>{{ program.duration }}</span>
+                    {% if program.available_slots %}
+                      <span class="bg-blue-100 text-blue-700 text-sm px-3 py-1 rounded-full flex items-center"><i class="fa-solid fa-users mr-2"></i>{{ program.available_slots }} slots</span>
+                    {% endif %}
+                  </div>
+
+                  {% if program.batch_starts %}
+                    <div class="text-sm text-gray-500 mb-2">
+                      <i class="fa-solid fa-play mr-1"></i>Batch starts: {{ program.batch_starts }}
+                    </div>
+                  {% endif %}
+
+                  <hr class="my-2" />
+                  <a href="{% url 'program_detail' program.id %}" class="mt-2 text-[#f07c00] font-semibold flex items-center group-hover:text-[#d36c00] transition">
+                    Know More
+                    <i class="fa-solid fa-arrow-right ml-2 transform group-hover:translate-x-1 transition-transform"></i>
+                  </a>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-span-full text-center py-12">
+                <i class="fa-solid fa-graduation-cap text-6xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">No Programs Available</h3>
+                <p class="text-gray-500">Check back later for new programs!</p>
+              </div>
+            {% endfor %}
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
   <!-- MARQUEE BAR -->
   <div class="bg-black border-y border-gray-700/50 overflow-hidden">
     <div class="flex animate-scroll-text whitespace-nowrap py-4">
@@ -589,54 +760,420 @@
         <div class="flex-grow p-6 md:p-8 lg:p-12 text-center">
           <h3 class="text-2xl md:text-4xl lg:text-5xl font-bold text-yellow-400">Golden Pass <span class="text-lg md:text-2xl">🪙</span></h3>
           <p class="text-yellow-500/80 tracking-[0.1em] md:tracking-[0.2em] mt-2 font-semibold text-xs md:text-sm">AN EXCLUSIVE COURSE ACCESS</p>
-          
+
           <!-- Course Packs - Mobile: Stack, Desktop: Row -->
           <div class="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 mt-6 md:mt-8">
             <div class="p-3 md:p-4 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-700 text-white text-center w-full md:w-48">
               <h4 class="font-bold text-sm md:text-base">Internship</h4>
               <p class="text-xs md:text-sm opacity-80">(30+ classes)</p>
             </div>
-            
+
             <span class="text-xl md:text-2xl text-white/50">+</span>
-            
+
             <div class="p-3 md:p-4 rounded-lg md:rounded-xl bg-gradient-to-br from-[#ef7d00] to-orange-600 text-white text-center w-full md:w-48">
               <h4 class="font-bold text-sm md:text-base">Placement Guidance</h4>
               <p class="text-xs md:text-sm opacity-80">(15+ classes)</p>
             </div>
-            
+
             <span class="text-xl md:text-2xl text-white/50">+</span>
-            
+
             <div class="p-3 md:p-4 rounded-lg md:rounded-xl bg-gradient-to-br from-green-500 to-emerald-700 text-white text-center w-full md:w-48">
               <h4 class="font-bold text-sm md:text-base">Get 5 premium</h4>
               <p class="text-xs md:text-sm opacity-80">certificate</p>
             </div>
           </div>
-          
+
           <div class="mt-6 md:mt-8 text-white">
             <p class="font-semibold text-sm md:text-base">6 months access</p>
           </div>
         </div>
-        
+
         <!-- Vertical Side Panel -->
         <div class="flex-shrink-0 h-20 md:h-auto md:w-32 lg:w-40 sparkle-effect md:rounded-r-xl lg:rounded-r-2xl flex items-center justify-center relative">
           <!-- Mobile: Horizontal text -->
-          <p class="text-black/70 text-lg font-extrabold tracking-wider uppercase block md:hidden">
-            Life-Time Access
-          </p>
-          
+          <p class="text-black/70 text-lg font-extrabold tracking-wider uppercase block md:hidden">Life-Time Access</p>
+
           <!-- Desktop: Vertical text -->
-          <p class="text-black/70 text-2xl font-extrabold tracking-widest uppercase hidden md:block text-center" style="writing-mode: vertical-rl; text-orientation: mixed;">
-            Life - Time Access
-          </p>
-          
+          <p class="text-black/70 text-2xl font-extrabold tracking-widest uppercase hidden md:block text-center" style="writing-mode: vertical-rl; text-orientation: mixed;">Life - Time Access</p>
+
           <!-- Decorative circles for desktop -->
           <div class="hidden md:block absolute -left-4 top-0 h-6 w-6 md:h-8 md:w-8 bg-[#2c1e12] rounded-full" style="transform: translateY(-50%);"></div>
           <div class="hidden md:block absolute -left-4 bottom-0 h-6 w-6 md:h-8 md:w-8 bg-[#2c1e12] rounded-full" style="transform: translateY(50%);"></div>
         </div>
       </div>
-
-      <!-- "Explore Gold" Button -->
-      <button class="mt-8 md:mt-12 bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-6 md:px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 text-sm md:text-base">Explore Gold</button>
     </div>
   </section>
+
+  <!-- WHY CHOOSE TOP GRADE SECTION -->
+  <section class="bg-orange-50/50 py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <!-- Section Title -->
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800">Why Choose Top Grade ?</h2>
+
+      <!-- Connector Diagram -->
+      <div class="max-w-2xl mx-auto my-12 flex items-center justify-between">
+        <span class="border border-gray-400 text-gray-600 font-semibold px-4 py-2 rounded-md text-sm">LEARNING CHALLENGES</span>
+        <div class="flex-grow h-0.5 mx-4 bg-gradient-to-r from-orange-400 to-[#ef7d00] relative">
+          <i class="fa-solid fa-play text-[#ef7d00] absolute -right-2 top-1/2 -translate-y-1/2"></i>
+        </div>
+        <span class="bg-[#ef7d00] text-white font-semibold px-4 py-2 rounded-md text-sm">HOW WE ENCOUNTER</span>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <!-- Left Column: Challenges (Chat Simulation) -->
+        <div class="max-w-sm mx-auto p-4 bg-gray-200/70 rounded-3xl shadow-lg">
+          <div class="bg-gray-50 rounded-2xl p-4 space-y-4">
+            <!-- Chat Message 1 -->
+            <div class="flex items-start gap-3 chat-msg" style="--delay:0s;">
+              <img src="https://i.pravatar.cc/150?img=1" alt="Avatar" class="w-8 h-8 rounded-full" />
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
+                <p class="text-sm text-gray-700">I'm struggling to retain what is taught.</p>
+                <p class="text-xs text-gray-400 text-right mt-1">9:30 AM</p>
+              </div>
+            </div>
+            <!-- Chat Message 2 -->
+            <div class="flex items-start gap-3 chat-msg" style="--delay:1s;">
+              <img src="https://i.pravatar.cc/150?img=2" alt="Avatar" class="w-8 h-8 rounded-full" />
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
+                <p class="text-sm text-gray-700">It's all solo study without peer support.</p>
+                <p class="text-xs text-gray-400 text-right mt-1">11:15 AM</p>
+              </div>
+            </div>
+            <!-- Chat Message 3 -->
+            <div class="flex items-start gap-3 chat-msg" style="--delay:2s;">
+              <img src="https://i.pravatar.cc/150?img=3" alt="Avatar" class="w-8 h-8 rounded-full" />
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
+                <p class="text-sm text-gray-700">I am unable to find good mentors with work experience.</p>
+                <p class="text-xs text-gray-400 text-right mt-1">3:35 PM</p>
+              </div>
+            </div>
+            <!-- Chat Message 4 -->
+            <div class="flex items-start gap-3 chat-msg" style="--delay:3s;">
+              <img src="https://i.pravatar.cc/150?img=4" alt="Avatar" class="w-8 h-8 rounded-full" />
+              <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-fit">
+                <p class="text-sm text-gray-700">I am not able to build portfolio-worthy projects.</p>
+                <p class="text-xs text-gray-400 text-right mt-1">5:12 PM</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Solutions (Features) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Features -->
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-video text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">LIVE Interactive Session</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-graduation-cap text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">Industry ratified certifications</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-user-tie text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">Expert Industry Mentor</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-briefcase text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">Portfolio worthy projects</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-comments text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">Dedicated query session</p>
+          </div>
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center bg-orange-100">
+              <i class="fa-solid fa-users text-2xl text-[#ef7d00]"></i>
+            </div>
+            <p class="font-semibold text-gray-700">Active Community</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Script for Filtering -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const filterButtons = document.querySelectorAll('.filter-btn')
+      const programCards = document.querySelectorAll('.program-card')
+    
+      filterButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const category = button.getAttribute('data-category')
+    
+          // Remove active styles from all buttons
+          filterButtons.forEach((btn) => btn.classList.remove('bg-[#f07c00]', 'text-white'))
+          filterButtons.forEach((btn) => btn.classList.add('bg-white/5', 'text-white/70'))
+    
+          // Highlight the clicked button
+          button.classList.add('bg-[#f07c00]', 'text-white')
+          button.classList.remove('bg-white/5', 'text-white/70')
+    
+          // Show/Hide programs
+          programCards.forEach((card) => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+              card.style.display = 'block'
+            } else {
+              card.style.display = 'none'
+            }
+          })
+        })
+      })
+    })
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const buttons = document.querySelectorAll('#mobile-filters .filter-btn')
+      const cards = document.querySelectorAll('#program-list .program-card')
+    
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          // Remove active state from all buttons
+          buttons.forEach((b) => b.classList.remove('bg-[#f07c00]', 'text-white', 'active'))
+          buttons.forEach((b) => b.classList.add('bg-white/5', 'text-white/70'))
+    
+          // Add active state to clicked button
+          btn.classList.remove('bg-white/5', 'text-white/70')
+          btn.classList.add('bg-[#f07c00]', 'text-white', 'active')
+    
+          const category = btn.getAttribute('data-category')
+    
+          // Show/Hide cards
+          cards.forEach((card) => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+              card.style.display = 'block'
+            } else {
+              card.style.display = 'none'
+            }
+          })
+        })
+      })
+    })
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('DOM loaded, initializing program filters...')
+    
+      // Program filtering functionality with AJAX
+      const filterButtons = document.querySelectorAll('.filter-btn')
+      const programsContainer = document.getElementById('programs-container')
+      let isLoading = false
+    
+      console.log('Found filter buttons:', filterButtons.length)
+      console.log('Found programs container:', programsContainer ? 'Yes' : 'No')
+    
+      // Function to show loading state
+      function showLoading() {
+        programsContainer.innerHTML = `
+                                                              <div class="col-span-full text-center py-12">
+                                                                  <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+                                                                  <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
+                                                                  <p class="text-gray-500">Please wait while we fetch the programs.</p>
+                                                              </div>
+                                                          `
+      }
+    
+      // Function to show error state
+      function showError(message = 'Failed to load programs') {
+        programsContainer.innerHTML = `
+                                                            <div class="col-span-full text-center py-12">
+                                                                <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                                                                <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
+                                                                <p class="text-gray-500">${message}. Please try again.</p>
+                                                                <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
+                                                                    Retry
+                                                                </button>
+                                                            </div>
+                                                        `
+      }
+    
+      // Function to filter programs via AJAX
+      function filterPrograms(categoryId) {
+        console.log('Filtering programs for category:', categoryId)
+    
+        if (isLoading) {
+          console.log('Already loading, skipping request')
+          return
+        }
+    
+        isLoading = true
+        showLoading()
+    
+        // Make AJAX request
+        const url = `/ajax/filter-programs/?category_id=${categoryId}`
+        console.log('Making AJAX request to:', url)
+    
+        fetch(url, {
+          method: 'GET',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+          }
+        })
+          .then((response) => {
+            console.log('Response status:', response.status)
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            return response.json()
+          })
+          .then((data) => {
+            console.log('Response data:', data)
+            isLoading = false
+    
+            if (data.success) {
+              // Update the programs container with new HTML
+              programsContainer.innerHTML = data.html
+    
+              // Add fade-in animation to new cards
+              const newCards = programsContainer.querySelectorAll('.program-card')
+              newCards.forEach((card) => {
+                card.classList.add('animate-fade-in')
+              })
+    
+              console.log(`Loaded ${data.count} programs for category ${categoryId}`)
+            } else {
+              console.error('Server returned error:', data.error)
+              showError(data.error || 'Unknown error occurred')
+            }
+          })
+          .catch((error) => {
+            isLoading = false
+            console.error('Error filtering programs:', error)
+            showError('Network error occurred')
+          })
+      }
+    
+      // Function to update active filter button
+      function updateActiveFilter(activeButton) {
+        console.log('Updating active filter button')
+    
+        filterButtons.forEach((btn) => {
+          // Reset all buttons to inactive state
+          btn.classList.remove('bg-orange-100', 'text-orange-800', 'font-semibold')
+          btn.classList.add('bg-white/5', 'text-white/70')
+    
+          // Update icon color
+          const icon = btn.querySelector('i:last-child')
+          if (icon) {
+            icon.classList.remove('text-orange-600')
+            icon.classList.add('text-white/50')
+          }
+        })
+    
+        // Set active button
+        activeButton.classList.remove('bg-white/5', 'text-white/70')
+        activeButton.classList.add('bg-[#f07c00]', 'text-white')
+    
+        // Update active icon color
+        const activeIcon = activeButton.querySelector('i:last-child')
+        if (activeIcon) {
+          activeIcon.classList.remove('text-white/50')
+          activeIcon.classList.add('text-white')
+        }
+      }
+    
+      // Add click event listeners to filter buttons
+      filterButtons.forEach((button, index) => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault()
+    
+          if (isLoading) {
+            return
+          }
+    
+          const categoryId = this.getAttribute('data-category')
+    
+          // Update active filter appearance
+          updateActiveFilter(this)
+    
+          // Filter programs via AJAX
+          filterPrograms(categoryId)
+        })
+      })
+    
+      // Add CSS for animations and loading states
+      const style = document.createElement('style')
+      style.textContent = `
+                                                            .animate-fade-in {
+                                                                animation: fadeIn 0.5s ease-in-out;
+                                                            }
+                                                            
+                                                            @keyframes fadeIn {
+                                                                from {
+                                                                    opacity: 0;
+                                                                    transform: translateY(20px);
+                                                                }
+                                                                to {
+                                                                    opacity: 1;
+                                                                    transform: translateY(0);
+                                                                }
+                                                            }
+                                                            
+                                                            .program-card {
+                                                                transition: all 0.3s ease;
+                                                            }
+                                                            
+                                                            .program-card:hover {
+                                                                transform: translateY(-5px);
+                                                                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                                                            }
+                                                            
+                                                            .filter-btn {
+                                                                transition: all 0.3s ease;
+                                                            }
+                                                            
+                                                            .filter-btn:disabled {
+                                                                opacity: 0.6;
+                                                                cursor: not-allowed;
+                                                            }
+                                                            
+                                                            @keyframes spin {
+                                                                to {
+                                                                    transform: rotate(360deg);
+                                                                }
+                                                            }
+                                                            
+                                                            .animate-spin {
+                                                                animation: spin 1s linear infinite;
+                                                            }
+                                                            
+                                                        `
+      document.head.appendChild(style)
+    
+      // Test AJAX endpoint immediately
+      fetch('/ajax/filter-programs/?category_id=all', {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        }
+      })
+        .then((response) => {
+          console.log('Test AJAX response status:', response.status)
+          return response.json()
+        })
+        .then((data) => {
+          console.log('Test AJAX response data:', data)
+        })
+        .catch((error) => {
+          console.error('Test AJAX error:', error)
+        })
+    })
+  </script>
 {% endblock %}
