@@ -7,37 +7,15 @@
 {% block content %}
   <style>
     .big-circle {
-      height: 100%;
-      width: 100%;
-      position: relative;
-      border: 3px solid #ef7d00;
-      border-radius: 50%;
-      display: flex;
-      display: -webkit-flex;
-      align-items: center;
-      -webkit-align-items: center;
-      justify-content: center;
-      -webkit-justify-content: center;
       animation: Rotate 20s linear infinite;
       -webkit-animation: Rotate 20s linear infinite;
     }
     
     .icon-block {
       position: absolute;
-      border-radius: 50%;
-      display: flex;
-      display: -webkit-flex;
-      align-items: center;
-      -webkit-align-items: center;
-      justify-content: center;
-      -webkit-justify-content: center;
-      background-image: linear-gradient(180deg, #ef7d00 0%, #ff6900 100%);
-      -webkit-background-image: linear-gradient(180deg, #ef7d00 0%, #ff6900 100%);
     }
     
     .icon-block img {
-      margin: 0px auto;
-      width: 86%;
       animation: Rotate-reverse 20s linear infinite;
       -webkit-animation: Rotate-reverse 20s linear infinite;
     }
@@ -74,15 +52,8 @@
     .circle {
       animation: circle-rotate 20s linear infinite;
       -webkit-animation: circle-rotate 20s linear infinite;
-      position: absolute;
-      top: 50%;
-      left: 50%;
       transform: translate(-50%, -50%) rotate(45deg);
       -webkit-transform: translate(-50%, -50%) rotate(45deg);
-      width: 75%;
-      height: 75%;
-      border: 3px solid #ef7d00;
-      border-radius: 50%;
     }
     
     .circle .icon-block img {
@@ -92,9 +63,6 @@
     
     /* center logo */
     .center-logo {
-      position: absolute;
-      top: 50%;
-      left: 50%;
       transform: translate(-50%, -50%);
       -webkit-transform: translate(-50%, -50%);
     }
@@ -183,43 +151,43 @@
 
   <section class="relative bg-gradient-to-br from-[#d97706] to-[#4d2c0d] overflow-hidden">
     <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 items-center min-h-[calc(100vh-120px)] px-8 py-20 lg:py-0">
-      <div class="main relative mx-auto h-[300px] w-[300px] lg:h-[420px] lg:w-[420px] md:order-2">
-        <div class="big-circle z-20">
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+      <div class="main relative mx-auto h-[300px] w-[300px] lg:h-[450px] lg:w-[450px] md:order-2">
+        <div class="big-circle z-20 h-full w-full relative border-4 border-orange-500 rounded-full flex items-center justify-center">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
             <i class="fa-solid fa-briefcase text-xl lg:text-2xl text-white"></i>
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
             <i class="fa-solid fa-gamepad text-xl lg:text-2xl text-white"></i>
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
             <i class="fa-solid fa-laptop-code text-xl lg:text-2xl text-white"></i>
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
             <i class="fa-solid fa-laptop-medical text-xl lg:text-2xl text-white"></i>
           </div>
         </div>
-        <div class="circle z-20">
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+        <div class="circle z-20 absolute top-1/2 left-1/2 w-3/4 h-3/4 border-4 border-orange-500 rounded-full">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
             <i class="fas fa-mobile-alt text-xl lg:text-2xl text-white"></i>
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
-            <img src="https://www.yudiz.com/codepen/animated-portfolio/blockchain-icon.png" alt="blockchain icon" />
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/blockchain-icon.png" alt="blockchain icon" class="mx-auto w-5/6" />
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
-            <img src="https://www.yudiz.com/codepen/animated-portfolio/arvr-icon.png" alt="ar-vr icon" />
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/arvr-icon.png" alt="ar-vr icon" class="mx-auto w-5/6" />
           </div>
-          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
-            <img src="https://www.yudiz.com/codepen/animated-portfolio/artificial-intelligence-icon.png" alt="artificial intelligence icon" />
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px] rounded-full flex items-center justify-center bg-gradient-to-b from-[#d97706] to-orange-600">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/artificial-intelligence-icon.png" alt="artificial intelligence icon" class="mx-auto w-5/6" />
           </div>
         </div>
-        <div class="center-logo overflow-hidden">
+        <div class="center-logo overflow-hidden absolute top-1/2 left-1/2 rounded-full">
           <img src="{% static 'assets/website/images/student.webp' %}" alt="logo" width="600" height="400" />
         </div>
       </div>
 
       <!-- Text Column (Mobile: below, Desktop: left) -->
       <div class="text-white text-center lg:text-left z-20 mt-6 lg:mt-0 lg:mb-12 order-2 lg:order-1">
-        <h1 class="text-3xl lg:text-5xl font-bold leading-tight lg:max-w-xl text-white">Empowering Best learning <br /> with Top industrial mentors</h1>
+        <h1 class="text-3xl lg:text-5xl font-bold leading-tight lg:max-w-xl text-white">Empowering the best learning experience <br /> with top industry mentors.</h1>
         <p class="mt-6 text-base lg:text-xl text-white/80 max-w-lg mx-auto lg:mx-0">Transform how students and educators connect, learn and succeed - anytime, anywhere</p>
         <div class="mt-10">
           <!-- MOBILE BUTTON -->
