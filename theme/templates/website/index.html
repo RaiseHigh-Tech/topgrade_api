@@ -1,0 +1,233 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block title %}
+  TopGrade
+{% endblock %}
+
+{% block content %}
+  <style>
+    .big-circle {
+      height: 100%;
+      width: 100%;
+      position: relative;
+      border: 3px solid #ef7d00;
+      border-radius: 50%;
+      display: flex;
+      display: -webkit-flex;
+      align-items: center;
+      -webkit-align-items: center;
+      justify-content: center;
+      -webkit-justify-content: center;
+      animation: Rotate 20s linear infinite;
+      -webkit-animation: Rotate 20s linear infinite;
+    }
+    
+    .icon-block {
+      position: absolute;
+      border-radius: 50%;
+      display: flex;
+      display: -webkit-flex;
+      align-items: center;
+      -webkit-align-items: center;
+      justify-content: center;
+      -webkit-justify-content: center;
+      background-image: linear-gradient(180deg, #ef7d00 0%, #ff6900 100%);
+      -webkit-background-image: linear-gradient(180deg, #ef7d00 0%, #ff6900 100%);
+    }
+    
+    .icon-block img {
+      margin: 0px auto;
+      width: 86%;
+      animation: Rotate-reverse 20s linear infinite;
+      -webkit-animation: Rotate-reverse 20s linear infinite;
+    }
+    
+    .icon-block:first-child {
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+    }
+    
+    .icon-block:nth-child(2) {
+      top: 50%;
+      right: 0;
+      transform: translate(50%, -50%);
+      -webkit-transform: translate(50%, -50%);
+    }
+    
+    .icon-block:nth-child(3) {
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 50%);
+      -webkit-transform: translate(-50%, 50%);
+    }
+    
+    .icon-block:nth-child(4) {
+      top: 50%;
+      left: 0;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+    }
+    
+    /* circle content */
+    .circle {
+      animation: circle-rotate 20s linear infinite;
+      -webkit-animation: circle-rotate 20s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      -webkit-transform: translate(-50%, -50%) rotate(45deg);
+      width: 75%;
+      height: 75%;
+      border: 3px solid #ef7d00;
+      border-radius: 50%;
+    }
+    
+    .circle .icon-block img {
+      animation: img-rotate 20s linear infinite;
+      -webkit-animation: img-rotate 20s linear infinite;
+    }
+    
+    /* center logo */
+    .center-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      -webkit-transform: translate(-50%, -50%);
+    }
+    
+    /* keyframe animation */
+    @keyframes Rotate {
+      from {
+        transform: rotate(0deg);
+      }
+    
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @-webkit-keyframes Rotate {
+      from {
+        -webkit-transform: rotate(0deg);
+      }
+    
+      to {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+    
+    @keyframes Rotate-reverse {
+      from {
+        transform: rotate(360deg);
+      }
+    
+      to {
+        transform: rotate(0deg);
+      }
+    }
+    
+    @-webkit-keyframes Rotate-reverse {
+      from {
+        -webkit-transform: rotate(360deg);
+      }
+    
+      to {
+        -webkit-transform: rotate(0deg);
+      }
+    }
+    
+    @keyframes circle-rotate {
+      from {
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+    
+      to {
+        transform: translate(-50%, -50%) rotate(405deg);
+      }
+    }
+    
+    @-webkit-keyframes circle-rotate {
+      from {
+        -webkit-transform: translate(-50%, -50%) rotate(45deg);
+      }
+    
+      to {
+        -webkit-transform: translate(-50%, -50%) rotate(405deg);
+      }
+    }
+    
+    @keyframes img-rotate {
+      from {
+        transform: rotate(-45deg);
+      }
+    
+      to {
+        transform: rotate(-405deg);
+      }
+    }
+    
+    @-webkit-keyframes img-rotate {
+      from {
+        -webkit-transform: rotate(-45deg);
+      }
+    
+      to {
+        -webkit-transform: rotate(-405deg);
+      }
+    }
+  </style>
+
+  <section class="relative bg-gradient-to-br from-[#d97706] to-[#4d2c0d] overflow-hidden">
+    <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 items-center min-h-[calc(100vh-120px)] px-8 py-20 lg:py-0">
+      <div class="main relative mx-auto h-[300px] w-[300px] lg:h-[420px] lg:w-[420px] md:order-2">
+        <div class="big-circle z-20">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <i class="fa-solid fa-briefcase text-xl lg:text-2xl text-white"></i>
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <i class="fa-solid fa-gamepad text-xl lg:text-2xl text-white"></i>
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <i class="fa-solid fa-laptop-code text-xl lg:text-2xl text-white"></i>
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <i class="fa-solid fa-laptop-medical text-xl lg:text-2xl text-white"></i>
+          </div>
+        </div>
+        <div class="circle z-20">
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <i class="fas fa-mobile-alt text-xl lg:text-2xl text-white"></i>
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/blockchain-icon.png" alt="blockchain icon" />
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/arvr-icon.png" alt="ar-vr icon" />
+          </div>
+          <div class="icon-block w-[48px] h-[48px] lg:h-[56px] lg:w-[56px]">
+            <img src="https://www.yudiz.com/codepen/animated-portfolio/artificial-intelligence-icon.png" alt="artificial intelligence icon" />
+          </div>
+        </div>
+        <div class="center-logo overflow-hidden">
+          <img src="{% static 'assets/website/images/student.webp' %}" alt="logo" width="600" height="400" />
+        </div>
+      </div>
+
+      <!-- Text Column (Mobile: below, Desktop: left) -->
+      <div class="text-white text-center lg:text-left z-20 mt-6 lg:mt-0 lg:mb-12 order-2 lg:order-1">
+        <h1 class="text-3xl lg:text-5xl font-bold leading-tight lg:max-w-xl text-white">Empowering Best learning <br /> with Top industrial mentors</h1>
+        <p class="mt-6 text-base lg:text-xl text-white/80 max-w-lg mx-auto lg:mx-0">Transform how students and educators connect, learn and succeed - anytime, anywhere</p>
+        <div class="mt-10">
+          <!-- MOBILE BUTTON -->
+          <a href="#ExploreMobile" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 lg:hidden">Explore Programs</a>
+          <!-- DESKTOP BUTTON -->
+          <a href="#ExploreDesktop" class="hidden lg:inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Explore Programs</a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
