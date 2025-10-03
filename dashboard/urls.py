@@ -20,5 +20,12 @@ urlpatterns = [
     path('assign-programs/', views.assign_programs_view, name='assign_programs'),
     path('chat/', views.chat_view, name='chat'),
     path('carousel/', views.carousel_view, name='carousel'),
-    path('program/<int:program_id>/', views.program_details_view, name='program_details')
+    path('program/<int:program_id>/', views.program_details_view, name='program_details'),
+    
+    # Testimonials management
+    path('testimonials/', views.testimonials_view, name='testimonials'),
+    path('testimonials/add/', views.add_testimonial, name='add_testimonial'),
+    path('testimonials/edit/<int:testimonial_id>/', views.edit_testimonial, name='edit_testimonial'),
+    path('testimonials/delete/<int:testimonial_id>/', views.delete_testimonial, name='delete_testimonial'),
+    path('testimonials/toggle/<int:testimonial_id>/', views.toggle_testimonial_status, name='toggle_testimonial_status')
 ]   

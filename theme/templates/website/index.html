@@ -969,7 +969,7 @@
           <div class="mx-4 w-3 h-3 rounded-full bg-orange-400 animate-pulse"></div>
           <div class="mx-2 w-2 h-2 rounded-full bg-orange-300"></div>
         </div>
-        
+
         <!-- Center element -->
         <div class="relative mx-8">
           <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
@@ -980,18 +980,13 @@
           <div class="absolute -bottom-2 -left-2 w-3 h-3 bg-orange-400 rounded-full opacity-70 animate-bounce" style="animation-delay: 0.4s;"></div>
           <div class="absolute top-1 -right-4 w-2 h-2 bg-orange-500 rounded-full opacity-50 animate-bounce" style="animation-delay: 0.6s;"></div>
         </div>
-        
+
         <!-- Right decorative element -->
         <div class="flex-1 flex items-center">
           <div class="mx-2 w-2 h-2 rounded-full bg-orange-300"></div>
           <div class="mx-4 w-3 h-3 rounded-full bg-orange-400 animate-pulse"></div>
           <div class="h-0.5 flex-1 bg-gradient-to-r from-orange-500 via-orange-300 to-transparent"></div>
         </div>
-      </div>
-      
-      <!-- Subtle text element -->
-      <div class="text-center mt-8">
-        <p class="text-sm text-orange-600 font-medium tracking-wider uppercase opacity-60">What Our Students Say</p>
       </div>
     </div>
   </div>
@@ -1015,210 +1010,224 @@
   <section class="bg-orange-50/50 py-12 md:py-16 lg:py-24 overflow-hidden">
     <div class="container mx-auto px-4">
       <!-- Section Title (fixed) -->
-      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">A Testimony to What We Do</h2>
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">What Our Learners Say</h2>
 
-      <!-- Testimonial Grid Container -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
-        <!-- Column 1 -->
-        <div class="testimonial-column space-y-8 overflow-hidden">
-          <div class="testimonial-scroll" style="animation-duration:10s;">
-            <div class="space-y-8">
-              <!-- Testimonial 1 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
-                    <p class="text-sm text-gray-500">
-                      Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav Vidyapeeth</span>
-                    </p>
+      {% if testimonials %}
+        <!-- Testimonial Grid Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
+          <!-- Column 1 -->
+          <div class="testimonial-column space-y-8 overflow-hidden">
+            <div class="testimonial-scroll" style="animation-duration:15s;">
+              <div class="space-y-8">
+                {% for testimonial in testimonials|slice:':2' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
-                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with deep insights into psychological theories and practical skills.</p>
+                {% endfor %}
               </div>
-              <!-- Testimonial 2 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
-                    <p class="text-sm text-gray-500">
-                      Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka University</span>
-                    </p>
+              <br />
+              <!-- Duplicate for infinite scroll -->
+              <div class="space-y-8" aria-hidden="true">
+                {% for testimonial in testimonials|slice:':2' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
-                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills and insights that I am eager to apply in my professional endeavors.</p>
-              </div>
-            </div>
-            <br />
-            <!-- Duplicate for infinite scroll -->
-            <div class="space-y-8" aria-hidden="true">
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=1" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Ashi Dabhade</h3>
-                    <p class="text-sm text-gray-500">
-                      Psychology @ <span class="text-[#ef7d00] font-medium">Shri Vaishnav Vidyapeeth</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I got deep insights and practical skills</h4>
-                <p class="text-gray-600 text-sm mt-2">This experience has been incredibly enriching, providing me with deep insights into psychological theories and practical skills.</p>
-              </div>
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=2" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Simran Yaseen</h3>
-                    <p class="text-sm text-gray-500">
-                      Nanoscience @ <span class="text-[#ef7d00] font-medium">GD Goenka University</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">This journey has been rewarding</h4>
-                <p class="text-gray-600 text-sm mt-2">This journey has been rewarding, providing me with invaluable skills and insights that I am eager to apply in my professional endeavors.</p>
+                {% endfor %}
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Column 2 -->
-        <div class="testimonial-column space-y-8 overflow-hidden">
-          <div class="testimonial-scroll reverse" style="animation-duration:10s;">
-            <div class="space-y-8">
-              <!-- Testimonial 3 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Pavan R V's</h3>
-                    <p class="text-sm text-gray-500">
-                      Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
-                    </p>
+          <!-- Column 2 -->
+          <div class="testimonial-column space-y-8 overflow-hidden">
+            <div class="testimonial-scroll reverse" style="animation-duration:15s;">
+              <div class="space-y-8">
+                {% for testimonial in testimonials|slice:'2:4' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
-                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning journey. I deeply appreciate the knowledge gained.</p>
+                {% endfor %}
               </div>
-              <!-- Testimonial 4 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
-                    <p class="text-sm text-gray-500">
-                      Marketing @ <span class="text-[#ef7d00] font-medium">Vellore Institute Of Technology</span>
-                    </p>
+              <br />
+              <!-- Duplicate for infinite scroll -->
+              <div class="space-y-8" aria-hidden="true">
+                {% for testimonial in testimonials|slice:'2:4' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
-                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks to enroll students for various courses and programs.</p>
+                {% endfor %}
               </div>
             </div>
-            <br />
-            <!-- Duplicate for infinite scroll -->
-            <div class="space-y-8" aria-hidden="true">
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=3" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Pavan R V's</h3>
-                    <p class="text-sm text-gray-500">
-                      Data Science @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
-                    </p>
+          </div>
+
+          <!-- Column 3 -->
+          <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
+            <div class="testimonial-scroll" style="animation-duration:15s;">
+              <div class="space-y-8">
+                {% for testimonial in testimonials|slice:'4:' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">Guidance and expertise were instrumental</h4>
-                <p class="text-gray-600 text-sm mt-2">Your guidance and expertise were instrumental in my learning journey. I deeply appreciate the knowledge gained.</p>
+                {% empty %}
+                  <!-- Fallback if no testimonials in third column -->
+                  <div class="bg-white p-6 rounded-xl shadow-lg opacity-50">
+                    <div class="flex items-center gap-4">
+                      <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gray-100 flex items-center justify-center">
+                        <i class="text-gray-400 text-xl">👤</i>
+                      </div>
+                      <div>
+                        <h3 class="font-bold text-lg text-gray-400">More testimonials coming soon...</h3>
+                        <p class="text-sm text-gray-400">Share your experience with us!</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
               </div>
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=4" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Aashi Makhija</h3>
-                    <p class="text-sm text-gray-500">
-                      Marketing @ <span class="text-[#ef7d00] font-medium">Vellore Institute Of Technology</span>
-                    </p>
+              <br />
+              <!-- Duplicate for infinite scroll -->
+              <div class="space-y-8" aria-hidden="true">
+                {% for testimonial in testimonials|slice:'4:' %}
+                  <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center gap-4">
+                      {% if testimonial.avatar_image %}
+                        <img src="{{ testimonial.avatar_image.url }}" alt="{{ testimonial.name }}" class="w-14 h-14 rounded-full border-2 border-[#ef7d00] object-cover" />
+                      {% else %}
+                        <div class="w-14 h-14 rounded-full border-2 border-[#ef7d00] bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <text x="50%" y="50%" text-anchor="middle" dy="0.35em" font-family="Arial, sans-serif" font-size="10" font-weight="bold">
+                              {{ testimonial.name|first|upper }}{% if testimonial.name|wordcount > 1 %}{{ testimonial.name|last|first|upper }}{% endif %}
+                            </text>
+                          </svg>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <h3 class="font-bold text-lg">{{ testimonial.name }}</h3>
+                        <p class="text-sm text-gray-500">
+                          <span class="text-[#ef7d00] font-medium">{{ testimonial.field_of_study }}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <h4 class="font-bold text-gray-800 mt-4">{{ testimonial.title }}</h4>
+                    <p class="text-gray-600 text-sm mt-2">{{ testimonial.content }}</p>
                   </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I got to learn how to build a strong network</h4>
-                <p class="text-gray-600 text-sm mt-2">I'm happy to share that I completed my internship, performing tasks to enroll students for various courses and programs.</p>
+                {% endfor %}
               </div>
             </div>
           </div>
         </div>
-        <!-- Column 3 -->
-        <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
-          <div class="testimonial-scroll" style="animation-duration:10s;">
-            <div class="space-y-8">
-              <!-- Testimonial 5 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
-                    <p class="text-sm text-gray-500">
-                      Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
-                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various aspects. This project was the best part of my internship.</p>
-              </div>
-              <br />
-              <!-- Testimonial 6 -->
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Prabash T</h3>
-                    <p class="text-sm text-gray-500">
-                      Web Development @ <span class="text-[#ef7d00] font-medium">GITAM Deemed University</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
-                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical skills and gaining practical experience.</p>
-              </div>
+      {% else %}
+        <!-- No testimonials fallback -->
+        <div class="text-center py-16">
+          <div class="max-w-md mx-auto">
+            <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-10 h-10 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
+              </svg>
             </div>
-            <br />
-            <!-- Duplicate for infinite scroll -->
-            <div class="space-y-8" aria-hidden="true">
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=5" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Parthiv Kumar</h3>
-                    <p class="text-sm text-gray-500">
-                      Cybersecurity @ <span class="text-[#ef7d00] font-medium">Amrita Vishwa Vidyapeetham</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">I am grateful for this opportunity</h4>
-                <p class="text-gray-600 text-sm mt-2">During this intensive program, I gained experience in various aspects. This project was the best part of my internship.</p>
-              </div>
-              <br />
-              <div class="bg-white p-6 rounded-xl shadow-lg">
-                <div class="flex items-center gap-4">
-                  <img src="https://i.pravatar.cc/150?img=6" class="w-14 h-14 rounded-full border-2 border-[#ef7d00]" />
-                  <div>
-                    <h3 class="font-bold text-lg">Prabash T</h3>
-                    <p class="text-sm text-gray-500">
-                      Web Development @ <span class="text-[#ef7d00] font-medium">GITAM Deemed University</span>
-                    </p>
-                  </div>
-                </div>
-                <h4 class="font-bold text-gray-800 mt-4">This experience allowed me to learn</h4>
-                <p class="text-gray-600 text-sm mt-2">I recently completed a rewarding opportunity, enhancing my technical skills and gaining practical experience.</p>
-              </div>
-              <br />
-            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">No testimonials yet</h3>
+            <p class="text-gray-600">We're collecting amazing stories from our learners. Check back soon!</p>
           </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </section>
 
@@ -1298,26 +1307,26 @@
       // Function to show loading state
       function showLoading() {
         programsContainer.innerHTML = `
-                                                                                                      <div class="col-span-full text-center py-12">
-                                                                                                          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
-                                                                                                          <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
-                                                                                                          <p class="text-gray-500">Please wait while we fetch the programs.</p>
-                                                                                                      </div>
-                                                                                                  `
+                                                                                                                          <div class="col-span-full text-center py-12">
+                                                                                                                              <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-4"></div>
+                                                                                                                              <h3 class="text-xl font-semibold text-gray-600 mb-2">Loading Programs...</h3>
+                                                                                                                              <p class="text-gray-500">Please wait while we fetch the programs.</p>
+                                                                                                                          </div>
+                                                                                                                      `
       }
     
       // Function to show error state
       function showError(message = 'Failed to load programs') {
         programsContainer.innerHTML = `
-                                                                                                    <div class="col-span-full text-center py-12">
-                                                                                                        <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
-                                                                                                        <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
-                                                                                                        <p class="text-gray-500">${message}. Please try again.</p>
-                                                                                                        <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
-                                                                                                            Retry
-                                                                                                        </button>
-                                                                                                    </div>
-                                                                                                `
+                                                                                                                        <div class="col-span-full text-center py-12">
+                                                                                                                            <i class="fa-solid fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                                                                                                                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Error Loading Programs</h3>
+                                                                                                                            <p class="text-gray-500">${message}. Please try again.</p>
+                                                                                                                            <button onclick="location.reload()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition">
+                                                                                                                                Retry
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                                                                    `
       }
     
       // Function to filter programs via AJAX
@@ -1429,50 +1438,50 @@
       // Add CSS for animations and loading states
       const style = document.createElement('style')
       style.textContent = `
-                                                                                                    .animate-fade-in {
-                                                                                                        animation: fadeIn 0.5s ease-in-out;
-                                                                                                    }
-                                                                                                    
-                                                                                                    @keyframes fadeIn {
-                                                                                                        from {
-                                                                                                            opacity: 0;
-                                                                                                            transform: translateY(20px);
-                                                                                                        }
-                                                                                                        to {
-                                                                                                            opacity: 1;
-                                                                                                            transform: translateY(0);
-                                                                                                        }
-                                                                                                    }
-                                                                                                    
-                                                                                                    .program-card {
-                                                                                                        transition: all 0.3s ease;
-                                                                                                    }
-                                                                                                    
-                                                                                                    .program-card:hover {
-                                                                                                        transform: translateY(-5px);
-                                                                                                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-                                                                                                    }
-                                                                                                    
-                                                                                                    .filter-btn {
-                                                                                                        transition: all 0.3s ease;
-                                                                                                    }
-                                                                                                    
-                                                                                                    .filter-btn:disabled {
-                                                                                                        opacity: 0.6;
-                                                                                                        cursor: not-allowed;
-                                                                                                    }
-                                                                                                    
-                                                                                                    @keyframes spin {
-                                                                                                        to {
-                                                                                                            transform: rotate(360deg);
-                                                                                                        }
-                                                                                                    }
-                                                                                                    
-                                                                                                    .animate-spin {
-                                                                                                        animation: spin 1s linear infinite;
-                                                                                                    }
-                                                                                                    
-                                                                                                `
+                                                                                                                        .animate-fade-in {
+                                                                                                                            animation: fadeIn 0.5s ease-in-out;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes fadeIn {
+                                                                                                                            from {
+                                                                                                                                opacity: 0;
+                                                                                                                                transform: translateY(20px);
+                                                                                                                            }
+                                                                                                                            to {
+                                                                                                                                opacity: 1;
+                                                                                                                                transform: translateY(0);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .program-card {
+                                                                                                                            transition: all 0.3s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .program-card:hover {
+                                                                                                                            transform: translateY(-5px);
+                                                                                                                            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .filter-btn {
+                                                                                                                            transition: all 0.3s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .filter-btn:disabled {
+                                                                                                                            opacity: 0.6;
+                                                                                                                            cursor: not-allowed;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes spin {
+                                                                                                                            to {
+                                                                                                                                transform: rotate(360deg);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .animate-spin {
+                                                                                                                            animation: spin 1s linear infinite;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                    `
       document.head.appendChild(style)
     
       // Test AJAX endpoint immediately

@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from topgrade_api.models import Category, Program, Carousel
+from topgrade_api.models import Category, Program, Carousel, Testimonial
 
 # Create your views here.
 def index(request):
@@ -10,10 +10,14 @@ def index(request):
     programs = Program.get_regular_programs()
     # Get advanced programs list
     advance_programs = Program.get_advanced_programs()
+    # Get active testimonials for display
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('created_at')
+    
     context = {
         'categories': categories,
         'programs': programs,
-        'advance_programs': advance_programs
+        'advance_programs': advance_programs,
+        'testimonials': testimonials
     }
     return render(request, 'website/index.html', context)
 

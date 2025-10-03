@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser
+from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser, Testimonial
 
 User = get_user_model()
 
@@ -1524,3 +1524,109 @@ def carousel_view(request):
     }
     
     return render(request, 'dashboard/carousel.html', context)
+
+
+@login_required
+def testimonials_view(request):
+    """View to display all testimonials"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    testimonials = Testimonial.objects.all().order_by('-created_at')
+    
+    context = {
+        'testimonials': testimonials,
+        'total_testimonials': testimonials.count(),
+        'active_testimonials': testimonials.filter(is_active=True).count(),
+        'inactive_testimonials': testimonials.filter(is_active=False).count(),
+    }
+    
+    return render(request, 'dashboard/testimonials.html', context)
+
+
+@login_required
+def add_testimonial(request):
+    """Add a new testimonial"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    if request.method == 'POST':
+        try:
+            testimonial = Testimonial.objects.create(
+                name=request.POST.get('name'),
+                field_of_study=request.POST.get('field_of_study'),
+                title=request.POST.get('title'),
+                content=request.POST.get('content'),
+                avatar_image=request.FILES.get('avatar_image') if 'avatar_image' in request.FILES else None
+            )
+            messages.success(request, f'Testimonial by {testimonial.name} has been added successfully!')
+        except Exception as e:
+            messages.error(request, f'Error adding testimonial: {str(e)}')
+    
+    return redirect('dashboard:testimonials')
+
+
+@login_required
+def edit_testimonial(request, testimonial_id):
+    """Edit an existing testimonial"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+    
+    if request.method == 'POST':
+        try:
+            testimonial.name = request.POST.get('name')
+            testimonial.field_of_study = request.POST.get('field_of_study')
+            testimonial.title = request.POST.get('title')
+            testimonial.content = request.POST.get('content')
+            
+            if 'avatar_image' in request.FILES:
+                testimonial.avatar_image = request.FILES['avatar_image']
+            
+            testimonial.save()
+            messages.success(request, f'Testimonial by {testimonial.name} has been updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Error updating testimonial: {str(e)}')
+    
+    return redirect('dashboard:testimonials')
+
+
+@login_required
+def delete_testimonial(request, testimonial_id):
+    """Delete a testimonial"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+    
+    if request.method == 'POST':
+        try:
+            name = testimonial.name
+            testimonial.delete()
+            messages.success(request, f'Testimonial by {name} has been deleted successfully!')
+        except Exception as e:
+            messages.error(request, f'Error deleting testimonial: {str(e)}')
+    
+    return redirect('dashboard:testimonials')
+
+
+@login_required
+def toggle_testimonial_status(request, testimonial_id):
+    """Toggle testimonial active/inactive status"""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Access denied. Only superusers can access this page.")
+    
+    testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+    
+    if request.method == 'POST':
+        try:
+            testimonial.is_active = not testimonial.is_active
+            testimonial.save()
+            
+            status = "activated" if testimonial.is_active else "deactivated"
+            messages.success(request, f'Testimonial by {testimonial.name} has been {status}!')
+        except Exception as e:
+            messages.error(request, f'Error updating testimonial status: {str(e)}')
+    
+    return redirect('dashboard:testimonials')

@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
-    UserTopicProgress, UserCourseProgress, Carousel
+    UserTopicProgress, UserCourseProgress, Carousel, Testimonial
 )
 
 # Restrict admin access to superusers only
@@ -254,3 +254,34 @@ class CarouselAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'field_of_study', 'is_active', 'created_at')
+    list_filter = ('is_active', 'field_of_study', 'created_at')
+    search_fields = ('name', 'field_of_study', 'title', 'content')
+    ordering = ('created_at',)
+    list_editable = ('is_active',)
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('name', 'field_of_study')
+        }),
+        ('Testimonial Content', {
+            'fields': ('title', 'content')
+        }),
+        ('Display Settings', {
+            'fields': ('avatar_image', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_queryset(self, request):
+        """Override to show active testimonials first"""
+        qs = super().get_queryset(request)
+        return qs.order_by('-is_active', 'created_at')

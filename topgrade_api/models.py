@@ -482,3 +482,28 @@ class Carousel(models.Model):
 
     def __str__(self):
         return f"Carousel Slide {self.id}"
+
+
+class Testimonial(models.Model):
+    """Model to store student testimonials for the website"""
+    name = models.CharField(max_length=100, help_text="Student's full name")
+    field_of_study = models.CharField(max_length=100, help_text="e.g., Psychology, Data Science, Web Development")
+    title = models.CharField(max_length=200, help_text="Testimonial heading/title")
+    content = models.TextField(help_text="Testimonial description/content")
+    avatar_image = models.ImageField(
+        upload_to='testimonials/avatars/', 
+        blank=True, 
+        null=True, 
+        help_text="Upload avatar image (optional - will use default if not provided)"
+    )
+    is_active = models.BooleanField(default=True, help_text="Whether to display this testimonial on the website")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Testimonial'
+        verbose_name_plural = 'Testimonials'
+    
+    def __str__(self):
+        return f"{self.name} - {self.field_of_study}"
