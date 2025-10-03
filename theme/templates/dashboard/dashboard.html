@@ -92,7 +92,13 @@
                     
                     
                     
+                    
+                    
+                    
                     growth-positive
+
+
+
 
 
 
@@ -104,7 +110,13 @@
                     
                     
                     
+                    
+                    
+                    
                     growth-negative
+
+
+
 
 
 
@@ -117,7 +129,13 @@
                       
                       
                       
+                      
+                      
+                      
                       up
+
+
+
 
 
 
@@ -129,7 +147,13 @@
                       
                       
                       
+                      
+                      
+                      
                       down
+
+
+
 
 
 
@@ -196,7 +220,13 @@
                     
                     
                     
+                    
+                    
+                    
                     growth-positive
+
+
+
 
 
 
@@ -208,7 +238,13 @@
                     
                     
                     
+                    
+                    
+                    
                     growth-negative
+
+
+
 
 
 
@@ -221,7 +257,13 @@
                       
                       
                       
+                      
+                      
+                      
                       up
+
+
+
 
 
 
@@ -233,7 +275,13 @@
                       
                       
                       
+                      
+                      
+                      
                       down
+
+
+
 
 
 
@@ -435,7 +483,7 @@
   <!-- Tables Row -->
   <div class="row">
     <div class="col-xl-8">
-      <div class="card">
+      <div class="card" style="height: 500px; overflow-y: auto;">
         <div class="card-header d-flex align-items-center">
           <h5 class="card-title mb-0 flex-grow-1">Top Performing Programs</h5>
           <div class="flex-shrink-0">
@@ -528,7 +576,7 @@
     </div>
 
     <div class="col-xl-4">
-      <div class="card">
+      <div class="card" style="height: 500px; overflow-y: auto;">
         <div class="card-header d-flex align-items-center">
           <h5 class="card-title mb-0 flex-grow-1">Recent Enrollments</h5>
           <div class="flex-shrink-0">
@@ -554,7 +602,13 @@
                       
                       
                       
+                      
+                      
+                      
                       success
+
+
+
 
 
 
@@ -566,7 +620,13 @@
                       
                       
                       
+                      
+                      
+                      
                       warning
+
+
+
 
 
 
@@ -578,7 +638,13 @@
                       
                       
                       
+                      
+                      
+                      
                       danger
+
+
+
 
 
 
@@ -595,73 +661,6 @@
                 <p class="mb-0">No recent enrollments</p>
               </div>
             {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Quick Stats Row -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="card-title mb-0">Quick Statistics</h5>
-        </div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-lg-3 col-md-6">
-              <div class="p-3 border rounded">
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0">
-                    <i class="ri-calendar-check-line text-primary fs-24"></i>
-                  </div>
-                  <div class="flex-grow-1 ms-3">
-                    <h5 class="mb-1">{{ enrollments_today|default:0 }}</h5>
-                    <p class="text-muted mb-0">Enrollments Today</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <div class="p-3 border rounded">
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0">
-                    <i class="ri-calendar-line text-success fs-24"></i>
-                  </div>
-                  <div class="flex-grow-1 ms-3">
-                    <h5 class="mb-1">{{ enrollments_this_month|default:0 }}</h5>
-                    <p class="text-muted mb-0">This Month</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <div class="p-3 border rounded">
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0">
-                    <i class="ri-hourglass-line text-warning fs-24"></i>
-                  </div>
-                  <div class="flex-grow-1 ms-3">
-                    <h5 class="mb-1">{{ pending_enrollments|default:0 }}</h5>
-                    <p class="text-muted mb-0">Pending</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <div class="p-3 border rounded">
-                <div class="d-flex align-items-center">
-                  <div class="flex-shrink-0">
-                    <i class="ri-star-line text-info fs-24"></i>
-                  </div>
-                  <div class="flex-grow-1 ms-3">
-                    <h5 class="mb-1">{{ advanced_programs|default:0 }}</h5>
-                    <p class="text-muted mb-0">Advanced Programs</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

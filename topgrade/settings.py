@@ -175,7 +175,7 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://3e630c61ae12a0af4755b75865fe5fb5.serveo.net",
+    "https://torrential-india-problematically.ngrok-free.dev",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -184,5 +184,5 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
-    "https://3e630c61ae12a0af4755b75865fe5fb5.serveo.net",
+    "https://torrential-india-problematically.ngrok-free.dev",
 ]
