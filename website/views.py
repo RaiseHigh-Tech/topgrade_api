@@ -22,10 +22,36 @@ def index(request):
     return render(request, 'website/index.html', context)
 
 def about(request):
-    return render(request, 'website/about.html')
+    """About page"""
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/about.html', context)
 
 def blog(request):
-    return render(request, 'website/blog.html')
+    """Blog page"""
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/blog.html', context)
 
 def programs(request):
     """Programs page - shows first available program or specific program"""
@@ -124,3 +150,27 @@ def program_detail(request, program_id):
 
 def advance_program_detail(request, advance_program_id):
     return render(request, 'website/advance_program_detail.html')
+
+def program_list(request):
+    """All programs listing page with filters and search"""
+    # Get all programs
+    programs = Program.objects.all().order_by('-created_at')
+    
+    # Get all categories
+    categories = Category.objects.all().order_by('name')
+    
+    # Calculate statistics
+    total_programs = programs.count()
+    regular_programs_count = programs.exclude(category__name='Advanced Program').count()
+    advanced_programs_count = programs.filter(category__name='Advanced Program').count()
+    bestseller_count = programs.filter(is_best_seller=True).count()
+    
+    context = {
+        'programs': programs,
+        'categories': categories,
+        'total_programs': total_programs,
+        'regular_programs_count': regular_programs_count,
+        'advanced_programs_count': advanced_programs_count,
+        'bestseller_count': bestseller_count,
+    }
+    return render(request, 'website/program_list.html', context)

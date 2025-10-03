@@ -1,0 +1,136 @@
+{% extends 'website/base.html' %}
+{% load static %}
+{% block title %}
+  TopGrade
+{% endblock %}
+
+{% block content %}
+  <style>
+    @keyframes scroll-text {
+      0% {
+        transform: translateX(0);
+      }
+    
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+    
+    .animate-scroll-text {
+      animation: scroll-text 30s linear infinite;
+    }
+    
+    /* Faster on mobile */
+    @media (max-width: 768px) {
+      .animate-scroll-text {
+        animation: scroll-text 15s linear infinite;
+        /* increase speed */
+      }
+    }
+    
+    .hero-background-enhanced {
+      background-color: #2c1e12;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3e%3cpath fill='none' stroke='%23ef7d00' stroke-opacity='0.1' stroke-width='2' d='M100,5 A95,95 0 1,1 99.9,5 Z'/%3e%3cpath fill='none' stroke='%23ef7d00' stroke-opacity='0.1' stroke-width='2' d='M100,25 A75,75 0 1,1 99.9,25 Z'/%3e%3cpath fill='none' stroke='%23ef7d00' stroke-opacity='0.1' stroke-width='2' d='M100,45 A55,55 0 1,1 99.9,45 Z'/%3e%3c/svg%3e"), linear-gradient(160deg, #4d2c0d 0%, #3a220c 100%);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 600px, 100% 100%;
+    }
+  </style>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero-background-enhanced py-20 md:py-24">
+      <div class="container mx-auto px-4 text-center text-white">
+        <h1 class="text-5xl md:text-6xl font-extrabold">From the <span class="text-[#ef7d00]">Blog</span></h1>
+        <p class="mt-4 text-lg text-white/80 max-w-2xl mx-auto">Insights, tutorials, and stories from the world of tech and education. Stay ahead of the curve with Top Grade.</p>
+      </div>
+    </section>
+
+    <!-- CATEGORIES MARQUEE -->
+    <section class="py-4 border-y border-orange-300/50">
+      <div class="bg-[#e47f00] overflow-hidden">
+        <div class="flex animate-scroll-text whitespace-nowrap py-3 text-white">
+          <div class="flex items-center">
+            <span class="font-semibold mx-6">WEB DEVELOPMENT</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">CAREER ADVICE</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">CYBERSECURITY</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">PYTHON</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">DATA SCIENCE</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span>
+          </div>
+          <div class="flex items-center" aria-hidden="true">
+            <span class="font-semibold mx-6">WEB DEVELOPMENT</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">CAREER ADVICE</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">CYBERSECURITY</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">PYTHON</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span><span class="font-semibold mx-6">DATA SCIENCE</span><span class="text-white/70 text-xl mx-6 animate-spin [animation-duration:10s]">&#10022;</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED POST & BLOG GRID -->
+    <section class="bg-[#f7f6f2] py-16 md:py-24 text-slate-800">
+      <div class="container mx-auto px-4">
+        <article class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-16 md:mb-24">
+          <a href="#" class="block rounded-2xl overflow-hidden group"><img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Featured blog post" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300" /></a>
+          <div>
+            <span class="text-sm font-semibold text-[#ef7d00]">WEB DEVELOPMENT</span>
+            <h2 class="text-3xl md:text-4xl font-bold mt-2 hover:text-[#ef7d00] transition-colors"><a href="#">10 Essential VS Code Extensions for Modern Web Developers</a></h2>
+            <p class="mt-4 text-slate-600 leading-relaxed">Boost your productivity and streamline your workflow with these must-have extensions for Visual Studio Code, covering everything from code formatting to live collaboration.</p>
+            <div class="flex items-center gap-4 mt-6">
+              <img src="https://i.pravatar.cc/150?img=1" alt="Author" class="w-12 h-12 rounded-full" />
+              <div>
+                <p class="font-semibold">Jane Doe</p>
+                <p class="text-sm text-slate-500">Lead Instructor • 12 Aug 2024</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <article class="bg-white rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 shadow-md hover:shadow-xl hover:shadow-orange-200">
+            <a href="#" class="block"><img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Blog post" class="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300" /></a>
+            <div class="p-6">
+              <span class="text-sm font-semibold text-[#ef7d00]">PYTHON</span>
+              <h3 class="text-xl font-bold mt-2 hover:text-[#ef7d00] transition-colors"><a href="#">Getting Started with Django</a></h3>
+              <p class="mt-3 text-slate-600 text-sm leading-relaxed">A step-by-step tutorial on setting up your first Django project, creating models, and building a simple web application.</p>
+              <div class="flex items-center gap-3 mt-4 pt-4 border-t border-orange-200/60">
+                <img src="https://i.pravatar.cc/150?img=2" alt="Author" class="w-10 h-10 rounded-full" />
+                <div>
+                  <p class="font-semibold text-sm">John Smith</p>
+                  <p class="text-xs text-slate-500">10 Aug 2024</p>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 shadow-md hover:shadow-xl hover:shadow-orange-200">
+            <a href="#" class="block"><img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Blog post" class="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300" /></a>
+            <div class="p-6">
+              <span class="text-sm font-semibold text-[#ef7d00]">CYBERSECURITY</span>
+              <h3 class="text-xl font-bold mt-2 hover:text-[#ef7d00] transition-colors"><a href="#">5 Common Security Threats</a></h3>
+              <p class="mt-3 text-slate-600 text-sm leading-relaxed">Learn to protect yourself and your projects from phishing, malware, and other common cybersecurity threats with these practical tips.</p>
+              <div class="flex items-center gap-3 mt-4 pt-4 border-t border-orange-200/60">
+                <img src="https://i.pravatar.cc/150?img=3" alt="Author" class="w-10 h-10 rounded-full" />
+                <div>
+                  <p class="font-semibold text-sm">Emily White</p>
+                  <p class="text-xs text-slate-500">08 Aug 2024</p>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-2xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 shadow-md hover:shadow-xl hover:shadow-orange-200">
+            <a href="#" class="block"><img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Blog post" class="w-full h-56 object-cover transform group-hover:scale-105 transition-transform duration-300" /></a>
+            <div class="p-6">
+              <span class="text-sm font-semibold text-[#ef7d00]">CAREER ADVICE</span>
+              <h3 class="text-xl font-bold mt-2 hover:text-[#ef7d00] transition-colors"><a href="#">How to Build a Tech Portfolio</a></h3>
+              <p class="mt-3 text-slate-600 text-sm leading-relaxed">Your portfolio is your most important asset. Discover the key elements that hiring managers look for and how to showcase your skills.</p>
+              <div class="flex items-center gap-3 mt-4 pt-4 border-t border-orange-200/60">
+                <img src="https://i.pravatar.cc/150?img=4" alt="Author" class="w-10 h-10 rounded-full" />
+                <div>
+                  <p class="font-semibold text-sm">Michael Brown</p>
+                  <p class="text-xs text-slate-500">05 Aug 2024</p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="text-center mt-16">
+          <button class="bg-transparent border border-orange-500 text-orange-500 font-bold py-3 px-8 rounded-lg hover:bg-orange-500 hover:text-white transition-colors">Load More Posts</button>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %}
