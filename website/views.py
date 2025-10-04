@@ -1,6 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from topgrade_api.models import Category, Program, Carousel, Testimonial
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from topgrade_api.models import Category, Program, Carousel, Testimonial, ProgramEnquiry
 
 # Create your views here.
 def index(request):
@@ -177,3 +181,136 @@ def program_list(request):
         'bestseller_count': bestseller_count,
     }
     return render(request, 'website/program_list.html', context)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def submit_program_enquiry(request):
+    """Handle program enquiry form submission via AJAX"""
+    try:
+        # Parse JSON data from request
+        data = json.loads(request.body)
+        
+        # Extract form data
+        first_name = data.get('first_name', '').strip()
+        phone_number = data.get('phone_number', '').strip()
+        email = data.get('email', '').strip()
+        college_name = data.get('college_name', '').strip()
+        program_id = data.get('program_id')
+        
+        # Validate required fields
+        if not all([first_name, phone_number, email, college_name, program_id]):
+            return JsonResponse({
+                'success': False,
+                'message': 'All fields are required.'
+            }, status=400)
+        
+        # Validate email format
+        from django.core.validators import validate_email
+        from django.core.exceptions import ValidationError
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please enter a valid email address.'
+            }, status=400)
+        
+        # Validate program exists
+        try:
+            program = Program.objects.get(id=program_id)
+        except Program.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid program selected.'
+            }, status=400)
+        
+        # Check if enquiry already exists for this email and program
+        existing_enquiry = ProgramEnquiry.objects.filter(
+            email=email,
+            program=program
+        ).first()
+        
+        if existing_enquiry:
+            # Update existing enquiry if it's older than 30 days or in closed status
+            from django.utils import timezone
+            days_since_enquiry = (timezone.now() - existing_enquiry.created_at).days
+            
+            if existing_enquiry.follow_up_status in ['closed', 'not_interested'] or days_since_enquiry > 30:
+                # Update existing enquiry
+                existing_enquiry.first_name = first_name
+                existing_enquiry.phone_number = phone_number
+                existing_enquiry.college_name = college_name
+                existing_enquiry.follow_up_status = 'new'
+                existing_enquiry.notes = f"Updated enquiry on {timezone.now().strftime('%Y-%m-%d %H:%M')}"
+                existing_enquiry.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Thank you! Your enquiry has been updated. Our team will contact you soon.',
+                    'enquiry_id': existing_enquiry.id
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'You have already enquired about this program. Our team will contact you soon.'
+                })
+        
+        # Create new enquiry
+        enquiry = ProgramEnquiry.objects.create(
+            program=program,
+            first_name=first_name,
+            phone_number=phone_number,
+            email=email,
+            college_name=college_name,
+            follow_up_status='new'
+        )
+        
+        # Optional: Send notification email to admin (uncomment if needed)
+        # try:
+        #     from django.core.mail import send_mail
+        #     from django.conf import settings
+        #     
+        #     subject = f"New Program Enquiry - {program.title}"
+        #     message = f"""
+        #     New enquiry received:
+        #     
+        #     Name: {first_name}
+        #     Email: {email}
+        #     Phone: {phone_number}
+        #     College: {college_name}
+        #     Program: {program.title} - {program.subtitle}
+        #     
+        #     Please follow up with the student.
+        #     """
+        #     
+        #     send_mail(
+        #         subject,
+        #         message,
+        #         settings.DEFAULT_FROM_EMAIL,
+        #         [settings.ADMIN_EMAIL],
+        #         fail_silently=True
+        #     )
+        # except Exception as e:
+        #     # Log error but don't fail the request
+        #     print(f"Failed to send notification email: {e}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Thank you for your enquiry! Our team will contact you within 24 hours.',
+            'enquiry_id': enquiry.id
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid request format.'
+        }, status=400)
+        
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in submit_program_enquiry: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while processing your enquiry. Please try again.'
+        }, status=500)

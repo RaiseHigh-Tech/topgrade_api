@@ -1,0 +1,437 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block title %}Program Enquiries{% endblock %}
+
+{% block content %}
+
+    <!-- Start page title -->
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <h4 class="mb-sm-0">Program Enquiries</h4>
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Program Enquiries</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End page title -->
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-animate">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Enquiries</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-end justify-content-between mt-4">
+                        <div>
+                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ stats.total }}</h4>
+                        </div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-success rounded fs-3">
+                                <i class="bx bx-user-plus"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-animate">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">New Enquiries</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-end justify-content-between mt-4">
+                        <div>
+                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ stats.new }}</h4>
+                        </div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-warning rounded fs-3">
+                                <i class="bx bx-time"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-animate">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Needs Follow-up</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-end justify-content-between mt-4">
+                        <div>
+                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ stats.needs_follow_up }}</h4>
+                        </div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-danger rounded fs-3">
+                                <i class="bx bx-bell"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-animate">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Enrolled</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-end justify-content-between mt-4">
+                        <div>
+                            <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ stats.enrolled }}</h4>
+                        </div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-success rounded fs-3">
+                                <i class="bx bx-check-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-sm">
+                            <div>
+                                <h5 class="card-title mb-0">Enquiry Management</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+
+                    <!-- Success/Error Messages -->
+                    <div class="mb-2" id="message-container"></div>
+
+                    <!-- Filters Form -->
+                    <form method="GET" class="row g-3 mb-4">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="search-box">
+                                <input type="text" name="search" class="form-control search" 
+                                        placeholder="Search enquiries..." value="{{ current_filters.search }}">
+                                <i class="ri-search-line search-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-2">
+                            <select class="form-select" name="status">
+                                <option value="">All Status</option>
+                                {% for value, label in status_choices %}
+                                    <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-2">
+                            <select class="form-select" name="program">
+                                <option value="">All Programs</option>
+                                {% for program in programs %}
+                                    <option value="{{ program.id }}" {% if current_filters.program == program.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ program.title }} - {{ program.subtitle }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-2">
+                            <select class="form-select" name="assigned">
+                                <option value="">All Assignments</option>
+                                <option value="unassigned" {% if current_filters.assigned == "unassigned" %}selected{% endif %}>
+                                    Unassigned
+                                </option>
+                                {% for staff in staff_members %}
+                                    <option value="{{ staff.id }}" {% if current_filters.assigned == staff.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ staff.fullname|default:staff.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ri-search-line align-bottom"></i> Filter
+                                </button>
+                                <a href="{% url 'dashboard:program_enquiries' %}" class="btn btn-light">
+                                    <i class="ri-refresh-line align-bottom"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Enquiries Table -->
+                    <div class="table-responsive table-card">
+                        <table class="table table-nowrap table-striped-columns mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Student</th>
+                                    <th scope="col">Contact</th>
+                                    <th scope="col">Program</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Assigned To</th>
+                                    <th scope="col">Days Since</th>
+                                    <th scope="col">Follow-up</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enquiry in page_obj %}
+                                <tr data-enquiry-id="{{ enquiry.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <h6 class="mb-0">{{ enquiry.first_name }}</h6>
+                                                <small class="text-muted">{{ enquiry.college_name|truncatechars:30 }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <p class="mb-1">{{ enquiry.email }}</p>
+                                            <small class="text-muted">{{ enquiry.phone_number }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium">{{ enquiry.program.title }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ enquiry.program.subtitle }}</small>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm status-select" 
+                                                data-enquiry-id="{{ enquiry.id }}"
+                                                style="width: auto;">
+                                            {% for value, label in status_choices %}
+                                                <option value="{{ value }}" {% if enquiry.follow_up_status == value %}selected{% endif %}>
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm assign-select" 
+                                                data-enquiry-id="{{ enquiry.id }}"
+                                                style="width: auto;">
+                                            <option value="">Unassigned</option>
+                                            {% for staff in staff_members %}
+                                                <option value="{{ staff.id }}" 
+                                                        {% if enquiry.assigned_to.id == staff.id %}selected{% endif %}>
+                                                    {{ staff.fullname|default:staff.email|truncatechars:15 }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-soft-info text-info">
+                                            {% if enquiry.days_since_enquiry == 0 %}
+                                                Today
+                                            {% elif enquiry.days_since_enquiry == 1 %}
+                                                1 day
+                                            {% else %}
+                                                {{ enquiry.days_since_enquiry }} days
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if enquiry.needs_follow_up %}
+                                            <span class="badge bg-soft-danger text-danger">
+                                                <i class="ri-alarm-warning-line align-bottom"></i> Needed
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-soft-success text-success">
+                                                <i class="ri-check-line align-bottom"></i> Up to date
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="ri-inbox-line fs-1 text-muted mb-3"></i>
+                                            <h5 class="text-muted">No enquiries found</h5>
+                                            <p class="text-muted mb-0">Try adjusting your filters or search criteria</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <div class="row g-0 align-items-center pb-4 pt-3">
+                        <div class="col-sm">
+                            <div class="text-muted">
+                                Showing <span class="fw-semibold">{{ page_obj.start_index }}</span> to 
+                                <span class="fw-semibold">{{ page_obj.end_index }}</span> of 
+                                <span class="fw-semibold">{{ page_obj.paginator.count }}</span> results
+                            </div>
+                        </div>
+                        <div class="col-sm-auto">
+                            <div class="pagination-wrap hstack gap-2">
+                                {% if page_obj.has_previous %}
+                                    <a class="page-item pagination-prev" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                        Previous
+                                    </a>
+                                {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <span class="page-item active">{{ num }}</span>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                        <a class="page-item" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <a class="page-item pagination-next" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                        Next
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to show message
+    function showMessage(message, type = 'success') {
+        const messageContainer = document.getElementById('message-container');
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        
+        messageContainer.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="ri-${type === 'success' ? 'check-circle' : 'error-warning'}-line me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    // Handle status updates
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const enquiryId = this.dataset.enquiryId;
+            const newStatus = this.value;
+            const originalValue = this.querySelector('option[selected]')?.value || '';
+            
+            // Disable select while updating
+            this.disabled = true;
+            
+            fetch('{% url "dashboard:update_enquiry_status" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    enquiry_id: enquiryId,
+                    status: newStatus
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.disabled = false;
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Update the selected attribute
+                    this.querySelectorAll('option').forEach(opt => opt.removeAttribute('selected'));
+                    this.querySelector(`option[value="${newStatus}"]`).setAttribute('selected', 'selected');
+                } else {
+                    showMessage(data.message, 'error');
+                    // Revert to original value
+                    this.value = originalValue;
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                showMessage('Error updating status: ' + error.message, 'error');
+                this.value = originalValue;
+            });
+        });
+    });
+
+    // Handle assignment updates
+    document.querySelectorAll('.assign-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const enquiryId = this.dataset.enquiryId;
+            const staffId = this.value;
+            const originalValue = this.querySelector('option[selected]')?.value || '';
+            
+            // Disable select while updating
+            this.disabled = true;
+            
+            fetch('{% url "dashboard:assign_enquiry" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    enquiry_id: enquiryId,
+                    staff_id: staffId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.disabled = false;
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Update the selected attribute
+                    this.querySelectorAll('option').forEach(opt => opt.removeAttribute('selected'));
+                    if (staffId) {
+                        this.querySelector(`option[value="${staffId}"]`).setAttribute('selected', 'selected');
+                    }
+                } else {
+                    showMessage(data.message, 'error');
+                    // Revert to original value
+                    this.value = originalValue;
+                }
+            })
+            .catch(error => {
+                this.disabled = false;
+                showMessage('Error updating assignment: ' + error.message, 'error');
+                this.value = originalValue;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

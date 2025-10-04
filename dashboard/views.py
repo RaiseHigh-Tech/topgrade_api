@@ -2,10 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser, Testimonial, Certificate
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+import json
+from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase, UserBookmark, CustomUser, Testimonial, Certificate, ProgramEnquiry
 
 User = get_user_model()
 
@@ -1715,3 +1719,175 @@ def delete_certificate(request, certificate_id):
             messages.error(request, f'Error deleting certificate: {str(e)}')
     
     return redirect('dashboard:certificates')
+
+
+
+@login_required
+def program_enquiries(request):
+    """View to display and manage program enquiries"""
+    if not request.user.is_staff:
+        messages.error(request, "Access denied. Staff access required.")
+        return redirect("dashboard:dashboard")
+    
+    # Get filter parameters
+    status_filter = request.GET.get("status", "")
+    program_filter = request.GET.get("program", "")
+    assigned_filter = request.GET.get("assigned", "")
+    search_query = request.GET.get("search", "")
+    
+    # Base queryset
+    enquiries = ProgramEnquiry.objects.all().select_related("program", "assigned_to")
+    
+    # Apply filters
+    if status_filter:
+        enquiries = enquiries.filter(follow_up_status=status_filter)
+    
+    if program_filter:
+        enquiries = enquiries.filter(program_id=program_filter)
+    
+    if assigned_filter:
+        if assigned_filter == "unassigned":
+            enquiries = enquiries.filter(assigned_to__isnull=True)
+        else:
+            enquiries = enquiries.filter(assigned_to_id=assigned_filter)
+    
+    if search_query:
+        enquiries = enquiries.filter(
+            Q(first_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(phone_number__icontains=search_query) |
+            Q(college_name__icontains=search_query) |
+            Q(program__title__icontains=search_query)
+        )
+    
+    # Order by creation date (newest first)
+    enquiries = enquiries.order_by("-created_at")
+    
+    # Pagination
+    paginator = Paginator(enquiries, 25)
+    page_number = request.GET.get("page")
+    try:
+        page_obj = paginator.get_page(page_number)
+    except (EmptyPage, PageNotAnInteger):
+        page_obj = paginator.get_page(1)
+    
+    # Get filter options
+    programs = Program.objects.all().order_by("title")
+    staff_members = CustomUser.objects.filter(is_staff=True).order_by("fullname")
+    status_choices = ProgramEnquiry.FOLLOW_UP_STATUS_CHOICES
+    
+    # Count statistics
+    total_enquiries = ProgramEnquiry.objects.count()
+    new_enquiries = ProgramEnquiry.objects.filter(follow_up_status="new").count()
+    needs_follow_up = len([e for e in ProgramEnquiry.objects.all() if e.needs_follow_up])
+    enrolled_count = ProgramEnquiry.objects.filter(follow_up_status="enrolled").count()
+    
+    context = {
+        "page_obj": page_obj,
+        "programs": programs,
+        "staff_members": staff_members,
+        "status_choices": status_choices,
+        "current_filters": {
+            "status": status_filter,
+            "program": program_filter,
+            "assigned": assigned_filter,
+            "search": search_query,
+        },
+        "stats": {
+            "total": total_enquiries,
+            "new": new_enquiries,
+            "needs_follow_up": needs_follow_up,
+            "enrolled": enrolled_count,
+        }
+    }
+    
+    return render(request, "dashboard/program_enquiries.html", context)
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def update_enquiry_status(request):
+    """AJAX view to update enquiry follow-up status"""
+    if not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Access denied"}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get("enquiry_id")
+        new_status = data.get("status")
+        
+        if not enquiry_id or not new_status:
+            return JsonResponse({"success": False, "message": "Missing required fields"}, status=400)
+        
+        # Validate status
+        valid_statuses = [choice[0] for choice in ProgramEnquiry.FOLLOW_UP_STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return JsonResponse({"success": False, "message": "Invalid status"}, status=400)
+        
+        # Get and update enquiry
+        enquiry = get_object_or_404(ProgramEnquiry, id=enquiry_id)
+        old_status = enquiry.follow_up_status
+        enquiry.follow_up_status = new_status
+        
+        # Update last_contacted if status is contacted
+        if new_status == "contacted":
+            from django.utils import timezone
+            enquiry.last_contacted = timezone.now()
+        
+        enquiry.save()
+        
+        return JsonResponse({
+            "success": True, 
+            "message": f"Status updated from {old_status} to {new_status}",
+            "new_status": new_status,
+            "status_display": enquiry.get_follow_up_status_display()
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def assign_enquiry(request):
+    """AJAX view to assign enquiry to staff member"""
+    if not request.user.is_staff:
+        return JsonResponse({"success": False, "message": "Access denied"}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get("enquiry_id")
+        staff_id = data.get("staff_id")
+        
+        if not enquiry_id:
+            return JsonResponse({"success": False, "message": "Enquiry ID required"}, status=400)
+        
+        enquiry = get_object_or_404(ProgramEnquiry, id=enquiry_id)
+        
+        if staff_id:
+            staff_member = get_object_or_404(CustomUser, id=staff_id, is_staff=True)
+            enquiry.assigned_to = staff_member
+            assigned_name = staff_member.fullname or staff_member.email
+            message = f"Enquiry assigned to {assigned_name}"
+        else:
+            enquiry.assigned_to = None
+            assigned_name = "Unassigned"
+            message = "Enquiry unassigned"
+        
+        enquiry.save()
+        
+        return JsonResponse({
+            "success": True,
+            "message": message,
+            "assigned_name": assigned_name
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+

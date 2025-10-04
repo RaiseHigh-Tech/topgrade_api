@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 import datetime
 
 class CustomUserManager(BaseUserManager):
@@ -533,3 +534,117 @@ class Certificate(models.Model):
     
     def __str__(self):
         return f"{self.program.title} - Certificate"
+
+
+class ProgramEnquiry(models.Model):
+    """Model to store program enquiry/application form data"""
+    
+    # Follow-up status choices
+    FOLLOW_UP_STATUS_CHOICES = [
+        ('new', 'New Enquiry'),
+        ('contacted', 'Initial Contact Made'),
+        ('interested', 'Interested'),
+        ('not_interested', 'Not Interested'),
+        ('enrolled', 'Enrolled'),
+        ('follow_up_needed', 'Follow-up Needed'),
+        ('closed', 'Closed'),
+    ]
+    
+    # Program enquired about
+    program = models.ForeignKey(
+        Program,
+        on_delete=models.CASCADE,
+        related_name='enquiries',
+        help_text="Program the user enquired about"
+    )
+    
+    # User information from form
+    first_name = models.CharField(
+        max_length=100,
+        help_text="User's first name"
+    )
+    phone_number = models.CharField(
+        max_length=20,
+        help_text="User's phone number"
+    )
+    email = models.EmailField(
+        help_text="User's email address"
+    )
+    college_name = models.CharField(
+        max_length=200,
+        help_text="User's college/institution name"
+    )
+    
+    # Follow-up tracking
+    follow_up_status = models.CharField(
+        max_length=20,
+        choices=FOLLOW_UP_STATUS_CHOICES,
+        default='new',
+        help_text="Current follow-up status"
+    )
+    
+    # Internal notes for follow-up
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Internal notes for follow-up and tracking"
+    )
+    
+    # Assigned to staff member for follow-up
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_enquiries',
+        help_text="Staff member assigned to follow up"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_contacted = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last time this enquiry was contacted"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Program Enquiry'
+        verbose_name_plural = 'Program Enquiries'
+        indexes = [
+            models.Index(fields=['follow_up_status', 'created_at']),
+            models.Index(fields=['program', 'created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.first_name} - {self.program.title} ({self.get_follow_up_status_display()})"
+    
+    @property
+    def full_name(self):
+        """Get user's full name"""
+        return self.first_name
+    
+    @property
+    def days_since_enquiry(self):
+        """Calculate days since enquiry was made"""
+        from django.utils import timezone
+        return (timezone.now() - self.created_at).days
+    
+    @property
+    def needs_follow_up(self):
+        """Check if enquiry needs follow-up based on status and time"""
+        if self.follow_up_status in ['enrolled', 'closed', 'not_interested']:
+            return False
+        
+        if self.follow_up_status == 'new' and self.days_since_enquiry > 1:
+            return True
+            
+        if self.follow_up_status == 'contacted' and self.days_since_enquiry > 3:
+            return True
+            
+        if self.follow_up_status == 'follow_up_needed':
+            return True
+            
+        return False

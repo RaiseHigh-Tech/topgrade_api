@@ -3,7 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
-    UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate
+    UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
+    ProgramEnquiry
 )
 
 # Restrict admin access to superusers only
@@ -316,3 +317,115 @@ class CertificateAdmin(admin.ModelAdmin):
         """Optimize query with program data"""
         qs = super().get_queryset(request)
         return qs.select_related('program')
+
+
+@admin.register(ProgramEnquiry)
+class ProgramEnquiryAdmin(admin.ModelAdmin):
+    list_display = (
+        'first_name', 'email', 'phone_number', 'get_program_title', 
+        'follow_up_status', 'assigned_to', 'days_since_enquiry_display',
+        'needs_follow_up_display', 'created_at'
+    )
+    list_filter = (
+        'follow_up_status', 'program', 'assigned_to', 'created_at',
+        'last_contacted'
+    )
+    search_fields = (
+        'first_name', 'email', 'phone_number', 'college_name',
+        'program__title', 'program__subtitle'
+    )
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at', 'days_since_enquiry_display')
+    list_editable = ('follow_up_status', 'assigned_to')
+    list_per_page = 50
+    
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('first_name', 'email', 'phone_number', 'college_name')
+        }),
+        ('Program Details', {
+            'fields': ('program',)
+        }),
+        ('Follow-up Management', {
+            'fields': ('follow_up_status', 'assigned_to', 'last_contacted', 'notes')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['mark_as_contacted', 'mark_as_interested', 'mark_as_enrolled', 'assign_to_me']
+    
+    def get_program_title(self, obj):
+        """Display program title and subtitle"""
+        if obj.program:
+            return f"{obj.program.title} - {obj.program.subtitle}"
+        return "N/A"
+    get_program_title.short_description = 'Program'
+    get_program_title.admin_order_field = 'program__title'
+    
+    def days_since_enquiry_display(self, obj):
+        """Display days since enquiry with color coding"""
+        days = obj.days_since_enquiry
+        if days == 0:
+            return "Today"
+        elif days == 1:
+            return "1 day ago"
+        else:
+            return f"{days} days ago"
+    days_since_enquiry_display.short_description = 'Days Since Enquiry'
+    
+    def needs_follow_up_display(self, obj):
+        """Display if enquiry needs follow-up with visual indicator"""
+        return obj.needs_follow_up
+    needs_follow_up_display.boolean = True
+    needs_follow_up_display.short_description = 'Needs Follow-up'
+    
+    def get_queryset(self, request):
+        """Optimize query with related data"""
+        qs = super().get_queryset(request)
+        return qs.select_related('program', 'assigned_to')
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Customize form fields"""
+        if db_field.name == "program":
+            kwargs["queryset"] = Program.objects.all().order_by('title')
+            kwargs["empty_label"] = "Select a program..."
+        elif db_field.name == "assigned_to":
+            # Only show staff users for assignment
+            kwargs["queryset"] = CustomUser.objects.filter(is_staff=True).order_by('fullname')
+            kwargs["empty_label"] = "Assign to staff member..."
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    # Custom admin actions
+    def mark_as_contacted(self, request, queryset):
+        """Mark selected enquiries as contacted"""
+        from django.utils import timezone
+        updated = queryset.update(
+            follow_up_status='contacted',
+            last_contacted=timezone.now()
+        )
+        self.message_user(request, f"{updated} enquiries marked as contacted.")
+    mark_as_contacted.short_description = "Mark as contacted"
+    
+    def mark_as_interested(self, request, queryset):
+        """Mark selected enquiries as interested"""
+        updated = queryset.update(follow_up_status='interested')
+        self.message_user(request, f"{updated} enquiries marked as interested.")
+    mark_as_interested.short_description = "Mark as interested"
+    
+    def mark_as_enrolled(self, request, queryset):
+        """Mark selected enquiries as enrolled"""
+        updated = queryset.update(follow_up_status='enrolled')
+        self.message_user(request, f"{updated} enquiries marked as enrolled.")
+    mark_as_enrolled.short_description = "Mark as enrolled"
+    
+    def assign_to_me(self, request, queryset):
+        """Assign selected enquiries to current user"""
+        if request.user.is_staff:
+            updated = queryset.update(assigned_to=request.user)
+            self.message_user(request, f"{updated} enquiries assigned to you.")
+        else:
+            self.message_user(request, "Only staff members can assign enquiries.", level='ERROR')
+    assign_to_me.short_description = "Assign to me"
