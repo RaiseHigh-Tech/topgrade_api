@@ -204,7 +204,7 @@ class Syllabus(models.Model):
 def get_topic_video_path(instance, filename):
     """Generate upload path for topic videos"""
     program_type = "advanced" if instance.syllabus.program.is_advanced else "regular"
-    program_name = instance.syllabus.program.title.replace(' ', '_').replace('/', '_')
+    program_name = instance.syllabus.program.subtitle.replace(' ', '_').replace('/', '_')
     return f'programs/{program_type}/{program_name}/{filename}'
 
 class Topic(models.Model):
