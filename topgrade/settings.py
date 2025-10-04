@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'ninja',
+    'storages',
     'topgrade_api',
     'dashboard',
     'website',
@@ -186,3 +192,46 @@ CORS_ALLOW_ALL_ORIGINS = False
 CSRF_TRUSTED_ORIGINS = [
     "https://torrential-india-problematically.ngrok-free.dev",
 ]
+
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+# S3 Storage Settings
+AWS_DEFAULT_ACL = None
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+
+# Use S3 for media files in production
+USE_S3 = os.getenv('USE_S3', 'False').lower() == 'true'
+
+# CloudFront CDN Configuration
+AWS_CLOUDFRONT_DOMAIN = os.getenv('AWS_CLOUDFRONT_DOMAIN')
+USE_CLOUDFRONT = os.getenv('USE_CLOUDFRONT', 'False').lower() == 'true'
+
+if USE_S3:
+    # S3 Media files using custom storage backend
+    DEFAULT_FILE_STORAGE = 'topgrade_api.storage_backends.MediaStorage'
+    
+    # Use CloudFront CDN if configured, otherwise use S3 directly
+    if USE_CLOUDFRONT and AWS_CLOUDFRONT_DOMAIN:
+        MEDIA_URL = f'https://{AWS_CLOUDFRONT_DOMAIN}/media/'
+    else:
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    
+    # S3 Static files (optional - uncomment if you want to serve static files from S3)
+    # STATICFILES_STORAGE = 'topgrade_api.storage_backends.StaticStorage'
+    # if USE_CLOUDFRONT and AWS_CLOUDFRONT_DOMAIN:
+    #     STATIC_URL = f'https://{AWS_CLOUDFRONT_DOMAIN}/static/'
+    # else:
+    #     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+else:
+    # Local file storage (development)
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_URL = '/media/'

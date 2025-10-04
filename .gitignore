@@ -1,4 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,python
+
+# Environment variables
+.env
+.env.local
+.env.production
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,python
 
 ### Django ###
