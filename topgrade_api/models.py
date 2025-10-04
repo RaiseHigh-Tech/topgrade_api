@@ -31,6 +31,7 @@ class CustomUser(AbstractUser):
     USER_ROLES = [
         ('student', 'Student'),
         ('admin', 'Admin'),
+        ('operations_staff', 'Operations Staff'),
     ]
     
     email = models.EmailField(unique=True)

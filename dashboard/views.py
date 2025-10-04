@@ -158,7 +158,6 @@ def dashboard_logout(request):
     logout(request)
     return redirect('/dashboard/signin/')
 
-
 @admin_required
 def dashboard_home(request):
     """
@@ -1452,7 +1451,6 @@ def chat_view(request):
     
     return render(request, 'dashboard/chat.html', context)
 
-
 def carousel_view(request):
     """
     Carousel management view for uploading, managing, and organizing carousel images
@@ -1528,7 +1526,6 @@ def carousel_view(request):
     }
     
     return render(request, 'dashboard/carousel.html', context)
-
 
 @login_required
 def testimonials_view(request):
@@ -1721,7 +1718,6 @@ def delete_certificate(request, certificate_id):
     return redirect('dashboard:certificates')
 
 
-
 @login_required
 def program_enquiries(request):
     """View to display and manage program enquiries"""
@@ -1802,7 +1798,6 @@ def program_enquiries(request):
     }
     
     return render(request, "dashboard/program_enquiries.html", context)
-
 
 @login_required
 @require_POST
