@@ -101,7 +101,6 @@ def calculate_video_duration(video_file):
             except Exception as e:
                 logger.warning(f"Failed to cleanup temp file {temp_path}: {e}")
 
-
 def format_duration(duration_seconds):
     """Format duration in seconds to HH:MM:SS or MM:SS string"""
     if not duration_seconds or duration_seconds <= 0:
@@ -612,7 +611,7 @@ def programs_view(request):
     programs_page_range = range(programs_start_page, programs_end_page + 1)
     
     # Categories Pagination
-    categories_paginator = Paginator(categories_list, 5)  # Show 5 categories per page
+    categories_paginator = Paginator(categories_list, 9)  # Show 9 categories per page
     categories_page = request.GET.get('categories_page')
     
     try:
@@ -1544,7 +1543,6 @@ def testimonials_view(request):
     
     return render(request, 'dashboard/testimonials.html', context)
 
-
 @login_required
 def add_testimonial(request):
     """Add a new testimonial"""
@@ -1565,7 +1563,6 @@ def add_testimonial(request):
             messages.error(request, f'Error adding testimonial: {str(e)}')
     
     return redirect('dashboard:testimonials')
-
 
 @login_required
 def edit_testimonial(request, testimonial_id):
@@ -1592,7 +1589,6 @@ def edit_testimonial(request, testimonial_id):
     
     return redirect('dashboard:testimonials')
 
-
 @login_required
 def delete_testimonial(request, testimonial_id):
     """Delete a testimonial"""
@@ -1610,7 +1606,6 @@ def delete_testimonial(request, testimonial_id):
             messages.error(request, f'Error deleting testimonial: {str(e)}')
     
     return redirect('dashboard:testimonials')
-
 
 @login_required
 def toggle_testimonial_status(request, testimonial_id):
@@ -1632,7 +1627,6 @@ def toggle_testimonial_status(request, testimonial_id):
     
     return redirect('dashboard:testimonials')
 
-
 @login_required
 def certificates_view(request):
     """View to display all certificates"""
@@ -1649,7 +1643,6 @@ def certificates_view(request):
     }
     
     return render(request, 'dashboard/certificates.html', context)
-
 
 @login_required
 def add_certificate(request):
@@ -1671,7 +1664,6 @@ def add_certificate(request):
             messages.error(request, f'Error adding certificate: {str(e)}')
     
     return redirect('dashboard:certificates')
-
 
 @login_required
 def edit_certificate(request, certificate_id):
@@ -1698,7 +1690,6 @@ def edit_certificate(request, certificate_id):
     
     return redirect('dashboard:certificates')
 
-
 @login_required
 def delete_certificate(request, certificate_id):
     """Delete a certificate"""
@@ -1716,7 +1707,6 @@ def delete_certificate(request, certificate_id):
             messages.error(request, f'Error deleting certificate: {str(e)}')
     
     return redirect('dashboard:certificates')
-
 
 @login_required
 def program_enquiries(request):
@@ -1843,7 +1833,6 @@ def update_enquiry_status(request):
         return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
     except Exception as e:
         return JsonResponse({"success": False, "message": str(e)}, status=500)
-
 
 @login_required
 @require_POST
