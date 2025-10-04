@@ -12,7 +12,9 @@ urlpatterns = [
     path('advance_programs/', views.advance_programs, name='advance_programs'),
     path('contact/', views.contact, name='contact'),
     path('programs/<int:program_id>/', views.program_detail, name='program_detail'),
-    path('advance_programs/<int:advance_program_id>/', views.advance_program_detail, name='advance_program_detail'),
     path('all_programs/', views.program_list, name='program_list'),
+    path('certificate-verification/', views.certificate_check, name='certificate_check'),
     path('api/submit-enquiry/', views.submit_program_enquiry, name='submit_program_enquiry'),
+    path('api/verify-certificate/', views.verify_certificate, name='verify_certificate'),
 ]
+    

@@ -1,4 +1,7 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -155,9 +158,6 @@ def program_detail(request, program_id):
     }
     return render(request, 'website/program_detail.html', context)
 
-def advance_program_detail(request, advance_program_id):
-    return render(request, 'website/advance_program_detail.html')
-
 def program_list(request):
     """All programs listing page with filters and search"""
     # Get all programs
@@ -313,4 +313,90 @@ def submit_program_enquiry(request):
         return JsonResponse({
             'success': False,
             'message': 'An error occurred while processing your enquiry. Please try again.'
+        }, status=500)
+
+def certificate_check(request):
+    """Certificate verification page"""
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/certificate_check.html', context)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def verify_certificate(request):
+    """API endpoint to verify certificate"""
+    try:
+        data = json.loads(request.body)
+        certificate_number = data.get('certificate_number', '').strip().upper()
+        
+        if not certificate_number:
+            return JsonResponse({
+                'success': False,
+                'message': 'Certificate number is required'
+            }, status=400)
+        
+        # Sample certificate data - replace with actual database lookup
+        valid_certificates = {
+            'TG-2024-WD-001234': {
+                'student_name': 'Rajesh Kumar Sharma',
+                'program_name': 'Full Stack Web Development',
+                'program_description': 'Comprehensive course covering HTML, CSS, JavaScript, React, Node.js, and MongoDB',
+                'duration': '6 Months',
+                'provider': 'TopGrade Education Pvt. Ltd.',
+                'issue_date': 'March 15, 2024',
+                'grade': 'A+ (95%)',
+                'certificate_number': certificate_number
+            },
+            'TG-2024-DS-002156': {
+                'student_name': 'Priya Patel',
+                'program_name': 'Data Science & Machine Learning',
+                'program_description': 'Advanced course in Python, Statistics, ML algorithms, and Data Visualization',
+                'duration': '8 Months',
+                'provider': 'TopGrade Education Pvt. Ltd.',
+                'issue_date': 'February 28, 2024',
+                'grade': 'A (92%)',
+                'certificate_number': certificate_number
+            },
+            'TG-2024-CS-003789': {
+                'student_name': 'Amit Singh',
+                'program_name': 'Cybersecurity Specialist',
+                'program_description': 'Complete cybersecurity training including ethical hacking and network security',
+                'duration': '4 Months',
+                'provider': 'TopGrade Education Pvt. Ltd.',
+                'issue_date': 'April 10, 2024',
+                'grade': 'A+ (96%)',
+                'certificate_number': certificate_number
+            }
+        }
+        
+        if certificate_number in valid_certificates:
+            return JsonResponse({
+                'success': True,
+                'certificate': valid_certificates[certificate_number]
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'Certificate not found. Please check the certificate number and try again.'
+            }, status=404)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'An error occurred: {str(e)}'
         }, status=500)
