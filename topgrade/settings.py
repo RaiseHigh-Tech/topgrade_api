@@ -219,6 +219,16 @@ if USE_S3:
     # S3 Media files using custom storage backend
     DEFAULT_FILE_STORAGE = 'topgrade_api.storage_backends.MediaStorage'
     
+    # Django 4.2+ STORAGES setting (overrides DEFAULT_FILE_STORAGE)
+    STORAGES = {
+        "default": {
+            "BACKEND": "topgrade_api.storage_backends.MediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    
     # Use CloudFront CDN if configured, otherwise use S3 directly
     if USE_CLOUDFRONT and AWS_CLOUDFRONT_DOMAIN:
         MEDIA_URL = f'https://{AWS_CLOUDFRONT_DOMAIN}/media/'
@@ -234,4 +244,12 @@ if USE_S3:
 else:
     # Local file storage (development)
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
     MEDIA_URL = '/media/'
