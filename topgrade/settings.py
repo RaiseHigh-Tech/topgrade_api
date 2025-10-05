@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-+_q9s&%ws-35^#a@k8fkwc)u3mt&uc+mrxf_ns!(eans)d^w3g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'a001cb2a9b2e.ngrok-free.app']
+ALLOWED_HOSTS = ['*', 'a001cb2a9b2e.ngrok-free.app', '13.232.200.100', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -51,8 +51,17 @@ INSTALLED_APPS = [
     'dashboard',
     'website',
     'tailwind',
-    'theme'
+    'theme',
+    'channels',
 ]
+
+
+# Channel layers
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 TAILWIND_APP_NAME = 'theme'
 
@@ -84,7 +93,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'topgrade.wsgi.application'
+# WSGI_APPLICATION = 'topgrade.wsgi.application'
+ASGI_APPLICATION = 'topgrade_api.asgi.application'
 
 
 # Database
