@@ -18,3 +18,4 @@ urlpatterns = [
     path('api/verify-certificate/', views.verify_certificate, name='verify_certificate'),
 ]
     
+    
