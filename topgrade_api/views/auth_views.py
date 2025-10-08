@@ -2,8 +2,8 @@ from ninja import NinjaAPI
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
-from .schemas import LoginSchema, SignupSchema, RequestOtpSchema, VerifyOtpSchema, ResetPasswordSchema, RequestPhoneOtpSchema, PhoneSigninSchema, RefreshTokenSchema
-from .models import CustomUser, OTPVerification, PhoneOTPVerification
+from topgrade_api.schemas import LoginSchema, SignupSchema, RequestOtpSchema, VerifyOtpSchema, ResetPasswordSchema, RequestPhoneOtpSchema, PhoneSigninSchema, RefreshTokenSchema
+from topgrade_api.models import CustomUser, OTPVerification, PhoneOTPVerification
 from django.utils import timezone
 import time
 
