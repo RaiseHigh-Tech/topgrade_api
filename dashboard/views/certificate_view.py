@@ -14,7 +14,6 @@ def certificates_view(request):
     }
     return render(request, 'dashboard/certificates.html', context)
 
-
 @admin_required
 def add_certificate(request):
     """Add new certificate"""
@@ -41,7 +40,6 @@ def add_certificate(request):
             messages.error(request, 'Student name, program name, completion date, and certificate ID are required')
     
     return redirect('dashboard:certificates')
-
 
 @admin_required
 def edit_certificate(request, certificate_id):
@@ -74,7 +72,6 @@ def edit_certificate(request, certificate_id):
             messages.error(request, 'Student name, program name, completion date, and certificate ID are required')
     
     return redirect('dashboard:certificates')
-
 
 @admin_required
 def delete_certificate(request, certificate_id):

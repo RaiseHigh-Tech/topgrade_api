@@ -63,7 +63,6 @@ def program_enquiries(request):
     }
     return render(request, 'dashboard/program_enquiries.html', context)
 
-
 @admin_required
 @require_POST
 @csrf_exempt

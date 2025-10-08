@@ -17,7 +17,6 @@ def testimonials_view(request):
     }
     return render(request, 'dashboard/testimonials.html', context)
 
-
 @admin_required
 def add_testimonial(request):
     """Add new testimonial"""
@@ -45,7 +44,6 @@ def add_testimonial(request):
             messages.error(request, 'Student name, content, and rating are required')
     
     return redirect('dashboard:testimonials')
-
 
 @admin_required
 def edit_testimonial(request, testimonial_id):
@@ -80,7 +78,6 @@ def edit_testimonial(request, testimonial_id):
     
     return redirect('dashboard:testimonials')
 
-
 @admin_required
 def delete_testimonial(request, testimonial_id):
     """Delete testimonial"""
@@ -94,7 +91,6 @@ def delete_testimonial(request, testimonial_id):
         messages.error(request, f'Error deleting testimonial: {str(e)}')
     
     return redirect('dashboard:testimonials')
-
 
 @admin_required
 @require_POST

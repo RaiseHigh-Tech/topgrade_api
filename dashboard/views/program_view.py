@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from topgrade_api.models import Category, Program, Syllabus, Topic, UserPurchase
+from topgrade_api.models import Category, Program, Syllabus, Topic, UserBookmark, UserPurchase
 from .auth_view import admin_required
 
 
@@ -38,10 +38,10 @@ def calculate_video_duration(video_file):
         # Method 1: Try with moviepy first (more reliable for various formats)
         try:
             try:
-                from moviepy.editor import VideoFileClip
+                from moviepy import VideoFileClip
             except ImportError:
                 # Try alternative import
-                import moviepy.editor as mp
+                import moviepy as mp
                 VideoFileClip = mp.VideoFileClip
             
             with VideoFileClip(temp_path) as clip:

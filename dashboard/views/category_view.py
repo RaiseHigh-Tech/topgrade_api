@@ -4,7 +4,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from topgrade_api.models import Category, Program
 from .auth_view import admin_required
 
-
 @admin_required
 def edit_category_view(request, id):
     """Edit category view"""

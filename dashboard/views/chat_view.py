@@ -8,4 +8,4 @@ def chat_view(request):
     context = {
         'user': request.user,
     }
-    return render(request, 'dashboard/chat.html', context)
+    return render(request, 'dashboard/coming_soon.html', context)
