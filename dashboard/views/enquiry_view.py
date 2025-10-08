@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.utils import timezone
 import json
 from topgrade_api.models import ProgramEnquiry
 from .auth_view import admin_required
@@ -15,20 +16,30 @@ def program_enquiries(request):
     """Program enquiries management view"""
     # Get filter parameters
     status_filter = request.GET.get('status', 'all')
+    program_filter = request.GET.get('program', '')
+    assigned_filter = request.GET.get('assigned', '')
     search_query = request.GET.get('search', '')
     
     # Base queryset
-    enquiries = ProgramEnquiry.objects.all().order_by('-created_at')
+    enquiries = ProgramEnquiry.objects.select_related('program', 'assigned_to').all().order_by('-created_at')
     
     # Apply filters
     if status_filter != 'all':
-        enquiries = enquiries.filter(status=status_filter)
+        enquiries = enquiries.filter(follow_up_status=status_filter)
+    
+    if program_filter:
+        enquiries = enquiries.filter(program_id=program_filter)
+    
+    if assigned_filter == 'unassigned':
+        enquiries = enquiries.filter(assigned_to__isnull=True)
+    elif assigned_filter:
+        enquiries = enquiries.filter(assigned_to_id=assigned_filter)
     
     if search_query:
         enquiries = enquiries.filter(
-            Q(name__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
             Q(email__icontains=search_query) |
-            Q(phone__icontains=search_query) |
+            Q(phone_number__icontains=search_query) |
             Q(program__title__icontains=search_query)
         )
     
@@ -45,21 +56,46 @@ def program_enquiries(request):
     
     # Get counts for different statuses
     total_count = ProgramEnquiry.objects.count()
-    pending_count = ProgramEnquiry.objects.filter(status='pending').count()
-    contacted_count = ProgramEnquiry.objects.filter(status='contacted').count()
-    converted_count = ProgramEnquiry.objects.filter(status='converted').count()
-    closed_count = ProgramEnquiry.objects.filter(status='closed').count()
+    new_count = ProgramEnquiry.objects.filter(follow_up_status='new').count()
+    contacted_count = ProgramEnquiry.objects.filter(follow_up_status='contacted').count()
+    interested_count = ProgramEnquiry.objects.filter(follow_up_status='interested').count()
+    enrolled_count = ProgramEnquiry.objects.filter(follow_up_status='enrolled').count()
+    closed_count = ProgramEnquiry.objects.filter(follow_up_status='closed').count()
+    
+    # Calculate needs_follow_up count
+    needs_follow_up_count = sum([
+        ProgramEnquiry.objects.filter(follow_up_status='new', created_at__lt=timezone.now() - timezone.timedelta(days=1)).count(),
+        ProgramEnquiry.objects.filter(follow_up_status='contacted', created_at__lt=timezone.now() - timezone.timedelta(days=3)).count(),
+        ProgramEnquiry.objects.filter(follow_up_status='follow_up_needed').count(),
+    ])
+    
+    # Get all programs for filter dropdown
+    from topgrade_api.models import Program
+    programs = Program.objects.all()
+    
+    # Get all staff members for assignment dropdown
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    staff_members = User.objects.filter(role__in=['admin', 'operations_staff'])
     
     context = {
         'user': request.user,
-        'enquiries': enquiries_page,
-        'status_filter': status_filter,
-        'search_query': search_query,
-        'total_count': total_count,
-        'pending_count': pending_count,
-        'contacted_count': contacted_count,
-        'converted_count': converted_count,
-        'closed_count': closed_count,
+        'page_obj': enquiries_page,  # Template expects 'page_obj'
+        'stats': {  # Template expects 'stats' object
+            'total': total_count,
+            'new': new_count,
+            'needs_follow_up': needs_follow_up_count,
+            'enrolled': enrolled_count,
+        },
+        'current_filters': {  # Template expects 'current_filters' object
+            'search': search_query,
+            'status': status_filter,
+            'program': program_filter,
+            'assigned': assigned_filter,
+        },
+        'programs': programs,
+        'staff_members': staff_members,
+        'status_choices': ProgramEnquiry.FOLLOW_UP_STATUS_CHOICES,
     }
     return render(request, 'dashboard/program_enquiries.html', context)
 
@@ -80,7 +116,7 @@ def update_enquiry_status(request):
             })
         
         enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
-        enquiry.status = new_status
+        enquiry.follow_up_status = new_status
         enquiry.save()
         
         return JsonResponse({
@@ -113,7 +149,7 @@ def assign_enquiry(request):
     try:
         data = json.loads(request.body)
         enquiry_id = data.get('enquiry_id')
-        assigned_to = data.get('assigned_to')
+        staff_id = data.get('staff_id')
         
         if not enquiry_id:
             return JsonResponse({
@@ -122,12 +158,28 @@ def assign_enquiry(request):
             })
         
         enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
-        enquiry.assigned_to = assigned_to
+        
+        if staff_id:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            try:
+                staff_member = User.objects.get(id=staff_id)
+                enquiry.assigned_to = staff_member
+                message = f'Enquiry assigned to {staff_member.email}'
+            except User.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Staff member not found'
+                })
+        else:
+            enquiry.assigned_to = None
+            message = 'Assignment removed'
+        
         enquiry.save()
         
         return JsonResponse({
             'success': True,
-            'message': f'Enquiry assigned to {assigned_to}' if assigned_to else 'Assignment removed'
+            'message': message
         })
         
     except ProgramEnquiry.DoesNotExist:

@@ -242,7 +242,7 @@
                                             <option value="">Unassigned</option>
                                             {% for staff in staff_members %}
                                                 <option value="{{ staff.id }}" 
-                                                        {% if enquiry.assigned_to.id == staff.id %}selected{% endif %}>
+                                                        {% if enquiry.assigned_to and enquiry.assigned_to.id == staff.id %}selected{% endif %}>
                                                     {{ staff.fullname|default:staff.email|truncatechars:15 }}
                                                 </option>
                                             {% endfor %}
