@@ -25,7 +25,7 @@ def get_my_learnings(
             user=user,
             status='completed'
         ).select_related('program__category').prefetch_related(
-            'program__syllabuses'
+            'program__syllabuses__topics'
         ).order_by('-purchase_date')
         
         learnings_data = []
@@ -46,11 +46,12 @@ def get_my_learnings(
                     total_modules = course_progress.total_topics
                     is_completed = course_progress.is_completed
                     last_activity = course_progress.last_activity_at
+                    
                 else:
                     # Fallback for purchases without progress tracking
                     progress_percentage = 0.0
                     completed_modules = 0
-                    total_modules = sum(s.topics.count() for s in program.syllabuses.all())
+                    total_modules = Topic.objects.filter(syllabus__program=program).count()
                     is_completed = False
                     last_activity = purchase.purchase_date
                 
@@ -258,27 +259,39 @@ def update_learning_progress(request, data: UpdateProgressSchema):
         total_topics = Topic.objects.filter(syllabus__program=purchase.program).count()
         completed_topics = UserTopicProgress.objects.filter(
             user=user,
-            purchase=purchase,
-            topic__isnull=False,
+            topic__syllabus__program=purchase.program,
             status='completed'
         ).count()
         in_progress_topics = UserTopicProgress.objects.filter(
             user=user,
-            purchase=purchase,
-            topic__isnull=False,
+            topic__syllabus__program=purchase.program,
             status='in_progress'
         ).count()
         
         # Calculate total watch time for this course
         total_watch_time = UserTopicProgress.objects.filter(
             user=user,
-            purchase=purchase,
-            topic__isnull=False
+            topic__syllabus__program=purchase.program
         ).aggregate(
             total_time=models.Sum('watch_time_seconds')
         )['total_time'] or 0
         
-        course_completion = (completed_topics / total_topics * 100) if total_topics > 0 else 0
+        # Calculate weighted progress based on actual topic completion percentages
+        if total_topics > 0:
+            # Get all topic progress for this program
+            topic_progress_data = UserTopicProgress.objects.filter(
+                user=user,
+                topic__syllabus__program=purchase.program
+            ).aggregate(
+                total_completion=models.Sum('completion_percentage')
+            )
+            
+            total_completion_percentage = topic_progress_data['total_completion'] or 0
+            # Calculate average completion across all topics
+            course_completion = total_completion_percentage / total_topics
+        else:
+            course_completion = 0
+        
         course_progress.completion_percentage = course_completion
         course_progress.completed_topics = completed_topics
         course_progress.in_progress_topics = in_progress_topics
