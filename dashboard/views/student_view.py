@@ -1,3 +1,4 @@
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -166,58 +167,111 @@ def student_details_view(request, student_id):
 def assign_programs_view(request):
     """Assign programs to students view"""
     if request.method == 'POST':
-        student_id = request.POST.get('student_id')
-        program_id = request.POST.get('program_id')
-        amount_paid = request.POST.get('amount_paid', 0)
+        form_type = request.POST.get('form_type')
         
-        if student_id and program_id:
-            try:
-                student = CustomUser.objects.get(id=student_id, role='student')
-                program = Program.objects.get(id=program_id)
-                
-                # Check if student already has this program
-                existing_purchase = UserPurchase.objects.filter(
-                    user=student,
-                    program=program
-                ).first()
-                
-                if existing_purchase:
-                    messages.warning(request, f'{student.fullname or student.email} is already enrolled in {program.title}')
-                else:
-                    # Create new purchase/enrollment
-                    purchase = UserPurchase.objects.create(
-                        user=student,
-                        program=program,
-                        amount_paid=float(amount_paid) if amount_paid else 0.0,
-                        status='completed',
-                        purchase_date=timezone.now()
-                    )
-                    messages.success(request, f'Successfully assigned {program.title} to {student.fullname or student.email}')
+        if form_type == 'assign_program':
+            student_id = request.POST.get('student_id')
+            program_id = request.POST.get('program_id')
+            amount_paid = request.POST.get('amount_paid', 0)
+            
+            if student_id and program_id:
+                try:
+                    student = CustomUser.objects.get(id=student_id, role='student')
+                    program = Program.objects.get(id=program_id)
                     
-            except CustomUser.DoesNotExist:
-                messages.error(request, 'Student not found')
-            except Program.DoesNotExist:
-                messages.error(request, 'Program not found')
-            except Exception as e:
-                messages.error(request, f'Error assigning program: {str(e)}')
-        else:
-            messages.error(request, 'Student and program selection are required')
+                    # Check if student already has this program
+                    existing_purchase = UserPurchase.objects.filter(
+                        user=student,
+                        program=program
+                    ).first()
+                    
+                    if existing_purchase:
+                        messages.warning(request, f'{student.fullname or student.email} is already enrolled in {program.title}')
+                    else:
+                        # Create new purchase/enrollment
+                        purchase = UserPurchase.objects.create(
+                            user=student,
+                            program=program,
+                            amount_paid=float(amount_paid) if amount_paid else 0.0,
+                            status='completed',
+                            purchase_date=timezone.now()
+                        )
+                        messages.success(request, f'Successfully assigned {program.title} to {student.fullname or student.email}')
+                        
+                except CustomUser.DoesNotExist:
+                    messages.error(request, 'Student not found')
+                except Program.DoesNotExist:
+                    messages.error(request, 'Program not found')
+                except Exception as e:
+                    messages.error(request, f'Error assigning program: {str(e)}')
+            else:
+                messages.error(request, 'Student and program selection are required')
+        
+        elif form_type == 'remove_assignment':
+            purchase_id = request.POST.get('purchase_id')
+            if purchase_id:
+                try:
+                    purchase = UserPurchase.objects.get(id=purchase_id)
+                    student_name = purchase.user.fullname or purchase.user.email
+                    program_title = purchase.program.title
+                    purchase.delete()
+                    messages.success(request, f'Successfully removed {program_title} from {student_name}')
+                except UserPurchase.DoesNotExist:
+                    messages.error(request, 'Assignment not found')
+                except Exception as e:
+                    messages.error(request, f'Error removing assignment: {str(e)}')
+            else:
+                messages.error(request, 'Assignment ID is required for removal')
         
         return redirect('dashboard:assign_programs')
     
-    # GET request - show assignment form
+    # GET request - show assignment form and data
+    search_query = request.GET.get('search', '').strip()
+    
+    # Get all assignments with search functionality
+    assignments_queryset = UserPurchase.objects.select_related('user', 'program', 'program__category').order_by('-purchase_date')
+    
+    if search_query:
+        assignments_queryset = assignments_queryset.filter(
+            Q(user__fullname__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(program__title__icontains=search_query) |
+            Q(program__category__name__icontains=search_query)
+        )
+    
+    # Pagination for assignments
+    paginator = Paginator(assignments_queryset, 15)  # Show 15 assignments per page
+    page = request.GET.get('page')
+    
+    try:
+        assignments = paginator.page(page)
+    except PageNotAnInteger:
+        assignments = paginator.page(1)
+    except EmptyPage:
+        assignments = paginator.page(paginator.num_pages)
+    
+    # Calculate statistics
+    total_assignments = UserPurchase.objects.count()
+    active_assignments = UserPurchase.objects.filter(status='completed').count()
+    total_students_with_programs = CustomUser.objects.filter(
+        role='student',
+        purchases__status='completed'
+    ).distinct().count()
+    
+    # Get data for dropdowns
     students = CustomUser.objects.filter(role='student').order_by('fullname', 'email')
     programs = Program.objects.all().order_by('title')
     categories = Category.objects.all().order_by('name')
-    
-    # Recent assignments
-    recent_assignments = UserPurchase.objects.select_related('user', 'program').order_by('-purchase_date')[:10]
     
     context = {
         'user': request.user,
         'students': students,
         'programs': programs,
         'categories': categories,
-        'recent_assignments': recent_assignments,
+        'assignments': assignments,
+        'search_query': search_query,
+        'total_assignments': total_assignments,
+        'active_assignments': active_assignments,
+        'total_students_with_programs': total_students_with_programs,
     }
     return render(request, 'dashboard/assign_programs.html', context)

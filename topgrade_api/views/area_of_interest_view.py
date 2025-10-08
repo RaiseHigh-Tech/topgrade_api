@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from ..schemas import AreaOfInterestSchema
-from .common import area_api as api, AuthBearer
+from .common import api as api, AuthBearer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

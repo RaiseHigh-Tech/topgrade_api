@@ -28,6 +28,3 @@ class AuthBearer(HttpBearer):
 
 # Common API instance for general endpoints
 api = NinjaAPI(version="1.0.0", title="General API")
-
-# Common API instance for area of interest endpoints  
-area_api = NinjaAPI(version="1.0.0", title="Area of Interest API")

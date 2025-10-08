@@ -1,8 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
 from topgrade_api.models import Testimonial
 from .auth_view import admin_required
 
@@ -21,27 +18,27 @@ def testimonials_view(request):
 def add_testimonial(request):
     """Add new testimonial"""
     if request.method == 'POST':
-        student_name = request.POST.get('student_name')
+        name = request.POST.get('name')
+        field_of_study = request.POST.get('field_of_study')
+        title = request.POST.get('title')
         content = request.POST.get('content')
-        rating = request.POST.get('rating')
-        program_name = request.POST.get('program_name')
-        student_image = request.FILES.get('student_image')
+        avatar_image = request.FILES.get('avatar_image')
         
-        if student_name and content and rating:
+        if name and field_of_study and title and content:
             try:
                 testimonial = Testimonial.objects.create(
-                    student_name=student_name,
+                    name=name,
+                    field_of_study=field_of_study,
+                    title=title,
                     content=content,
-                    rating=int(rating),
-                    program_name=program_name or '',
-                    student_image=student_image,
+                    avatar_image=avatar_image,
                     is_active=True
                 )
                 messages.success(request, 'Testimonial added successfully')
             except Exception as e:
                 messages.error(request, f'Error adding testimonial: {str(e)}')
         else:
-            messages.error(request, 'Student name, content, and rating are required')
+            messages.error(request, 'Name, field of study, title, and content are required')
     
     return redirect('dashboard:testimonials')
 
@@ -55,26 +52,29 @@ def edit_testimonial(request, testimonial_id):
         return redirect('dashboard:testimonials')
     
     if request.method == 'POST':
-        student_name = request.POST.get('student_name')
+        name = request.POST.get('name')
+        field_of_study = request.POST.get('field_of_study')
+        title = request.POST.get('title')
         content = request.POST.get('content')
-        rating = request.POST.get('rating')
-        program_name = request.POST.get('program_name')
-        student_image = request.FILES.get('student_image')
+        avatar_image = request.FILES.get('avatar_image')
         
-        if student_name and content and rating:
+        if name and field_of_study and title and content:
             try:
-                testimonial.student_name = student_name
+                testimonial.name = name
+                testimonial.field_of_study = field_of_study
+                testimonial.title = title
                 testimonial.content = content
-                testimonial.rating = int(rating)
-                testimonial.program_name = program_name or ''
-                if student_image:
-                    testimonial.student_image = student_image
+                if avatar_image:
+                    # Delete old image if it exists
+                    if testimonial.avatar_image:
+                        testimonial.avatar_image.delete(save=False)
+                    testimonial.avatar_image = avatar_image
                 testimonial.save()
                 messages.success(request, 'Testimonial updated successfully')
             except Exception as e:
                 messages.error(request, f'Error updating testimonial: {str(e)}')
         else:
-            messages.error(request, 'Student name, content, and rating are required')
+            messages.error(request, 'Name, field of study, title, and content are required')
     
     return redirect('dashboard:testimonials')
 
@@ -83,6 +83,11 @@ def delete_testimonial(request, testimonial_id):
     """Delete testimonial"""
     try:
         testimonial = Testimonial.objects.get(id=testimonial_id)
+        
+        # Delete the avatar image file if it exists
+        if testimonial.avatar_image:
+            testimonial.avatar_image.delete(save=False)
+        
         testimonial.delete()
         messages.success(request, 'Testimonial deleted successfully')
     except Testimonial.DoesNotExist:
@@ -93,8 +98,6 @@ def delete_testimonial(request, testimonial_id):
     return redirect('dashboard:testimonials')
 
 @admin_required
-@require_POST
-@csrf_exempt
 def toggle_testimonial_status(request, testimonial_id):
     """Toggle testimonial active status"""
     try:
@@ -102,18 +105,12 @@ def toggle_testimonial_status(request, testimonial_id):
         testimonial.is_active = not testimonial.is_active
         testimonial.save()
         
-        return JsonResponse({
-            'success': True,
-            'is_active': testimonial.is_active,
-            'message': f'Testimonial {"activated" if testimonial.is_active else "deactivated"} successfully'
-        })
+        status = "activated" if testimonial.is_active else "deactivated"
+        messages.success(request, f'Testimonial by {testimonial.name} {status} successfully')
+        
     except Testimonial.DoesNotExist:
-        return JsonResponse({
-            'success': False,
-            'message': 'Testimonial not found'
-        })
+        messages.error(request, 'Testimonial not found')
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'message': f'Error updating testimonial: {str(e)}'
-        })
+        messages.error(request, f'Error updating testimonial: {str(e)}')
+    
+    return redirect('dashboard:testimonials')

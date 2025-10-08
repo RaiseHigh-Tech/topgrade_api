@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-+_q9s&%ws-35^#a@k8fkwc)u3mt&uc+mrxf_ns!(eans)d^w3g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'a001cb2a9b2e.ngrok-free.app', 'www.topgradeinnovation.com', 'topgradeinnovation.com' '13.232.200.100', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'torrential-india-problematically.ngrok-free.dev', 'www.topgradeinnovation.com', 'topgradeinnovation.com' '13.232.200.100', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -192,8 +192,7 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://topgradeinnovation.com",
-    "https://www.topgradeinnovation.com",
+    "https://torrential-india-problematically.ngrok-free.dev"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -202,8 +201,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
-    "https://topgradeinnovation.com",
-    "https://www.topgradeinnovation.com",
+    "https://torrential-india-problematically.ngrok-free.dev",
 ]
 
 # AWS S3 Configuration
