@@ -172,7 +172,7 @@
                             <img src="{% static 'assets/dashboard/img/users/avatar-1.jpg' %}" alt="" class="avatar-xs rounded-circle" />
                           </div>
                           <div class="flex-grow-1">
-                            <h5 class="fs-13 mb-0"><a href="#" class="text-dark">{{ student.fullname|default:student.username }}</a></h5>
+                            <h5 class="fs-13 mb-0"><a href="#" class="text-dark">{{ student.fullname|default:student.username|default:student.email }}</a></h5>
                           </div>
                         </div>
                       </td>
