@@ -321,14 +321,19 @@ def get_program_details(request, program_id: int):
         # Check if user has purchased this program (for video access)
         user = request.auth
         has_purchased = False
+        purchase_id = None
         is_bookmarked = False
         
         if user:
-            has_purchased = UserPurchase.objects.filter(
+            purchase = UserPurchase.objects.filter(
                 user=user,
                 program=program,
                 status='completed'
-            ).exists()
+            ).first()
+            
+            if purchase:
+                has_purchased = True
+                purchase_id = purchase.id
             
             # Check if user has bookmarked this program
             is_bookmarked = UserBookmark.objects.filter(
@@ -408,6 +413,7 @@ def get_program_details(request, program_id: int):
             "is_best_seller": program.is_best_seller,
             "is_bookmarked": is_bookmarked,
             "has_purchased": has_purchased,
+            "purchase_id": purchase_id,
             "enrolled_students": enrolled_students,
             "pricing": {
                 "original_price": float(program.price),
