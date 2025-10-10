@@ -8,6 +8,7 @@ from . import (
     learning_view,
     carousel_view,
     area_of_interest_view,
+    profile_view,
 )
 
 # Export the API instances for URL configuration
@@ -25,4 +26,5 @@ __all__ = [
     'learning_view',
     'carousel_view',
     'area_of_interest_view',
+    'profile_view',
 ]

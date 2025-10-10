@@ -46,3 +46,8 @@ class UpdateProgressSchema(Schema):
     topic_id: int
     purchase_id: int  # Specific purchase to ensure correct program/topic mapping
     watch_time_seconds: int
+
+class UpdateProfileSchema(Schema):
+    fullname: str = None
+    phone_number: str = None
+    email: str = None

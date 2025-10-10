@@ -12,8 +12,6 @@ def get_carousel_slides(request):
     Get all active carousel slides ordered by their position
     """
     try:
-        from topgrade_api.models import Carousel
-        
         carousel_slides = Carousel.objects.filter(is_active=True).order_by('order', 'created_at')
         
         slides_data = []
