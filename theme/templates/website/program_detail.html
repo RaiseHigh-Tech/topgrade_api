@@ -370,9 +370,10 @@
       <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Certify your Success</h2>
 
       <!-- Certificates Container -->
-      <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+      <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6">
         {% if certificates %}
           {% for certificate in certificates %}
+            {# prettier-ignore-start #}
             <div class="w-full max-w-md aspect-[4/3] bg-white rounded-lg shadow-2xl border border-gray-200 transform {% if forloop.first %}
                 md:-rotate-3
               {% else %}
@@ -380,6 +381,7 @@
               {% endif %} hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden">
               <img src="{{ certificate.certificate_image.url }}" alt="Certificate {{ forloop.counter }}" class="w-full h-full object-cover" />
             </div>
+            {# prettier-ignore-end #}
           {% endfor %}
 
           <!-- Add second placeholder if only one certificate exists -->
@@ -419,9 +421,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
           <!-- Column 1 -->
           <div class="testimonial-column space-y-8 overflow-hidden">
-            <div class="testimonial-scroll" style="animation-duration:15s;">
+            <div class="testimonial-scroll" style="animation-duration:40s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:':2' %}
+                {% for testimonial in testimonials|slice:':3' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -450,7 +452,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:':2' %}
+                {% for testimonial in testimonials|slice:':3' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -481,9 +483,9 @@
 
           <!-- Column 2 -->
           <div class="testimonial-column space-y-8 overflow-hidden">
-            <div class="testimonial-scroll reverse" style="animation-duration:15s;">
+            <div class="testimonial-scroll reverse" style="animation-duration:45s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:'2:4' %}
+                {% for testimonial in testimonials|slice:'3:6' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -512,7 +514,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:'2:4' %}
+                {% for testimonial in testimonials|slice:'3:6' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -543,9 +545,9 @@
 
           <!-- Column 3 -->
           <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
-            <div class="testimonial-scroll" style="animation-duration:15s;">
+            <div class="testimonial-scroll" style="animation-duration:50s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:'4:' %}
+                {% for testimonial in testimonials|slice:'6:' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -587,7 +589,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:'4:' %}
+                {% for testimonial in testimonials|slice:'6:' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -644,14 +646,14 @@
         <!-- FAQ Item 1 -->
         <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
           <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
-            <span class="text-sm md:text-lg">Is technical support available if I encounter issues with the online platform?</span>
+            <span class="text-sm md:text-lg">What is TopGrade Innovation, and how does it help students?</span>
             <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
               <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
             </div>
           </button>
           <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
             <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
-              <p class="text-sm md:text-base">Yes, absolutely. We provide dedicated technical support to all our students. If you face any issues with the platform, you can reach out to our support team via email or the dedicated chat portal, and they will assist you promptly.</p>
+              <p class="text-sm md:text-base">TopGrade Innovation is an ed-tech platform that offers industry-focused programs across technology, design, management, and healthcare domains. We help learners gain real-world skills through live interactive sessions, hands-on projects, and placement-driven learning with industry-recognized certificate.</p>
             </div>
           </div>
         </div>
@@ -659,14 +661,14 @@
         <!-- FAQ Item 2 -->
         <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
           <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
-            <span class="text-sm md:text-lg">Are there discussion forums or community platforms for students?</span>
+            <span class="text-sm md:text-lg">Are the classes live or recorded?</span>
             <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
               <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
             </div>
           </button>
           <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
             <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
-              <p class="text-sm md:text-base">Yes, we believe in peer-to-peer learning. All our courses come with access to an exclusive community forum where you can interact with fellow students, ask questions, share projects, and collaborate with your peers.</p>
+              <p class="text-sm md:text-base">All sessions are recorded, so you can revisit them anytime through your student dashboard. We also host live doubt-clearing sessions to provide personalized support from our mentors.</p>
             </div>
           </div>
         </div>
@@ -674,14 +676,14 @@
         <!-- FAQ Item 3 -->
         <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
           <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
-            <span class="text-sm md:text-lg">Is there a pre-registration option available?</span>
+            <span class="text-sm md:text-lg">Will I get a certificate after completing the program?</span>
             <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
               <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
             </div>
           </button>
           <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
             <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
-              <p class="text-sm md:text-base">For some of our popular upcoming courses, we do offer a pre-registration option. This allows you to secure your spot in the batch and often comes with an early-bird discount. Please check the specific course page for availability.</p>
+              <p class="text-sm md:text-base">Yes! You’ll receive an industry-recognized certificate from TopGrade Innovation upon successful completion of your course. You can also showcase it on your LinkedIn profile and resume to boost your career opportunities.</p>
             </div>
           </div>
         </div>
@@ -689,14 +691,14 @@
         <!-- FAQ Item 4 -->
         <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
           <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
-            <span class="text-sm md:text-lg">What is the refund policy?</span>
+            <span class="text-sm md:text-lg">Do you provide placement guidance in the program?</span>
             <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
               <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
             </div>
           </button>
           <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
             <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
-              <p class="text-sm md:text-base">We offer a 7-day, no-questions-asked refund policy. If you are not satisfied with the course within the first 7 days of the batch starting, you can request a full refund. Please refer to our "Payment and Refund Policy" page for detailed terms.</p>
+              <p class="text-sm md:text-base">Absolutely! With the Gold Pack, you receive placement guidance along with your internship. We offer dedicated career and placement support that includes resume building, interview preparation, and access to our hiring partner network to help you secure top job opportunities.</p>
             </div>
           </div>
         </div>
@@ -704,14 +706,44 @@
         <!-- FAQ Item 5 -->
         <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
           <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
-            <span class="text-sm md:text-lg">How much time do I need to dedicate to the course each week?</span>
+            <span class="text-sm md:text-lg">What happens if I face any technical issues during the program?</span>
             <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
               <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
             </div>
           </button>
           <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
             <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
-              <p class="text-sm md:text-base">On average, we recommend dedicating 8-10 hours per week. This includes time for live sessions, self-study, and working on assignments and projects. However, the platform is flexible, allowing you to learn at your own pace.</p>
+              <p class="text-sm md:text-base">No worries! We provide dedicated technical support for all students. If you face any issues, you can reach us anytime through the chat portal, call us at 89044 65305, or email support@topgradeinnovations.com, and our team will assist you promptly.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Item 6 -->
+        <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+          <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
+            <span class="text-sm md:text-lg">Do you offer refunds or batch transfers?</span>
+            <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+              <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
+            </div>
+          </button>
+          <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+            <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
+              <p class="text-sm md:text-base">We do not provide refunds for programs. However, if you are unable to continue for valid reasons, you can transfer your enrollment to a future batch by paying a nominal administrative fee. Please contact our support team to assist with the transfer.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ Item 7 -->
+        <div class="faq-item bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-300">
+          <button class="faq-trigger flex justify-between items-center w-full text-left text-gray-800 font-semibold p-4 md:p-6">
+            <span class="text-sm md:text-lg">Is there a specific time to attend the program?</span>
+            <div class="w-6 h-6 md:w-8 md:h-8 flex-shrink-0 flex items-center justify-center bg-gray-100 rounded-full">
+              <i class="fa-solid fa-chevron-down transform transition-transform duration-300 text-xs md:text-sm"></i>
+            </div>
+          </button>
+          <div class="faq-content overflow-hidden max-h-0 transition-all duration-500 ease-in-out">
+            <div class="px-4 pb-4 md:px-6 md:pb-6 text-gray-600 border-t border-gray-200 pt-3 md:pt-4">
+              <p class="text-sm md:text-base">No,you can attend the sessions at your convenience, as there are no fixed timings. You can learn at your own flexible schedule.</p>
             </div>
           </div>
         </div>

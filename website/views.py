@@ -145,8 +145,8 @@ def program_detail(request, program_id):
     advance_programs = Program.get_advanced_programs()
     # Get active testimonials for display
     testimonials = Testimonial.objects.filter(is_active=True).order_by('created_at')
-    # Get certificates for this program (max 2)
-    certificates = program.certificates.all()[:2]
+    # Get certificates for this program (max 4)
+    certificates = program.certificates.all()[:4]
     
     context = {
         'program': program,

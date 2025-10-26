@@ -263,11 +263,11 @@
     .testimonial-scroll {
       display: flex;
       flex-direction: column;
-      animation: scroll-up 10s linear infinite;
+      animation: scroll-up 40s linear infinite;
     }
     
     .testimonial-scroll.reverse {
-      animation: scroll-down 10s linear infinite;
+      animation: scroll-down 45s linear infinite;
     }
     
     @keyframes scroll-up {
@@ -367,9 +367,9 @@
         <p class="mt-6 text-base lg:text-xl text-white/80 max-w-lg mx-auto lg:mx-0">Transform how students and educators connect, learn and succeed - anytime, anywhere</p>
         <div class="mt-10">
           <!-- MOBILE BUTTON -->
-          <a href="{% url 'program_list' %}" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 lg:hidden">Enroll Now</a>
+          <a href="{% url 'program_list' %}" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 lg:hidden">Explore Program</a>
           <!-- DESKTOP BUTTON -->
-          <a href="{% url 'program_list' %}" class="hidden lg:inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Enroll Now</a>
+          <a href="{% url 'program_list' %}" class="hidden lg:inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Explore Program</a>
         </div>
       </div>
     </div>
@@ -836,6 +836,11 @@
           <div class="mt-6 md:mt-8 text-white">
             <p class="font-semibold text-sm md:text-base">Get 5 premium certificates</p>
           </div>
+
+          <!-- Get Golden Pass Button -->
+          <div class="mt-6 md:mt-8 text-center">
+            <a href="{% url 'contact' %}" class="inline-block bg-[#ef7d00] hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300">Get Golden Pass</a>
+          </div>
         </div>
 
         <!-- Vertical Side Panel -->
@@ -1016,9 +1021,9 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-[70vh] max-h-[800px] overflow-hidden">
           <!-- Column 1 -->
           <div class="testimonial-column space-y-8 overflow-hidden">
-            <div class="testimonial-scroll" style="animation-duration:15s;">
+            <div class="testimonial-scroll" style="animation-duration:40s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:':2' %}
+                {% for testimonial in testimonials|slice:':3' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -1047,7 +1052,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:':2' %}
+                {% for testimonial in testimonials|slice:':3' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -1078,9 +1083,9 @@
 
           <!-- Column 2 -->
           <div class="testimonial-column space-y-8 overflow-hidden">
-            <div class="testimonial-scroll reverse" style="animation-duration:15s;">
+            <div class="testimonial-scroll reverse" style="animation-duration:45s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:'2:4' %}
+                {% for testimonial in testimonials|slice:'3:6' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -1109,7 +1114,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:'2:4' %}
+                {% for testimonial in testimonials|slice:'3:6' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -1140,9 +1145,9 @@
 
           <!-- Column 3 -->
           <div class="testimonial-column space-y-8 hidden lg:block overflow-hidden">
-            <div class="testimonial-scroll" style="animation-duration:15s;">
+            <div class="testimonial-scroll" style="animation-duration:50s;">
               <div class="space-y-8">
-                {% for testimonial in testimonials|slice:'4:' %}
+                {% for testimonial in testimonials|slice:'6:' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
@@ -1184,7 +1189,7 @@
               <br />
               <!-- Duplicate for infinite scroll -->
               <div class="space-y-8" aria-hidden="true">
-                {% for testimonial in testimonials|slice:'4:' %}
+                {% for testimonial in testimonials|slice:'6:' %}
                   <div class="bg-white p-6 rounded-xl shadow-lg">
                     <div class="flex items-center gap-4">
                       {% if testimonial.avatar_image %}
