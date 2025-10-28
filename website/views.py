@@ -127,6 +127,7 @@ def contact(request):
         # Get form data
         full_name = request.POST.get('full_name', '').strip()
         email = request.POST.get('email', '').strip()
+        contact_no = request.POST.get('contact_no', '').strip()
         subject = request.POST.get('subject', '').strip()
         message = request.POST.get('message', '').strip()
         
@@ -135,10 +136,12 @@ def contact(request):
             error_message = "Please fill in all required fields."
         elif len(full_name) < 2:
             error_message = "Please enter a valid full name."
-        elif len(subject) < 5:
-            error_message = "Subject must be at least 5 characters long."
-        elif len(message) < 10:
-            error_message = "Message must be at least 10 characters long."
+        elif len(subject) < 3:
+            error_message = "Subject must be at least 3 characters long."
+        elif len(message) < 5:
+            error_message = "Message must be at least 5 characters long."
+        elif contact_no and len(contact_no) < 10:
+            error_message = "Please enter a valid contact number (minimum 10 digits)."
         else:
             # Validate email format
             from django.core.validators import validate_email
@@ -157,6 +160,7 @@ def contact(request):
                     contact_submission = Contact.objects.create(
                         full_name=full_name,
                         email=email,
+                        contact_no=contact_no if contact_no else None,
                         subject=subject,
                         message=message
                     )

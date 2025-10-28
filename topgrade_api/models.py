@@ -646,6 +646,7 @@ class Contact(models.Model):
     """
     full_name = models.CharField(max_length=255, help_text="Full name of the person contacting")
     email = models.EmailField(help_text="Email address for response")
+    contact_no = models.CharField(max_length=20, help_text="Phone/contact number", blank=True, null=True)
     subject = models.CharField(max_length=500, help_text="Subject of the inquiry")
     message = models.TextField(help_text="Detailed message or inquiry")
     created_at = models.DateTimeField(auto_now_add=True, help_text="When the contact was submitted")

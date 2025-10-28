@@ -436,15 +436,15 @@ class ContactAdmin(admin.ModelAdmin):
     """
     Admin interface for Contact model
     """
-    list_display = ['full_name', 'email', 'subject', 'created_at', 'updated_at']
+    list_display = ['full_name', 'email', 'contact_no', 'subject', 'created_at', 'updated_at']
     list_filter = ['created_at', 'updated_at']
-    search_fields = ['full_name', 'email', 'subject', 'message']
+    search_fields = ['full_name', 'email', 'contact_no', 'subject', 'message']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
     
     fieldsets = (
         ('Contact Information', {
-            'fields': ('full_name', 'email')
+            'fields': ('full_name', 'email', 'contact_no')
         }),
         ('Message Details', {
             'fields': ('subject', 'message')
@@ -462,5 +462,5 @@ class ContactAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         """Make all fields readonly except for staff notes if needed"""
         if obj:  # editing an existing object
-            return ['full_name', 'email', 'subject', 'message', 'created_at', 'updated_at']
+            return ['full_name', 'email', 'contact_no', 'subject', 'message', 'created_at', 'updated_at']
         return self.readonly_fields

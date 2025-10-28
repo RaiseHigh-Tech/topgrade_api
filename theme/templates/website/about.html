@@ -26,14 +26,24 @@
     .animate-scroll-text {
       animation: scroll-text 25s linear infinite;
     }
+    
+    .hero-grid-background {
+      background-color: #1c120a;
+      background-image: linear-gradient(rgba(239, 125, 0, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(239, 125, 0, 0.15) 1px, transparent 1px), linear-gradient(180deg, #2c1e12 0%, #1c120a 100%);
+      background-size: 50px 50px, 50px 50px, 100% 100%;
+      background-position: -1px -1px, -1px -1px, 0 0;
+    }
   </style>
+
+  <!-- Empowering Background -->
   <section class="empowering-background text-white">
     <div class="container mx-auto flex flex-col items-center justify-center text-center px-6 py-20">
-      <h1 class="text-5xl md:text-6xl font-bold leading-tight max-w-4xl">Empowering <span class="text-[#ef7d00]">Your Future, Today</span></h1>
-      <p class="mt-6 text-lg text-white/80 max-w-2xl">Revolutionizing education by connecting with world-class experts who bring real-world insights and innovative learning experiences to every student, everywhere.</p>
+      <h1 class="text-5xl md:text-6xl font-bold leading-tight max-w-4xl">Your Path from Learning to <span class="text-[#ef7d00]">Earning Starts Here</span></h1>
+      <p class="mt-6 text-lg text-white/80 max-w-2xl">Bridging the gap between learning and earning with mentorship, practical skills, and industry-driven insights for every student</p>
     </div>
   </section>
 
+  <!-- Our Core Values -->
   <section>
     <div class="bg-gradient-to-r from-[#ef7d00] to-orange-500 border-y border-white/10 overflow-hidden">
       <div class="flex animate-scroll-text whitespace-nowrap py-4">
@@ -70,11 +80,12 @@
     </div>
   </section>
 
-  <section class="bg-[#2c1e12] text-white py-16 md:py-24">
+  <!-- What Drives Us -->
+  <section class="bg-[#2c1e12] text-white py-16 md:py-16">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">What Drives Us</h2>
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-18">What Drives Us</h2>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-30">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
         <div class="relative p-3 bg-gradient-to-br from-[#ef7d00] to-orange-400/50 rounded-3xl">
           <img src="{% static 'assets/website/images/icon_card.png' %}" alt="Decorative Sparkle" class="hidden md:block w-16 h-16 absolute -top-10 -right-13 drop-shadow-lg" />
           <div class="flex items-center gap-4">
@@ -82,15 +93,15 @@
           </div>
         </div>
 
-        <div class="space-y-6 text-white/90 text-lg">
-          <p>
-            At <span class="font-bold text-[#ef7d00]">Top Grade Innovation</span>, we hold the conviction that education should directly lead to employment.
+        <div class="space-y-6 text-white/90 text-lg self-start">
+          <p class="md:mt-4">
+            At <span class="font-bold text-[#ef7d00]">Top Grade Innovation</span>, we bridge the gap between learning and career success. Our programs connect students with industry-leading experts who provide practical insights, mentorship, and hands-on experiences. Every course, project, and internship is designed to equip learners with the skills, confidence, and real-world knowledge needed to excel in today’s competitive job market.
           </p>
-          <p>Our internship-focused courses are crafted with insights from industry professionals, making sure each lesson, project, and assessment equips you for practical work environments.</p>
-          <p>Whether you’re a student, recent graduate, or a professional seeking to enhance your skills, we provide the resources, mentorship, and opportunities necessary for success.</p>
+          <p>Whether you are just starting out or looking to upskill, we empower you to transform your education into tangible career opportunities—anywhere, anytime.</p>
         </div>
       </div>
 
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">Our Impact</h2>
       <div class="py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div class="bg-gradient-to-br from-orange-50 to-amber-100 text-gray-800 p-8 rounded-3xl flex flex-col h-full">
           <h3 class="text-5xl font-bold text-[#ef7d00]">10x</h3>
@@ -157,11 +168,9 @@
   </section>
 
   <!-- How It Works -->
-  <section class="py-16 md:py-24 bg-[#2c1e12] text-white">
+  <section class="py-16 md:py-8 bg-[#2c1e12] text-white">
     <div class="container mx-auto px-4">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl md:text-5xl font-extrabold text-gradient inline-block animate-pulse">How It Works</h2>
-      </div>
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">How It Works</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div class="bg-[#3e2e21] p-8 rounded-2xl border border-orange-500/20 shadow-lg flex flex-col items-center text-center card transition-transform duration-300 hover:scale-105 hover:shadow-2xl h-80">
           <div class="relative flex items-center justify-center w-20 h-20 rounded-full mb-6 transition-all duration-300 transform group-hover:scale-110">
@@ -201,7 +210,8 @@
     </div>
   </section>
 
-  <section class="bg-[#2c1e12] text-white py-8">
+  <!-- Our Core Values -->
+  <section class="bg-[#2c1e12] text-white py-8 md:pt-16 md:pb-16">
     <div class="container mx-auto px-4">
       <div class="text-center">
         <h2 class="text-3xl md:text-4xl font-bold mb-12">Our Core Values</h2>
@@ -248,6 +258,71 @@
     </div>
   </section>
 
+  <!-- Why Choose TopGrade Section -->
+  <section class="py-16 md:py-18 bg-[#2c1e12] text-white">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Why Choose TopGrade?</h2>
+        <p class="text-x max-w-3xl mx-auto">Discover what makes TopGrade Innovation the perfect choice for your learning journey and career transformation.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Expert-Led Learning -->
+        <div class="bg-gradient-to-br from-orange-50 to-amber-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Expert-Led Learning</h3>
+            <p class="text-gray-600 leading-relaxed">Learn directly from professionals who have real-world experience in their fields.</p>
+          </div>
+        </div>
+
+        <!-- Hands-On Projects -->
+        <div class="bg-gradient-to-br from-orange-50 to-amber-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Hands-On Projects</h3>
+            <p class="text-gray-600 leading-relaxed">Gain practical skills through assignments and projects designed for industry relevance.</p>
+          </div>
+        </div>
+
+        <!-- Internship Opportunities -->
+        <div class="bg-gradient-to-br from-orange-50 to-amber-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Internship Opportunities</h3>
+            <p class="text-gray-600 leading-relaxed">Apply your knowledge in real work environments to build your portfolio.</p>
+          </div>
+        </div>
+
+        <!-- Career Guidance -->
+        <div class="bg-gradient-to-br from-orange-50 to-amber-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Career Guidance</h3>
+            <p class="text-gray-600 leading-relaxed">Receive mentorship, resume building, and interview preparation to secure your dream role.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Life at TopGrade -->
   <section class="bg-[#2c1e12] text-white py-16 md:py-24 border-b-2 border-[#ef7d00]/20">
     <div class="container mx-auto px-4">
       <div class="text-center mb-12">
@@ -294,11 +369,20 @@
           <img src="https://images.unsplash.com/photo-1572021335469-31706a17aaef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Gallery image 8" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300" />
         </div>
       </div>
-
-      <div class="text-center mt-16">
-        <p class="text-2xl font-semibold mb-4">Would like to get in touch?</p>
-        <a href="{% url 'contact' %}" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Connect with us</a>
-      </div>
     </div>
   </section>
+
+  <!-- Join the TopGrade Community -->
+  <div class="hero-grid-background py-16 flex flex-col items-center justify-center text-white p-4 border-t-1 border-b-1 border-[#ef7d00]">
+    <div class="container max-w-4xl flex flex-col items-center bg-white px-12 py-6 rounded-2xl">
+      <div class="text-center mb-8 space-y-4">
+        <h1 class="text-xl md:text-4xl text-[#ef7d00] font-bold mb-8">Join the TopGrade Community</h1>
+        <p class="text-center text-lg text-gray-600 mb-8">Be part of a vibrant ecosystem of learners, mentors, and industry experts. Collaborate, innovate, and grow in an environment designed to help you achieve your goals faster and smarter.</p>
+        <div class="flex justify-center gap-4">
+          <a href="{% url 'contact' %}" class="inline-block bg-gradient-to-r from-[#ef7d00] to-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">Connect with us</a>
+          <a href="{% url 'program_list' %}" class="bg-transparent border border-orange-500 text-orange-500 font-bold py-3 px-8 rounded-lg hover:bg-orange-500 hover:text-white transition-colors">Explore Programs</a>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

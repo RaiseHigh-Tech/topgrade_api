@@ -81,16 +81,20 @@
                 <input type="text" name="full_name" id="full_name" required value="{{ request.POST.full_name|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
               </div>
               <div>
-                <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address *</label>
+                <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address <span class="text-red-500">*</span></label>
                 <input type="email" name="email" id="email" required autocomplete="email" value="{{ request.POST.email|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
               </div>
               <div>
-                <label for="subject" class="block text-sm font-medium text-slate-700 mb-1">Subject *</label>
+                <label for="contact_no" class="block text-sm font-medium text-slate-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
+                <input type="tel" name="contact_no" id="contact_no" value="{{ request.POST.contact_no|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
+              </div>
+              <div>
+                <label for="subject" class="block text-sm font-medium text-slate-700 mb-1">Subject <span class="text-red-500">*</span></label>
                 <input type="text" name="subject" id="subject" required value="{{ request.POST.subject|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
               </div>
               <div>
-                <label for="message" class="block text-sm font-medium text-slate-700 mb-1">Message *</label>
-                <textarea name="message" id="message" rows="5" required class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition">{{ request.POST.message|default:'' }}</textarea>
+                <label for="message" class="block text-sm font-medium text-slate-700 mb-1">Message <span class="text-red-500">*</span></label>
+                <textarea name="message" id="message" rows="3" required class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition">{{ request.POST.message|default:'' }}</textarea>
               </div>
               <div>
                 <button type="submit" class="w-full font-semibold py-3 px-8 rounded-lg bg-[#ef7d00] text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-300 transform hover:scale-105">Send Message</button>

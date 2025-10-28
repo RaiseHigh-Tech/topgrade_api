@@ -32,7 +32,7 @@
                         <label for="search" class="form-label">Search</label>
                         <input type="text" class="form-control" id="search" name="search" 
                                 value="{{ current_filters.search }}" 
-                                placeholder="Search by name, email, subject, or message...">
+                                placeholder="Search by name, email, contact number, subject, or message...">
                     </div>
                     <div class="col-md-3">
                         <label for="date" class="form-label">Date Filter</label>
@@ -71,6 +71,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th scope="col">Contact Info</th>
+                                <th scope="col">Contact Number</th>
                                 <th scope="col">Subject</th>
                                 <th scope="col">Message</th>
                                 <th scope="col">Submitted</th>
@@ -86,6 +87,18 @@
                                             <i class="ri-mail-line me-1"></i>{{ contact.email }}
                                         </span>
                                     </div>
+                                </td>
+                                <td>
+                                    {% if contact.contact_no %}
+                                    <a href="tel:{{ contact.contact_no }}" target="_blank">
+                                        <i class="ri-phone-line me-1"></i>{{ contact.contact_no }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-muted small mt-1">
+                                        <i class="ri-phone-line me-1"></i>Not Provided
+                                    </span>
+                                    {% endif %}
+
                                 </td>
                                 <td>
                                     <span class="fw-medium">{{ contact.subject }}</span>
@@ -112,7 +125,7 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <div class="d-flex flex-column align-items-center">
                                         <i class="ri-mail-line text-muted mb-2" style="font-size: 3rem;"></i>
                                         <h5 class="text-muted">No contact submissions found</h5>
@@ -171,6 +184,84 @@
     </div><!-- end col -->
 </div><!-- end row -->
 
+<!-- Contact Details Modal -->
+<div class="modal fade" id="contactDetailsModal" tabindex="-1" aria-labelledby="contactDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactDetailsModalLabel">Contact Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Full Name</label>
+                            <p id="modal-name" class="mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Email</label>
+                            <p id="modal-email" class="mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="modal-contact-no-section">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Contact Number</label>
+                            <p id="modal-contact-no" class="mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Subject</label>
+                            <p id="modal-subject" class="mb-0"></p>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Message</label>
+                            <div id="modal-message" class="bg-light p-3 rounded" style="min-height: 100px; white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Submitted On</label>
+                            <p id="modal-created" class="mb-0"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="modal-reply-btn" class="btn btn-primary">
+                    <i class="ri-mail-send-line me-1"></i> Reply via Email
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteContactModal" tabindex="-1" aria-labelledby="deleteContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteContactModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the contact submission from <strong id="delete-contact-name"></strong>?</p>
+                <p class="text-muted small">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -181,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const name = this.dataset.name;
             const email = this.dataset.email;
+            const contactNo = this.dataset.contactNo;
             const subject = this.dataset.subject;
             const message = this.dataset.message;
             const created = this.dataset.created;
@@ -191,6 +283,16 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modal-message').textContent = message;
             document.getElementById('modal-created').textContent = created;
             document.getElementById('modal-reply-btn').href = `mailto:${email}?subject=Re: ${subject}`;
+            
+            // Handle contact number display
+            const contactNoSection = document.getElementById('modal-contact-no-section');
+            const contactNoElement = document.getElementById('modal-contact-no');
+            if (contactNo && contactNo.trim() !== '') {
+                contactNoElement.textContent = contactNo;
+                contactNoSection.style.display = 'block';
+            } else {
+                contactNoSection.style.display = 'none';
+            }
             
             new bootstrap.Modal(document.getElementById('contactDetailsModal')).show();
         });

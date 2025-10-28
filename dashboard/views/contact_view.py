@@ -25,6 +25,7 @@ def contact_view(request):
         contacts = contacts.filter(
             Q(full_name__icontains=search_query) |
             Q(email__icontains=search_query) |
+            Q(contact_no__icontains=search_query) |
             Q(subject__icontains=search_query) |
             Q(message__icontains=search_query)
         )
