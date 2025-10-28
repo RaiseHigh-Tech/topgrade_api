@@ -54,7 +54,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.email
 
-
 class OTPVerification(models.Model):
     email = models.EmailField()
     is_verified = models.BooleanField(default=False)
@@ -75,7 +74,6 @@ class OTPVerification(models.Model):
     
     def __str__(self):
         return f"OTP for {self.email} - Verified: {self.is_verified}"
-
 
 class PhoneOTPVerification(models.Model):
     phone_number = models.CharField(max_length=15)
@@ -225,8 +223,6 @@ class Topic(models.Model):
     def __str__(self):
         return f"{self.syllabus.program.title} - {self.topic_title}"
 
-
-
 class UserPurchase(models.Model):
     """
     Simple model to track user purchases - courses are automatically assigned
@@ -259,7 +255,6 @@ class UserPurchase(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.program.title}"
 
-
 class UserBookmark(models.Model):
     """
     Model to track user bookmarks for programs
@@ -283,7 +278,6 @@ class UserBookmark(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - Bookmarked {self.program.title}"
-
 
 class UserTopicProgress(models.Model):
     """
@@ -388,7 +382,6 @@ class UserTopicProgress(models.Model):
         
         self.save()
 
-
 class UserCourseProgress(models.Model):
     """
     Overall course progress summary for a user's purchase
@@ -471,7 +464,6 @@ class UserCourseProgress(models.Model):
         
         self.save()
 
-
 class Carousel(models.Model):
     image = models.ImageField(upload_to='carousel_images/', help_text="Carousel image")
     is_active = models.BooleanField(default=True, help_text="Whether this slide is active in the carousel")
@@ -486,7 +478,6 @@ class Carousel(models.Model):
 
     def __str__(self):
         return f"Carousel Slide {self.id}"
-
 
 class Testimonial(models.Model):
     """Model to store student testimonials for the website"""
@@ -512,7 +503,6 @@ class Testimonial(models.Model):
     def __str__(self):
         return f"{self.name} - {self.field_of_study}"
 
-
 class Certificate(models.Model):
     """Model to store program certificate images"""
     program = models.ForeignKey(
@@ -535,7 +525,6 @@ class Certificate(models.Model):
     
     def __str__(self):
         return f"{self.program.title} - Certificate"
-
 
 class ProgramEnquiry(models.Model):
     """Model to store program enquiry/application form data"""
@@ -649,3 +638,23 @@ class ProgramEnquiry(models.Model):
             return True
             
         return False
+
+
+class Contact(models.Model):
+    """
+    Model to store contact form submissions from users
+    """
+    full_name = models.CharField(max_length=255, help_text="Full name of the person contacting")
+    email = models.EmailField(help_text="Email address for response")
+    subject = models.CharField(max_length=500, help_text="Subject of the inquiry")
+    message = models.TextField(help_text="Detailed message or inquiry")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When the contact was submitted")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When the contact was last updated")
+
+    class Meta:
+        verbose_name = "Contact"
+        verbose_name_plural = "Contacts"
+        ordering = ['-created_at']  # Show newest contacts first
+
+    def __str__(self):
+        return f"{self.full_name} - {self.subject[:50]}..."

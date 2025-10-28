@@ -39,4 +39,7 @@ urlpatterns = [
     path('enquiries/', views.program_enquiries, name='program_enquiries'),
     path('api/update-enquiry-status/', views.update_enquiry_status, name='update_enquiry_status'),
     path('api/assign-enquiry/', views.assign_enquiry, name='assign_enquiry'),
+
+    # Contact management
+    path('contact/', views.contact_view, name='contact'),
 ]   

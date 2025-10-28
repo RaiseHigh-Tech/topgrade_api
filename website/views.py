@@ -119,7 +119,58 @@ def advance_programs(request):
     return render(request, 'website/advance_programs.html', context)
 
 def contact(request):
-    """Contact page"""
+    """Contact page with form submission handling"""
+    success_message = None
+    error_message = None
+    
+    if request.method == 'POST':
+        # Get form data
+        full_name = request.POST.get('full_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        message = request.POST.get('message', '').strip()
+        
+        # Basic validation
+        if not all([full_name, email, subject, message]):
+            error_message = "Please fill in all required fields."
+        elif len(full_name) < 2:
+            error_message = "Please enter a valid full name."
+        elif len(subject) < 5:
+            error_message = "Subject must be at least 5 characters long."
+        elif len(message) < 10:
+            error_message = "Message must be at least 10 characters long."
+        else:
+            # Validate email format
+            from django.core.validators import validate_email
+            from django.core.exceptions import ValidationError
+            try:
+                validate_email(email)
+            except ValidationError:
+                error_message = "Please enter a valid email address."
+            
+            if not error_message:
+                try:
+                    # Import Contact model
+                    from topgrade_api.models import Contact
+                    
+                    # Create contact submission
+                    contact_submission = Contact.objects.create(
+                        full_name=full_name,
+                        email=email,
+                        subject=subject,
+                        message=message
+                    )
+                    
+                    success_message = "Thank you for contacting us! We'll get back to you within 24 hours."
+                    
+                    # Optional: Send email notification to admin
+                    # You can add email functionality here
+                    
+                except Exception as e:
+                    error_message = "Something went wrong. Please try again later."
+                    # Log the error in production
+                    print(f"Contact form error: {e}")
+    
     # Get all categories except 'Advanced Program' that have at least one program
     categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
     # Get all programs (including advanced programs)
@@ -131,6 +182,8 @@ def contact(request):
         'categories': categories,
         'programs': programs,
         'advance_programs': advance_programs,
+        'success_message': success_message,
+        'error_message': error_message,
     }
     return render(request, 'website/contact.html', context)
 

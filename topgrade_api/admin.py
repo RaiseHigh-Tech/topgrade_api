@@ -4,7 +4,7 @@ from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
-    ProgramEnquiry
+    ProgramEnquiry, Contact
 )
 
 # Restrict admin access to superusers only
@@ -429,3 +429,38 @@ class ProgramEnquiryAdmin(admin.ModelAdmin):
         else:
             self.message_user(request, "Only staff members can assign enquiries.", level='ERROR')
     assign_to_me.short_description = "Assign to me"
+
+
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    """
+    Admin interface for Contact model
+    """
+    list_display = ['full_name', 'email', 'subject', 'created_at', 'updated_at']
+    list_filter = ['created_at', 'updated_at']
+    search_fields = ['full_name', 'email', 'subject', 'message']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('Contact Information', {
+            'fields': ('full_name', 'email')
+        }),
+        ('Message Details', {
+            'fields': ('subject', 'message')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        """Disable adding contacts through admin (they should come from forms)"""
+        return False
+    
+    def get_readonly_fields(self, request, obj=None):
+        """Make all fields readonly except for staff notes if needed"""
+        if obj:  # editing an existing object
+            return ['full_name', 'email', 'subject', 'message', 'created_at', 'updated_at']
+        return self.readonly_fields
