@@ -639,7 +639,6 @@ class ProgramEnquiry(models.Model):
             
         return False
 
-
 class Contact(models.Model):
     """
     Model to store contact form submissions from users
@@ -659,3 +658,41 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.subject[:50]}..."
+
+
+class Gallery(models.Model):
+    """
+    Model to store gallery images for the website
+    """
+    image = models.ImageField(
+        upload_to='gallery/',
+        help_text="Upload gallery image"
+    )
+    alt_text = models.CharField(
+        max_length=255, 
+        help_text="Alternative text for accessibility",
+        blank=True, 
+        null=True
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this image should be displayed on the website"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When the image was uploaded")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When the image was last updated")
+
+    class Meta:
+        verbose_name = "Gallery Image"
+        verbose_name_plural = "Gallery Images"
+        ordering = ['-created_at']  # Order by newest first
+
+    def __str__(self):
+        return f"Gallery Image {self.id} - {self.created_at.strftime('%Y-%m-%d')}"
+
+    def get_image_url(self):
+        """
+        Get the URL of the image with fallback handling
+        """
+        if self.image and hasattr(self.image, 'url'):
+            return self.image.url
+        return None

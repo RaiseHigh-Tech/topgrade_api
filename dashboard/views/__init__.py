@@ -9,3 +9,4 @@ from .enquiry_view import *
 from .carousel_view import *
 from .student_view import *
 from .contact_view import *
+from .gallery_view import *

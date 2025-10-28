@@ -153,6 +153,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:gallery' %}active{% endif %}" href="{% url 'dashboard:gallery' %}" role="button">
+                                <i class="ri-gallery-line"></i> Gallery
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:testimonials' %}active{% endif %}" href="{% url 'dashboard:testimonials' %}" role="button">
                                 <i class="ri-chat-quote-line"></i> Testimonials
                             </a>

@@ -36,11 +36,16 @@ def about(request):
     programs = Program.get_regular_programs()
     # Get advanced programs list
     advance_programs = Program.get_advanced_programs()
+    
+    # Get 8 recent active gallery images for "Life at TopGrade" section
+    from topgrade_api.models import Gallery
+    gallery_images = Gallery.objects.filter(is_active=True).order_by('-created_at')[:8]
 
     context = {
         'categories': categories,
         'programs': programs,
         'advance_programs': advance_programs,
+        'gallery_images': gallery_images,
     }
     return render(request, 'website/about.html', context)
 
@@ -456,7 +461,6 @@ def verify_certificate(request):
             'success': False,
             'message': f'An error occurred: {str(e)}'
         }, status=500)
-
 
 def terms(request):
      # Get all categories except 'Advanced Program' that have at least one program

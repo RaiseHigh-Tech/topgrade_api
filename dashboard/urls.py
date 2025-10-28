@@ -20,6 +20,7 @@ urlpatterns = [
     path('assign-programs/', views.assign_programs_view, name='assign_programs'),
     path('chat/', views.chat_view, name='chat'),
     path('carousel/', views.carousel_view, name='carousel'),
+    path('gallery/', views.gallery_view, name='gallery'),
     path('program/<int:program_id>/', views.program_details_view, name='program_details'),
     
     # Testimonials management
