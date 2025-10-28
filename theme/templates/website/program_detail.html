@@ -374,7 +374,7 @@
         {% if certificates %}
           {% for certificate in certificates %}
             {# prettier-ignore-start #}
-            <div class="w-full max-w-md aspect-[4/3] bg-white rounded-lg shadow-2xl border border-gray-200 transform {% if forloop.first %}
+            <div class="w-full max-w-md aspect-[4/3] bg-white rounded-lg shadow-2xl border border-gray-200 transform {% if forloop.counter|divisibleby:2 %}
                 md:-rotate-3
               {% else %}
                 md:rotate-2 z-10

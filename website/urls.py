@@ -16,6 +16,9 @@ urlpatterns = [
     path('certificate-verification/', views.certificate_check, name='certificate_check'),
     path('api/submit-enquiry/', views.submit_program_enquiry, name='submit_program_enquiry'),
     path('api/verify-certificate/', views.verify_certificate, name='verify_certificate'),
+    path('terms-and-conditions/', views.terms, name='terms'),
+    path('privacy-policy/', views.privacy, name='privacy'),
+    path('refund-policy/', views.refund_policy, name='refund')
 ]
     
     

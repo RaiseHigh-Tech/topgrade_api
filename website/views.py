@@ -182,7 +182,6 @@ def program_list(request):
     }
     return render(request, 'website/program_list.html', context)
 
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def submit_program_enquiry(request):
@@ -400,3 +399,49 @@ def verify_certificate(request):
             'success': False,
             'message': f'An error occurred: {str(e)}'
         }, status=500)
+
+
+def terms(request):
+     # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/terms.html', context)
+
+def privacy(request):
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/privacy.html', context)
+
+def refund_policy(request):
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
+
+    context = {
+        'categories': categories,
+        'programs': programs,
+        'advance_programs': advance_programs,
+    }
+    return render(request, 'website/refund.html', context)
