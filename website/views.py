@@ -222,11 +222,22 @@ def program_detail(request, program_id):
 
 def program_list(request):
     """All programs listing page with filters and search"""
-    # Get all programs
-    programs = Program.objects.all().order_by('-created_at')
+    # Get all categories except 'Advanced Program' that have at least one program
+    categories = Category.objects.exclude(name='Advanced Program').filter(programs__isnull=False).distinct()
+    # Get all programs (including advanced programs)
+    programs = Program.get_regular_programs()
+    # Get advanced programs list
+    advance_programs = Program.get_advanced_programs()
     
-    # Get all categories
-    categories = Category.objects.all().order_by('name')
+    # Get category filter from URL parameter
+    selected_category_id = request.GET.get('category')
+    selected_category = None
+    
+    if selected_category_id:
+        try:
+            selected_category = Category.objects.get(id=selected_category_id)
+        except Category.DoesNotExist:
+            selected_category = None
     
     # Calculate statistics
     total_programs = programs.count()
@@ -241,6 +252,8 @@ def program_list(request):
         'regular_programs_count': regular_programs_count,
         'advanced_programs_count': advanced_programs_count,
         'bestseller_count': bestseller_count,
+        'selected_category': selected_category,
+        'advance_programs': advance_programs,
     }
     return render(request, 'website/program_list.html', context)
 

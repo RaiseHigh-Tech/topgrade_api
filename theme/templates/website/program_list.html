@@ -128,10 +128,22 @@
 
         <!-- Filter Buttons -->
         <div class="flex flex-wrap justify-center gap-3 mb-6">
-          <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white font-semibold active" data-filter="all"><i class="fa-solid fa-th-large mr-2"></i>All Programs</button>
+          <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white font-semibold {% if not selected_category %}active{% endif %}" data-filter="all"><i class="fa-solid fa-th-large mr-2"></i>All Programs</button>
           <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white/80 font-semibold" data-filter="regular"><i class="fa-solid fa-book mr-2"></i>Regular Programs</button>
           <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white/80 font-semibold" data-filter="advanced"><i class="fa-solid fa-crown mr-2"></i>Advanced Programs</button>
           <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white/80 font-semibold" data-filter="bestseller"><i class="fa-solid fa-fire mr-2"></i>Best Sellers</button>
+          {% for category in categories %}
+            {% if category.name != 'Advanced Program' %}
+              <button class="filter-btn px-6 py-3 rounded-xl bg-white/10 text-white/80 font-semibold {% if selected_category and selected_category.id == category.id %}active{% endif %}" data-filter="category-{{ category.id }}">
+                {% if category.icon %}
+                  <i class="{{ category.icon }} mr-2"></i>
+                {% else %}
+                  <i class="fa-solid fa-folder mr-2"></i>
+                {% endif %}
+                {{ category.name }}
+              </button>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -262,7 +274,10 @@
       const programCards = document.querySelectorAll('.program-card')
       const noResults = document.getElementById('noResults')
     
-      let currentFilter = 'all'
+      // Get initial filter from URL parameter or default to 'all'
+      const urlParams = new URLSearchParams(window.location.search)
+      const categoryParam = urlParams.get('category')
+      let currentFilter = categoryParam ? `category-${categoryParam}` : 'all'
     
       function filterPrograms() {
         const searchTerm = searchInput.value.toLowerCase()
@@ -272,6 +287,7 @@
         programCards.forEach((card) => {
           const title = card.dataset.title
           const type = card.dataset.type
+          const categoryId = card.dataset.category
     
           let showCard = true
     
@@ -288,6 +304,11 @@
               showCard = false
             } else if (currentFilter === 'bestseller' && !type.includes('bestseller')) {
               showCard = false
+            } else if (currentFilter.startsWith('category-')) {
+              const filterCategoryId = currentFilter.replace('category-', '')
+              if (categoryId !== filterCategoryId) {
+                showCard = false
+              }
             }
           }
     
@@ -316,12 +337,26 @@
           this.classList.add('active')
     
           currentFilter = this.dataset.filter
+          
+          // Update URL without page reload
+          const newUrl = new URL(window.location)
+          if (currentFilter !== 'all' && currentFilter.startsWith('category-')) {
+            const categoryId = currentFilter.replace('category-', '')
+            newUrl.searchParams.set('category', categoryId)
+          } else {
+            newUrl.searchParams.delete('category')
+          }
+          window.history.pushState({}, '', newUrl)
+          
           filterPrograms()
         })
       })
     
       // Search event listener
       searchInput.addEventListener('input', filterPrograms)
+      
+      // Apply initial filter on page load
+      filterPrograms()
     })
   </script>
 {% endblock %}
