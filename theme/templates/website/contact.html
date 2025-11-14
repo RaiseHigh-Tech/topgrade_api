@@ -82,11 +82,11 @@
               </div>
               <div>
                 <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email Address <span class="text-red-500">*</span></label>
-                <input type="email" name="email" id="email" required autocomplete="email" value="{{ request.POST.email|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
+                <input type="email" name="email" id="email" required autocomplete="email" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" title="Please enter a valid email address" value="{{ request.POST.email|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
               </div>
               <div>
                 <label for="contact_no" class="block text-sm font-medium text-slate-700 mb-1">Contact Number <span class="text-red-500">*</span></label>
-                <input type="tel" name="contact_no" id="contact_no" value="{{ request.POST.contact_no|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" />
+                <input type="tel" name="contact_no" id="contact_no" required pattern="[0-9]{10,15}" title="Please enter a valid phone number (10-15 digits only)" maxlength="15" value="{{ request.POST.contact_no|default:'' }}" class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ef7d00] focus:border-[#ef7d00] transition" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
               </div>
               <div>
                 <label for="subject" class="block text-sm font-medium text-slate-700 mb-1">Subject <span class="text-red-500">*</span></label>
