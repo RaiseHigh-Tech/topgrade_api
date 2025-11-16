@@ -207,7 +207,7 @@ def get_topic_video_path(instance, filename):
 
 class Topic(models.Model):
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='topics')
-    topic_title = models.CharField(max_length=200)
+    topic_title = models.CharField(max_length=500)
     description = models.TextField(blank=True, null=True)
     video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, help_text="Upload video file")
     video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
@@ -643,10 +643,10 @@ class Contact(models.Model):
     """
     Model to store contact form submissions from users
     """
-    full_name = models.CharField(max_length=255, help_text="Full name of the person contacting")
+    full_name = models.TextField(help_text="Full name of the person contacting")
     email = models.EmailField(help_text="Email address for response")
-    contact_no = models.CharField(max_length=20, help_text="Phone/contact number", blank=True, null=True)
-    subject = models.CharField(max_length=500, help_text="Subject of the inquiry")
+    contact_no = models.TextField(help_text="Phone/contact number", blank=True, null=True)
+    subject = models.TextField(help_text="Subject of the inquiry")
     message = models.TextField(help_text="Detailed message or inquiry")
     created_at = models.DateTimeField(auto_now_add=True, help_text="When the contact was submitted")
     updated_at = models.DateTimeField(auto_now=True, help_text="When the contact was last updated")
