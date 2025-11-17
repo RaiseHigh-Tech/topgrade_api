@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-+_q9s&%ws-35^#a@k8fkwc)u3mt&uc+mrxf_ns!(eans)d^w3g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*', 'a001cb2a9b2e.ngrok-free.app', 'www.topgradeinnovation.com', 'topgradeinnovation.com' '13.232.200.100', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'www.topgradeinnovation.com', 'topgradeinnovation.com' '13.127.233.16', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -206,12 +206,33 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.topgradeinnovation.com",
 ]
 
-# AWS S3 Configuration
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+FILE_UPLOAD_MAX_MEMORY_SIZE = 0  # Always use temp files, never memory
+
+# Stream large files to temporary files instead of memory
+FILE_UPLOAD_HANDLERS = [
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+# Temporary directory for file uploads (create this directory)
+FILE_UPLOAD_TEMP_DIR = '/home/ubuntu/topgrade_api/tmp'
+
+# ============================================
+# AWS S3 CONFIGURATION FOR LARGE FILE UPLOADS
+# ============================================
+
+# S3 Transfer Config - use multipart for files > 100MB
+AWS_S3_MAX_MEMORY_SIZE = 100 * 1024 * 1024  # 100MB
+
+# AWS Credentials
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'ap-south-1')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+# S3 Signature (required for some regions)
+AWS_S3_SIGNATURE_VERSION = 's3v4'
 
 # S3 Storage Settings
 AWS_DEFAULT_ACL = None
@@ -221,18 +242,23 @@ AWS_S3_OBJECT_PARAMETERS = {
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_FILE_OVERWRITE = False
 
-# Use S3 for media files in production
-USE_S3 = os.getenv('USE_S3', 'False').lower() == 'true'
+# CRITICAL: Multipart upload configuration for large files (500MB+)
+AWS_S3_MULTIPART_CHUNKSIZE = 100 * 1024 * 1024  # 100MB chunks
+AWS_S3_MULTIPART_THRESHOLD = 100 * 1024 * 1024  # Use multipart for files > 100MB
+AWS_S3_MAX_POOL_CONNECTIONS = 50  # Concurrent connections
 
 # CloudFront CDN Configuration
 AWS_CLOUDFRONT_DOMAIN = os.getenv('AWS_CLOUDFRONT_DOMAIN')
 USE_CLOUDFRONT = os.getenv('USE_CLOUDFRONT', 'False').lower() == 'true'
 
+# Use S3 for media files in production
+USE_S3 = os.getenv('USE_S3', 'False').lower() == 'true'
+
 if USE_S3:
     # S3 Media files using custom storage backend
     DEFAULT_FILE_STORAGE = 'topgrade_api.storage_backends.MediaStorage'
     
-    # Django 4.2+ STORAGES setting (overrides DEFAULT_FILE_STORAGE)
+    # Django 4.2+ STORAGES setting
     STORAGES = {
         "default": {
             "BACKEND": "topgrade_api.storage_backends.MediaStorage",
@@ -242,18 +268,11 @@ if USE_S3:
         },
     }
     
-    # Use CloudFront CDN if configured, otherwise use S3 directly
+    # Use CloudFront CDN if configured
     if USE_CLOUDFRONT and AWS_CLOUDFRONT_DOMAIN:
         MEDIA_URL = f'https://{AWS_CLOUDFRONT_DOMAIN}/media/'
     else:
         MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    
-    # S3 Static files (optional - uncomment if you want to serve static files from S3)
-    # STATICFILES_STORAGE = 'topgrade_api.storage_backends.StaticStorage'
-    # if USE_CLOUDFRONT and AWS_CLOUDFRONT_DOMAIN:
-    #     STATIC_URL = f'https://{AWS_CLOUDFRONT_DOMAIN}/static/'
-    # else:
-    #     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 else:
     # Local file storage (development)
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
