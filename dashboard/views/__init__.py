@@ -8,5 +8,6 @@ from .certificate_view import *
 from .enquiry_view import *
 from .carousel_view import *
 from .student_view import *
+from .student_certificate_view import *
 from .contact_view import *
 from .gallery_view import *

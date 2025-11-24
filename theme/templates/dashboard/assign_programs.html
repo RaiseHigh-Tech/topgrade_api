@@ -274,7 +274,7 @@
                     </td>
                     <td>
                       <div>
-                        <h6 class="mb-0">{{ assignment.program.title }}</h6>
+                        <h6 class="mb-0">{{ assignment.program.subtitle }}</h6>
                         <small class="text-muted">{{ assignment.program.category.name }}</small>
                       </div>
                     </td>
@@ -308,6 +308,9 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                           <li>
                             <button class="dropdown-item edit-assignment" data-id="{{ assignment.id }}" data-goldpass="{{ assignment.require_goldpass }}"><i class="ri-pencil-fill align-bottom me-2 text-primary"></i> Toggle GoldPass</button>
+                          </li>
+                          <li>
+                            <button class="dropdown-item mark-completed" data-id="{{ assignment.id }}" data-student="{{ assignment.user.fullname|default:assignment.user.email }}" data-program="{{ assignment.program.title }}"><i class="ri-checkbox-circle-fill align-bottom me-2 text-success"></i> Mark as Completed</button>
                           </li>
                           <li>
                             <button class="dropdown-item remove-assignment" data-id="{{ assignment.id }}" data-student="{{ assignment.user.fullname|default:assignment.user.email }}" data-program="{{ assignment.program.title }}"><i class="ri-delete-bin-fill align-bottom me-2 text-danger"></i> Remove</button>
@@ -488,6 +491,55 @@
             if (result.isConfirmed) {
               document.getElementById('remove_purchase_id').value = assignmentId
               document.getElementById('removeAssignmentForm').submit()
+            }
+          })
+        })
+      })
+    
+      // Mark as Completed handler
+      document.querySelectorAll('.mark-completed').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const assignmentId = this.getAttribute('data-id')
+          const studentName = this.getAttribute('data-student')
+          const programTitle = this.getAttribute('data-program')
+    
+          Swal.fire({
+            title: 'Mark as Completed?',
+            text: `Are you sure you want to mark "${programTitle}" as completed for ${studentName}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Mark Complete',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Create a form and submit
+              const form = document.createElement('form')
+              form.method = 'POST'
+              form.action = ''
+              
+              const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value
+              const csrfInput = document.createElement('input')
+              csrfInput.type = 'hidden'
+              csrfInput.name = 'csrfmiddlewaretoken'
+              csrfInput.value = csrfToken
+              form.appendChild(csrfInput)
+              
+              const formTypeInput = document.createElement('input')
+              formTypeInput.type = 'hidden'
+              formTypeInput.name = 'form_type'
+              formTypeInput.value = 'mark_completed'
+              form.appendChild(formTypeInput)
+              
+              const assignmentIdInput = document.createElement('input')
+              assignmentIdInput.type = 'hidden'
+              assignmentIdInput.name = 'assignment_id'
+              assignmentIdInput.value = assignmentId
+              form.appendChild(assignmentIdInput)
+              
+              document.body.appendChild(form)
+              form.submit()
             }
           })
         })

@@ -1,0 +1,278 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}
+  Student Certificates
+{% endblock %}
+{% block breadcrumb %}
+  Student Certificates
+{% endblock %}
+{% block content %}
+  <!-- start page title -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+        <h4 class="mb-sm-0">Student Certificates</h4>
+        <div class="page-title-right">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item">
+              <a href="{% url 'dashboard:dashboard' %}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active">Student Certificates</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end page title -->
+  
+  <div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-4 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Completed</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-success fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ total_completed }}">{{ total_completed }}</span></h4>
+              <a href="?status=all" class="text-decoration-underline">View all completed</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-success-subtle rounded fs-3"><i class="bx bx-check-circle text-success"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Certificates Sent</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-info fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ total_certificates_sent }}">{{ total_certificates_sent }}</span></h4>
+              <a href="?status=sent" class="text-decoration-underline">View sent certificates</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-info-subtle rounded fs-3"><i class="bx bx-paper-plane text-info"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+      <div class="card card-animate">
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <div class="flex-grow-1 overflow-hidden">
+              <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Pending Certificates</p>
+            </div>
+            <div class="flex-shrink-0">
+              <h5 class="text-warning fs-14 mb-0"><i class="ri-arrow-right-up-line fs-13 align-middle"></i></h5>
+            </div>
+          </div>
+          <div class="d-flex align-items-end justify-content-between mt-4">
+            <div>
+              <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ total_certificates_pending }}">{{ total_certificates_pending }}</span></h4>
+              <a href="?status=pending" class="text-decoration-underline">View pending</a>
+            </div>
+            <div class="avatar-sm flex-shrink-0">
+              <span class="avatar-title bg-warning-subtle rounded fs-3"><i class="bx bx-time text-warning"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0">Completed Courses - Certificate Management</h5>
+            </div>
+            <div class="col-auto">
+              <div class="d-flex gap-2">
+                <!-- Search -->
+                <form method="GET" class="d-flex gap-2">
+                  <input type="search" name="search" class="form-control" placeholder="Search student or program..." value="{{ search_query }}" />
+                  <button type="submit" class="btn btn-primary"><i class="ri-search-line"></i></button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive table-card mt-3 mb-1">
+            <table class="table align-middle table-nowrap" id="certificateTable">
+              <thead class="table-light">
+                <tr>
+                  <th>S No.</th>
+                  <th data-sort="student_name">Student</th>
+                  <th data-sort="program">Program</th>
+                  <th data-sort="completion_date">Completed Date</th>
+                  <th data-sort="certificate_status">Certificate Status</th>
+                  <th data-sort="certificate_number">Certificate Number</th>
+                  <th data-sort="action">Action</th>
+                </tr>
+              </thead>
+              <tbody class="list form-check-all">
+                {% for item in completed_courses %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="student_name">
+                      <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-2">
+                          <img src="{% static 'assets/dashboard/img/users/avatar-1.jpg' %}" alt="" class="avatar-xs rounded-circle" />
+                        </div>
+                        <div class="flex-grow-1">
+                          <h5 class="fs-13 mb-0">
+                            <a href="{% url 'dashboard:student_details' item.course_progress.user.id %}" class="text-dark">
+                              {{ item.course_progress.user.fullname|default:item.course_progress.user.email }}
+                            </a>
+                          </h5>
+                          <p class="text-muted mb-0 fs-11">{{ item.course_progress.user.email }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="program">
+                      <div>
+                        <h5 class="fs-13 mb-0">{{ item.course_progress.purchase.program.subtitle }}</h5>
+                        <p class="text-muted mb-0 fs-11">{{ item.course_progress.purchase.program.category.name }}</p>
+                      </div>
+                    </td>
+                    <td class="completion_date">
+                      {% if item.course_progress.completed_at %}
+                        {{ item.course_progress.completed_at|date:'d/m/Y' }}
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </td>
+                    <td class="certificate_status">
+                      {% if item.certificate_status == 'sent' %}
+                        <span class="badge bg-success-subtle text-success">
+                          <i class="ri-checkbox-circle-line align-middle"></i> Sent
+                        </span>
+                      {% elif item.certificate_status == 'pending' %}
+                        <span class="badge bg-warning-subtle text-warning">
+                          <i class="ri-time-line align-middle"></i> Pending
+                        </span>
+                      {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary">
+                          <i class="ri-file-list-line align-middle"></i> Not Issued
+                        </span>
+                      {% endif %}
+                    </td>
+                    <td class="certificate_number">
+                      {% if item.certificate_number %}
+                        <span class="badge bg-primary">{{ item.certificate_number }}</span>
+                      {% else %}
+                        <span class="text-muted">-</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        {% if item.certificate_obj and item.certificate_obj.certificate_file %}
+                          <!-- Certificate already generated, show download and send options -->
+                          <a href="{{ item.certificate_obj.certificate_file.url }}" target="_blank" class="btn btn-sm btn-success" title="View Certificate">
+                            <i class="ri-file-download-line align-bottom"></i> View/Download
+                          </a>
+                          {% if item.certificate_status != 'sent' %}
+                            <form method="POST" style="display: inline;">
+                              {% csrf_token %}
+                              <input type="hidden" name="action" value="send_certificate" />
+                              <input type="hidden" name="course_progress_id" value="{{ item.course_progress.id }}" />
+                              <button type="submit" class="btn btn-sm btn-primary" title="Send Certificate">
+                                <i class="ri-mail-send-line align-bottom"></i> Send
+                              </button>
+                            </form>
+                          {% else %}
+                            <span class="badge bg-success">
+                              <i class="ri-check-line"></i> Sent on {{ item.certificate_sent_date|date:'d/m/Y' }}
+                            </span>
+                          {% endif %}
+                        {% else %}
+                          <!-- No certificate generated yet, show generate button -->
+                          <form method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="generate_certificate" />
+                            <input type="hidden" name="course_progress_id" value="{{ item.course_progress.id }}" />
+                            <button type="submit" class="btn btn-sm btn-info" title="Generate Certificate">
+                              <i class="ri-file-text-line align-bottom"></i> Generate Certificate
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="7" class="text-center">
+                      <div class="noresult">
+                        <div class="text-center">
+                          <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>
+                          <h5 class="mt-2">Sorry! No Completed Courses Found</h5>
+                          <p class="text-muted mb-0">No students have completed any courses yet.</p>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          {% if completed_courses.has_other_pages %}
+            <div class="d-flex justify-content-end">
+              <div class="pagination-wrap hstack gap-2">
+                {% if completed_courses.has_previous %}
+                  <a class="page-item pagination-prev" href="?page={{ completed_courses.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">Previous</a>
+                {% else %}
+                  <a class="page-item pagination-prev disabled">Previous</a>
+                {% endif %}
+
+                <ul class="pagination listjs-pagination mb-0">
+                  {% for page_num in page_range %}
+                    {% if page_num == current_page %}
+                      <li class="active">
+                        <a class="page" href="#" data-i="{{ page_num }}" data-page="{{ page_num }}">{{ page_num }}</a>
+                      </li>
+                    {% else %}
+                      <li>
+                        <a class="page" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" data-i="{{ page_num }}" data-page="{{ page_num }}">{{ page_num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+
+                {% if completed_courses.has_next %}
+                  <a class="page-item pagination-next" href="?page={{ completed_courses.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">Next</a>
+                {% else %}
+                  <a class="page-item pagination-next disabled">Next</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

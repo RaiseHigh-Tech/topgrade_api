@@ -4,7 +4,7 @@ from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
-    ProgramEnquiry, Contact
+    ProgramEnquiry, Contact, UserCertificate
 )
 
 # Restrict admin access to superusers only
@@ -482,3 +482,42 @@ class ContactAdmin(admin.ModelAdmin):
         if obj:  # editing an existing object
             return ['full_name', 'email', 'contact_no', 'subject', 'message', 'created_at', 'updated_at']
         return self.readonly_fields
+
+
+@admin.register(UserCertificate)
+class UserCertificateAdmin(admin.ModelAdmin):
+    """
+    Admin interface for User Certificate model
+    """
+    list_display = ['certificate_number', 'get_student_name', 'get_program_title', 'status', 'issued_date', 'sent_date']
+    list_filter = ['status', 'issued_date', 'program']
+    search_fields = ['certificate_number', 'user__email', 'user__fullname', 'program__title']
+    readonly_fields = ['certificate_number', 'issued_date', 'created_at', 'updated_at']
+    ordering = ['-issued_date']
+    list_editable = ['status']
+    
+    fieldsets = (
+        ('Certificate Information', {
+            'fields': ('certificate_number', 'user', 'program', 'course_progress')
+        }),
+        ('Certificate File', {
+            'fields': ('certificate_file',)
+        }),
+        ('Status & Dates', {
+            'fields': ('status', 'issued_date', 'sent_date')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_student_name(self, obj):
+        return obj.user.fullname or obj.user.email
+    get_student_name.short_description = 'Student Name'
+    get_student_name.admin_order_field = 'user__fullname'
+    
+    def get_program_title(self, obj):
+        return obj.program.title
+    get_program_title.short_description = 'Program'
+    get_program_title.admin_order_field = 'program__title'

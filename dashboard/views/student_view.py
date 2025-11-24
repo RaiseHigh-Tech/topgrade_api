@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
 from django.db.models import Count, Q
-from topgrade_api.models import CustomUser, UserPurchase, Program, Category
+from topgrade_api.models import CustomUser, UserPurchase, Program, Category, UserCourseProgress
 from .auth_view import admin_required
 
 User = get_user_model()
@@ -295,6 +295,43 @@ def assign_programs_view(request):
                     messages.error(request, f'Error removing assignment: {str(e)}')
             else:
                 messages.error(request, 'Assignment ID is required for removal')
+        
+        elif form_type == 'mark_completed':
+            assignment_id = request.POST.get('assignment_id')
+            if assignment_id:
+                try:
+                    purchase = UserPurchase.objects.get(id=assignment_id)
+                    
+                    # Create or update UserCourseProgress as completed
+                    course_progress, created = UserCourseProgress.objects.get_or_create(
+                        user=purchase.user,
+                        purchase=purchase,
+                        defaults={
+                            'is_completed': True,
+                            'completion_percentage': 100.0,
+                            'completed_at': timezone.now(),
+                            'completed_topics': 0,
+                            'total_topics': 0,
+                        }
+                    )
+                    
+                    if not created:
+                        # Update existing progress to completed
+                        course_progress.is_completed = True
+                        course_progress.completion_percentage = 100.0
+                        course_progress.completed_at = timezone.now()
+                        course_progress.save()
+                    
+                    student_name = purchase.user.fullname or purchase.user.email
+                    program_title = purchase.program.title
+                    messages.success(request, f'Successfully marked {program_title} as completed for {student_name}')
+                    
+                except UserPurchase.DoesNotExist:
+                    messages.error(request, 'Assignment not found')
+                except Exception as e:
+                    messages.error(request, f'Error marking as completed: {str(e)}')
+            else:
+                messages.error(request, 'Assignment ID is required')
         
         return redirect('dashboard:assign_programs')
     

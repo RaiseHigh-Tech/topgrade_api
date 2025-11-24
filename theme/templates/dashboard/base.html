@@ -143,10 +143,15 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:student_certificates' %}active{% endif %}" href="{% url 'dashboard:student_certificates' %}" role="button">
+                                <i class="ri-award-line"></i> Student Certificates
+                            </a>
+                        </li>
+                        {% comment %} <li class="nav-item">
                             <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:chat' %}active{% endif %}" href="{% url 'dashboard:chat' %}" role="button">
                                 <i class="ri-chat-3-line"></i> Chat
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         <li class="nav-item">
                             <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:carousel' %}active{% endif %}" href="{% url 'dashboard:carousel' %}" role="button">
                                 <i class="ri-image-line"></i> Carousel
@@ -164,7 +169,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link menu-link {% if request.resolver_match.view_name == 'dashboard:certificates' %}active{% endif %}" href="{% url 'dashboard:certificates' %}" role="button">
-                                <i class="ri-award-line"></i> Certificates
+                                <i class="ri-award-line"></i>Sample Certificates
                             </a>
                         </li>
                         <li class="nav-item">

@@ -696,3 +696,79 @@ class Gallery(models.Model):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
         return None
+
+class UserCertificate(models.Model):
+    """
+    Model to track certificates issued to students for completed courses
+    """
+    CERTIFICATE_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('downloaded', 'Downloaded'),
+    ]
+    
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='user_certificates',
+        help_text="Student who earned the certificate"
+    )
+    course_progress = models.OneToOneField(
+        UserCourseProgress,
+        on_delete=models.CASCADE,
+        related_name='certificate',
+        help_text="Course progress record for this certificate"
+    )
+    program = models.ForeignKey(
+        Program,
+        on_delete=models.CASCADE,
+        related_name='user_certificates',
+        help_text="Program for which certificate is issued"
+    )
+    certificate_file = models.FileField(
+        upload_to='user_certificates/',
+        blank=True,
+        null=True,
+        help_text="Generated certificate file"
+    )
+    certificate_number = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Unique certificate number"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_STATUS_CHOICES,
+        default='pending',
+        help_text="Certificate delivery status"
+    )
+    issued_date = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Date when certificate was issued"
+    )
+    sent_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Date when certificate was sent to student"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-issued_date']
+        verbose_name = 'User Certificate'
+        verbose_name_plural = 'User Certificates'
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['certificate_number']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.fullname or self.user.email} - {self.program.title} - {self.certificate_number}"
+    
+    def save(self, *args, **kwargs):
+        # Generate certificate number if not exists
+        if not self.certificate_number:
+            import uuid
+            self.certificate_number = f"CERT-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
