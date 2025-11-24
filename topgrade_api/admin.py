@@ -168,10 +168,24 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(UserPurchase)
 class UserPurchaseAdmin(admin.ModelAdmin):
-    list_display = ['user', 'get_program_title', 'get_program_type', 'purchase_date', 'status', 'amount_paid']
-    list_filter = ['status', 'purchase_date', 'program__category']
+    list_display = ['user', 'get_program_title', 'get_program_type', 'purchase_date', 'status', 'amount_paid', 'require_goldpass', 'get_goldpass_status']
+    list_filter = ['status', 'purchase_date', 'program__category', 'require_goldpass']
     search_fields = ['user__email', 'program__title']
     ordering = ['-purchase_date']
+    list_editable = ['require_goldpass']
+    
+    fieldsets = (
+        ('Purchase Information', {
+            'fields': ('user', 'program', 'status', 'amount_paid')
+        }),
+        ('Additional Options', {
+            'fields': ('require_goldpass',)
+        }),
+        ('Timestamps', {
+            'fields': ('purchase_date',),
+            'classes': ('collapse',)
+        }),
+    )
     
     def get_program_title(self, obj):
         return obj.program.title if obj.program else "N/A"
@@ -180,6 +194,10 @@ class UserPurchaseAdmin(admin.ModelAdmin):
     def get_program_type(self, obj):
         return 'Advanced' if obj.program and obj.program.is_advanced else 'Regular'
     get_program_type.short_description = 'Program Type'
+    
+    def get_goldpass_status(self, obj):
+        return "🌟 GoldPass" if obj.require_goldpass else "Regular"
+    get_goldpass_status.short_description = 'Pass Type'
 
 
 @admin.register(UserBookmark)

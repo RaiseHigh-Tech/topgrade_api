@@ -142,7 +142,7 @@ def student_details_view(request, student_id):
         return redirect('dashboard:students')
     
     # Get student's purchases/enrollments
-    purchases = UserPurchase.objects.filter(user=student).select_related('program').order_by('-purchase_date')
+    purchases = UserPurchase.objects.filter(user=student).select_related('program', 'program__category').order_by('-purchase_date')
     
     # Calculate statistics for this student
     total_enrollments = purchases.count()
@@ -152,6 +152,47 @@ def student_details_view(request, student_id):
         total=models.Sum('amount_paid')
     )['total'] or 0
     
+    # Calculate overall progress (based on completed vs total)
+    total_courses = total_enrollments
+    completed_courses = completed_enrollments
+    overall_progress = int((completed_courses / total_courses * 100)) if total_courses > 0 else 0
+    
+    # Calculate time spent (placeholder values - can be enhanced with actual tracking)
+    total_watch_hours = 0
+    total_watch_minutes = 0
+    learning_days = 0
+    
+    # Count days student has been active (days since first enrollment)
+    if purchases.exists():
+        first_purchase = purchases.last()
+        learning_days = (timezone.now().date() - first_purchase.purchase_date.date()).days
+    
+    # Recent enrollments (last 10)
+    recent_enrollments = purchases[:10]
+    
+    # Calculate completion rate
+    completion_rate = int((completed_courses / total_courses * 100)) if total_courses > 0 else 0
+    
+    # Active enrollments (completed status)
+    active_enrollments = completed_enrollments
+    
+    # Total spent
+    total_spent = total_amount_paid
+    
+    # Average program rating (from enrolled programs)
+    avg_program_rating = 0
+    if purchases.exists():
+        ratings = purchases.filter(program__program_rating__gt=0).aggregate(
+            avg_rating=models.Avg('program__program_rating')
+        )
+        avg_program_rating = round(ratings['avg_rating'], 1) if ratings['avg_rating'] else 0
+    
+    # Progress data (placeholder - for future implementation with actual progress tracking)
+    progress_data = []
+    
+    # Activity data (placeholder - for future implementation with actual activity tracking)
+    activity_data = []
+    
     context = {
         'user': request.user,
         'student': student,
@@ -160,6 +201,19 @@ def student_details_view(request, student_id):
         'completed_enrollments': completed_enrollments,
         'pending_enrollments': pending_enrollments,
         'total_amount_paid': total_amount_paid,
+        'overall_progress': overall_progress,
+        'completed_courses': completed_courses,
+        'total_courses': total_courses,
+        'total_watch_hours': total_watch_hours,
+        'total_watch_minutes': total_watch_minutes,
+        'learning_days': learning_days,
+        'recent_enrollments': recent_enrollments,
+        'completion_rate': completion_rate,
+        'active_enrollments': active_enrollments,
+        'total_spent': total_spent,
+        'avg_program_rating': avg_program_rating,
+        'progress_data': progress_data,
+        'activity_data': activity_data,
     }
     return render(request, 'dashboard/student_details.html', context)
 
@@ -173,6 +227,7 @@ def assign_programs_view(request):
             student_id = request.POST.get('student_id')
             program_id = request.POST.get('program_id')
             amount_paid = request.POST.get('amount_paid', 0)
+            is_goldpass = request.POST.get('is_goldpass') == 'on'
             
             if student_id and program_id:
                 try:
@@ -194,9 +249,11 @@ def assign_programs_view(request):
                             program=program,
                             amount_paid=float(amount_paid) if amount_paid else 0.0,
                             status='completed',
-                            purchase_date=timezone.now()
+                            purchase_date=timezone.now(),
+                            require_goldpass=is_goldpass
                         )
-                        messages.success(request, f'Successfully assigned {program.title} to {student.fullname or student.email}')
+                        goldpass_text = ' as GoldPass' if is_goldpass else ''
+                        messages.success(request, f'Successfully assigned {program.title} to {student.fullname or student.email}{goldpass_text}')
                         
                 except CustomUser.DoesNotExist:
                     messages.error(request, 'Student not found')
@@ -206,6 +263,22 @@ def assign_programs_view(request):
                     messages.error(request, f'Error assigning program: {str(e)}')
             else:
                 messages.error(request, 'Student and program selection are required')
+        
+        elif form_type == 'toggle_goldpass':
+            purchase_id = request.POST.get('purchase_id')
+            if purchase_id:
+                try:
+                    purchase = UserPurchase.objects.get(id=purchase_id)
+                    purchase.require_goldpass = not purchase.require_goldpass
+                    purchase.save()
+                    status_text = 'GoldPass' if purchase.require_goldpass else 'Regular'
+                    messages.success(request, f'Successfully updated {purchase.program.title} to {status_text} for {purchase.user.fullname or purchase.user.email}')
+                except UserPurchase.DoesNotExist:
+                    messages.error(request, 'Assignment not found')
+                except Exception as e:
+                    messages.error(request, f'Error updating assignment: {str(e)}')
+            else:
+                messages.error(request, 'Assignment ID is required')
         
         elif form_type == 'remove_assignment':
             purchase_id = request.POST.get('purchase_id')

@@ -242,6 +242,7 @@ class UserPurchase(models.Model):
     purchase_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=PURCHASE_STATUS_CHOICES, default='pending')
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Amount actually paid after discounts")
+    require_goldpass = models.BooleanField(default=False, help_text="Indicates if this is a GoldPass program")
     
     class Meta:
         ordering = ['-purchase_date']
@@ -658,7 +659,6 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.subject[:50]}..."
-
 
 class Gallery(models.Model):
     """
