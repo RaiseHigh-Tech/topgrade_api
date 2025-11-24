@@ -707,16 +707,24 @@ class UserCertificate(models.Model):
         ('downloaded', 'Downloaded'),
     ]
     
+    CERTIFICATE_TYPE_CHOICES = [
+        ('internship', 'Internship Certificate'),
+        ('training', 'Training Certificate'),
+        ('credit', 'Credit Certificate'),
+        ('recommendation', 'Letter of Recommendation'),
+        ('placement', 'Placement Certificate'),
+    ]
+    
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='user_certificates',
         help_text="Student who earned the certificate"
     )
-    course_progress = models.OneToOneField(
+    course_progress = models.ForeignKey(
         UserCourseProgress,
         on_delete=models.CASCADE,
-        related_name='certificate',
+        related_name='certificates',
         help_text="Course progress record for this certificate"
     )
     program = models.ForeignKey(
@@ -724,6 +732,12 @@ class UserCertificate(models.Model):
         on_delete=models.CASCADE,
         related_name='user_certificates',
         help_text="Program for which certificate is issued"
+    )
+    certificate_type = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_TYPE_CHOICES,
+        default='internship',
+        help_text="Type of certificate"
     )
     certificate_file = models.FileField(
         upload_to='user_certificates/',
@@ -733,8 +747,7 @@ class UserCertificate(models.Model):
     )
     certificate_number = models.CharField(
         max_length=100,
-        unique=True,
-        help_text="Unique certificate number"
+        help_text="Certificate number (same for all certificates of a student)"
     )
     status = models.CharField(
         max_length=20,
@@ -758,13 +771,20 @@ class UserCertificate(models.Model):
         ordering = ['-issued_date']
         verbose_name = 'User Certificate'
         verbose_name_plural = 'User Certificates'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'course_progress', 'certificate_type'],
+                name='unique_user_course_certificate_type'
+            )
+        ]
         indexes = [
             models.Index(fields=['user', 'status']),
             models.Index(fields=['certificate_number']),
+            models.Index(fields=['course_progress', 'certificate_type']),
         ]
     
     def __str__(self):
-        return f"{self.user.fullname or self.user.email} - {self.program.title} - {self.certificate_number}"
+        return f"{self.user.fullname or self.user.email} - {self.program.title} - {self.get_certificate_type_display()} - {self.certificate_number}"
     
     def save(self, *args, **kwargs):
         # Generate certificate number if not exists

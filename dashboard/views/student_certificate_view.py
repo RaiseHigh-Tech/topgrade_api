@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from topgrade_api.models import CustomUser, UserCourseProgress, UserCertificate
 from .auth_view import admin_required
-from dashboard.utils import generate_certificate_pdf
+from dashboard.utils import generate_certificate_pdf, generate_bulk_certificates
 
 
 @admin_required
@@ -24,37 +24,54 @@ def student_certificates_view(request):
                 try:
                     course_progress = UserCourseProgress.objects.get(id=course_progress_id, is_completed=True)
                     
-                    # Check if certificate already exists
-                    certificate, created = UserCertificate.objects.get_or_create(
-                        user=course_progress.user,
-                        course_progress=course_progress,
-                        program=course_progress.purchase.program,
-                        defaults={
-                            'status': 'pending',
-                        }
-                    )
+                    # Check if user purchase requires goldpass to determine certificate types
+                    require_goldpass = course_progress.purchase.require_goldpass
                     
-                    # Generate PDF certificate
-                    pdf_file = generate_certificate_pdf(
+                    # Generate a single certificate number for all certificates
+                    import uuid
+                    base_certificate_number = f"CERT-{uuid.uuid4().hex[:8].upper()}"
+                    
+                    # Generate bulk certificates
+                    certificates = generate_bulk_certificates(
                         user=course_progress.user,
                         program=course_progress.purchase.program,
-                        certificate_number=certificate.certificate_number,
-                        completion_date=course_progress.completed_at
+                        base_certificate_number=base_certificate_number,
+                        completion_date=course_progress.completed_at,
+                        include_placement=require_goldpass
                     )
                     
-                    # Save the PDF file to the certificate
-                    certificate.certificate_file.save(
-                        f"certificate_{certificate.certificate_number}.pdf",
-                        pdf_file,
-                        save=True
-                    )
+                    # Save each certificate to the database
+                    certificates_created = []
+                    for cert_type, pdf_file in certificates.items():
+                        certificate, created = UserCertificate.objects.get_or_create(
+                            user=course_progress.user,
+                            course_progress=course_progress,
+                            program=course_progress.purchase.program,
+                            certificate_type=cert_type,
+                            defaults={
+                                'status': 'pending',
+                                'certificate_number': base_certificate_number,
+                            }
+                        )
+                        
+                        # Save the PDF file
+                        certificate.certificate_file.save(
+                            f"{cert_type}_certificate_{base_certificate_number}.pdf",
+                            pdf_file,
+                            save=True
+                        )
+                        certificates_created.append(certificate.get_certificate_type_display())
                     
-                    messages.success(request, f'Certificate generated successfully for {course_progress.user.fullname or course_progress.user.email}')
+                    student_name = course_progress.user.fullname or course_progress.user.email
+                    cert_count = len(certificates_created)
+                    cert_list = ', '.join(certificates_created)
+                    
+                    messages.success(request, f'Successfully generated {cert_count} certificates for {student_name}: {cert_list}')
                     
                 except UserCourseProgress.DoesNotExist:
                     messages.error(request, 'Course progress not found or not completed')
                 except Exception as e:
-                    messages.error(request, f'Error generating certificate: {str(e)}')
+                    messages.error(request, f'Error generating certificates: {str(e)}')
             else:
                 messages.error(request, 'Course progress ID is required')
         
@@ -64,33 +81,34 @@ def student_certificates_view(request):
                 try:
                     course_progress = UserCourseProgress.objects.get(id=course_progress_id, is_completed=True)
                     
-                    # Check if certificate already exists
-                    certificate, created = UserCertificate.objects.get_or_create(
+                    # Update all certificates for this course progress to sent
+                    certificates = UserCertificate.objects.filter(
                         user=course_progress.user,
                         course_progress=course_progress,
                         program=course_progress.purchase.program,
-                        defaults={
-                            'status': 'sent',
-                            'sent_date': timezone.now()
-                        }
                     )
                     
-                    if created:
-                        messages.success(request, f'Certificate sent to {course_progress.user.fullname or course_progress.user.email} for {course_progress.purchase.program.title}')
-                    else:
-                        # Update existing certificate
-                        if certificate.status == 'pending':
-                            certificate.status = 'sent'
-                            certificate.sent_date = timezone.now()
-                            certificate.save()
-                            messages.success(request, f'Certificate status updated to "Sent" for {course_progress.user.fullname or course_progress.user.email}')
+                    if certificates.exists():
+                        updated_count = 0
+                        for certificate in certificates:
+                            if certificate.status == 'pending':
+                                certificate.status = 'sent'
+                                certificate.sent_date = timezone.now()
+                                certificate.save()
+                                updated_count += 1
+                        
+                        if updated_count > 0:
+                            student_name = course_progress.user.fullname or course_progress.user.email
+                            messages.success(request, f'Successfully sent {updated_count} certificates to {student_name}')
                         else:
-                            messages.info(request, f'Certificate already sent to {course_progress.user.fullname or course_progress.user.email}')
+                            messages.info(request, f'All certificates already sent to {course_progress.user.fullname or course_progress.user.email}')
+                    else:
+                        messages.error(request, 'No certificates found for this student')
                     
                 except UserCourseProgress.DoesNotExist:
                     messages.error(request, 'Course progress not found or not completed')
                 except Exception as e:
-                    messages.error(request, f'Error sending certificate: {str(e)}')
+                    messages.error(request, f'Error sending certificates: {str(e)}')
             else:
                 messages.error(request, 'Course progress ID is required')
         
@@ -118,19 +136,28 @@ def student_certificates_view(request):
     # Annotate with certificate information
     completed_courses_with_certs = []
     for course_progress in completed_courses:
-        try:
-            certificate = UserCertificate.objects.get(course_progress=course_progress)
+        certificates = UserCertificate.objects.filter(course_progress=course_progress)
+        
+        if certificates.exists():
             has_certificate = True
-            certificate_status = certificate.status
-            certificate_number = certificate.certificate_number
-            certificate_sent_date = certificate.sent_date
-            certificate_obj = certificate
-        except UserCertificate.DoesNotExist:
+            # Get the status based on certificates (if any are sent, show sent, else pending)
+            sent_certificates = certificates.filter(status='sent')
+            if sent_certificates.exists():
+                certificate_status = 'sent'
+                certificate_sent_date = sent_certificates.first().sent_date
+            else:
+                certificate_status = 'pending'
+                certificate_sent_date = None
+            
+            # Use the first certificate's number (they should all have the same number)
+            certificate_number = certificates.first().certificate_number
+            certificates_list = certificates
+        else:
             has_certificate = False
             certificate_status = 'not_issued'
             certificate_number = None
             certificate_sent_date = None
-            certificate_obj = None
+            certificates_list = None
         
         completed_courses_with_certs.append({
             'course_progress': course_progress,
@@ -138,7 +165,8 @@ def student_certificates_view(request):
             'certificate_status': certificate_status,
             'certificate_number': certificate_number,
             'certificate_sent_date': certificate_sent_date,
-            'certificate_obj': certificate_obj,
+            'certificates_list': certificates_list,
+            'require_goldpass': course_progress.purchase.require_goldpass,
         })
     
     # Apply status filter
