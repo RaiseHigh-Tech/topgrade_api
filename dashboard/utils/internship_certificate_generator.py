@@ -42,7 +42,7 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
     }
     
     # Render HTML template
-    html_string = render_to_string('dashboard/internship_certificate_template.html', context)
+    html_string = render_to_string('certificates/internship_certificate_template.html', context)
     
     # Generate PDF from HTML
     html = HTML(string=html_string)
