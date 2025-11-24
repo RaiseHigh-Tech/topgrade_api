@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block content %}
+  {% csrf_token %}
   <style>
     .hero-grid-background {
       background-color: #1c120a;
@@ -85,6 +86,117 @@
       background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
       border-left: 4px solid #ef4444;
     }
+
+    /* Certificate Gallery Styles */
+    .certificate-thumbnail {
+      position: relative;
+      background: linear-gradient(135deg, #fff, #f8fafc);
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .certificate-thumbnail:hover {
+      border-color: #f07c00;
+      box-shadow: 0 8px 25px rgba(240, 124, 0, 0.15);
+      transform: translateY(-3px);
+    }
+
+    .certificate-thumbnail .certificate-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .certificate-thumbnail .certificate-type {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .certificate-thumbnail .certificate-status {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .certificate-actions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      display: flex;
+      gap: 8px;
+    }
+
+    .certificate-thumbnail:hover .certificate-actions {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .certificate-thumbnail:hover .certificate-icon,
+    .certificate-thumbnail:hover .certificate-type,
+    .certificate-thumbnail:hover .certificate-status {
+      opacity: 0.3;
+    }
+
+    .certificate-action-btn {
+      background: #f07c00;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .certificate-action-btn:hover {
+      background: #e06b00;
+      transform: scale(1.1);
+      color: white;
+    }
+
+    .certificate-action-btn.view-btn {
+      background: #10b981;
+    }
+
+    .certificate-action-btn.view-btn:hover {
+      background: #059669;
+    }
+
+    .certificate-action-btn.download-btn {
+      background: #3b82f6;
+    }
+
+    .certificate-action-btn.download-btn:hover {
+      background: #2563eb;
+    }
+
+    /* Certificate Type Icons */
+    .cert-icon-internship { color: #10b981; }
+    .cert-icon-training { color: #3b82f6; }
+    .cert-icon-credit { color: #f59e0b; }
+    .cert-icon-recommendation { color: #8b5cf6; }
+    .cert-icon-placement { color: #ef4444; }
   </style>
 
   <!-- HERO SECTION -->
@@ -246,6 +358,23 @@
                 </div>
               </div>
 
+              <!-- Certificate Gallery Section -->
+              <div class="border-t pt-6 mb-6">
+                <div class="flex items-center justify-between mb-6">
+                  <div class="flex items-center">
+                    <i class="fa-solid fa-certificate text-[#f07c00] text-xl mr-3"></i>
+                    <h3 class="font-semibold text-gray-800 text-lg">Available Certificates</h3>
+                  </div>
+                  <span class="badge bg-primary px-3 py-1 rounded-full text-sm font-semibold" id="packageTypeBadge">
+                    <span id="packageType">Standard Package</span>
+                  </span>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="certificateGallery">
+                  <!-- Certificate thumbnails will be loaded here -->
+                </div>
+              </div>
+
               <!-- Certificate Footer -->
               <div class="border-t pt-6 text-center">
                 <div class="flex items-center justify-center mb-4">
@@ -306,37 +435,6 @@
       const certificateDetails = document.getElementById('certificateDetails');
       const errorMessage = document.getElementById('errorMessage');
 
-      // Sample valid certificate numbers for demonstration
-      const validCertificates = {
-        'TG-2024-WD-001234': {
-          studentName: 'Rajesh Kumar Sharma',
-          programName: 'Full Stack Web Development',
-          programDescription: 'Comprehensive course covering HTML, CSS, JavaScript, React, Node.js, and MongoDB',
-          duration: '6 Months',
-          provider: 'TopGrade Education Pvt. Ltd.',
-          issueDate: 'March 15, 2024',
-          grade: 'A+ (95%)'
-        },
-        'TG-2024-DS-002156': {
-          studentName: 'Priya Patel',
-          programName: 'Data Science & Machine Learning',
-          programDescription: 'Advanced course in Python, Statistics, ML algorithms, and Data Visualization',
-          duration: '8 Months',
-          provider: 'TopGrade Education Pvt. Ltd.',
-          issueDate: 'February 28, 2024',
-          grade: 'A (92%)'
-        },
-        'TG-2024-CS-003789': {
-          studentName: 'Amit Singh',
-          programName: 'Cybersecurity Specialist',
-          programDescription: 'Complete cybersecurity training including ethical hacking and network security',
-          duration: '4 Months',
-          provider: 'TopGrade Education Pvt. Ltd.',
-          issueDate: 'April 10, 2024',
-          grade: 'A+ (96%)'
-        }
-      };
-
       function hideAllMessages() {
         certificateDetails.style.display = 'none';
         errorMessage.style.display = 'none';
@@ -348,28 +446,127 @@
         loadingState.classList.remove('hidden');
       }
 
-      function showCertificateDetails(certData, certNumber) {
+      function getCertificateIcon(certType) {
+        const icons = {
+          'internship': 'fa-briefcase',
+          'training': 'fa-graduation-cap',
+          'credit': 'fa-medal',
+          'recommendation': 'fa-thumbs-up',
+          'placement': 'fa-building'
+        };
+        return icons[certType] || 'fa-certificate';
+      }
+
+      function getCertificateColor(certType) {
+        const colors = {
+          'internship': 'cert-icon-internship',
+          'training': 'cert-icon-training',
+          'credit': 'cert-icon-credit',
+          'recommendation': 'cert-icon-recommendation',
+          'placement': 'cert-icon-placement'
+        };
+        return colors[certType] || 'cert-icon-internship';
+      }
+
+      function createCertificateGallery(certificates) {
+        const gallery = document.getElementById('certificateGallery');
+        gallery.innerHTML = '';
+
+        console.log('Creating certificate gallery with certificates:', certificates);
+
+        certificates.forEach(cert => {
+          const thumbnail = document.createElement('div');
+          thumbnail.className = 'certificate-thumbnail';
+          
+          const iconClass = getCertificateIcon(cert.type_code);
+          const colorClass = getCertificateColor(cert.type_code);
+          
+          thumbnail.innerHTML = `
+            <div class="certificate-icon ${colorClass}">
+              <i class="fa-solid ${iconClass}"></i>
+            </div>
+            <div class="certificate-type">${cert.type}</div>
+            <div class="certificate-status bg-green-100 text-green-800">${cert.status}</div>
+            
+            <div class="certificate-actions">
+              ${cert.file_url ? `
+                <a href="${cert.file_url}" target="_blank" class="certificate-action-btn view-btn" title="View Certificate">
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+                <a href="${cert.file_url}" download class="certificate-action-btn download-btn" title="Download Certificate">
+                  <i class="fa-solid fa-download"></i>
+                </a>
+              ` : `
+                <div class="certificate-action-btn" style="background: #6b7280; cursor: not-allowed;" title="Certificate not available">
+                  <i class="fa-solid fa-times"></i>
+                </div>
+              `}
+            </div>
+          `;
+          
+          gallery.appendChild(thumbnail);
+        });
+      }
+
+      function showCertificateDetails(certificate) {
         hideAllMessages();
         
         // Update certificate details with data
-        document.getElementById('studentName').textContent = certData.studentName;
-        document.getElementById('certNumber').textContent = certNumber;
-        document.getElementById('programName').textContent = certData.programName;
-        document.getElementById('programDescription').textContent = certData.programDescription;
-        document.getElementById('duration').textContent = certData.duration;
-        document.getElementById('provider').textContent = certData.provider;
-        document.getElementById('issueDate').textContent = certData.issueDate;
-        document.getElementById('grade').textContent = certData.grade;
+        document.getElementById('studentName').textContent = certificate.student_name;
+        document.getElementById('certNumber').textContent = certificate.certificate_number;
+        document.getElementById('programName').textContent = certificate.program_name;
+        document.getElementById('programDescription').textContent = certificate.program_description;
+        document.getElementById('provider').textContent = certificate.provider;
+        document.getElementById('issueDate').textContent = certificate.issue_date;
+        
+        // Update completion date (new field)
+        const completionDateElement = document.getElementById('completionDate');
+        if (completionDateElement) {
+          completionDateElement.textContent = certificate.completion_date;
+        }
+        
+        // Update package type
+        const packageTypeElement = document.getElementById('packageType');
+        const packageTypeBadge = document.getElementById('packageTypeBadge');
+        
+        if (packageTypeElement && packageTypeBadge) {
+          packageTypeElement.textContent = certificate.package_type;
+          
+          // Style badge based on package type
+          if (certificate.package_type.includes('Gold')) {
+            packageTypeBadge.className = 'badge bg-warning px-3 py-1 rounded-full text-sm font-semibold text-white';
+          } else {
+            packageTypeBadge.className = 'badge bg-primary px-3 py-1 rounded-full text-sm font-semibold';
+          }
+        }
+        
+        // Create certificate gallery
+        if (certificate.certificates && certificate.certificates.length > 0) {
+          createCertificateGallery(certificate.certificates);
+        }
         
         certificateDetails.style.display = 'block';
+        
+        // Smooth scroll to results
+        certificateDetails.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
       }
 
-      function showError() {
+      function showError(message = 'Certificate not found. Please check the certificate number and try again.') {
         hideAllMessages();
+        
+        // Update error message
+        const errorText = errorMessage.querySelector('.text-red-600');
+        if (errorText) {
+          errorText.textContent = message;
+        }
+        
         errorMessage.style.display = 'block';
       }
 
-      function verifyCertificate() {
+      async function verifyCertificate() {
         const certNumber = certificateInput.value.trim().toUpperCase();
         
         if (!certNumber) {
@@ -379,14 +576,33 @@
 
         showLoading();
 
-        // Simulate API call delay
-        setTimeout(() => {
-          if (validCertificates[certNumber]) {
-            showCertificateDetails(validCertificates[certNumber], certNumber);
+        try {
+          const response = await fetch('{% url "verify_certificate" %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+              certificate_number: certNumber
+            })
+          });
+
+          const data = await response.json();
+
+          console.log('Certificate verification response:', data);
+
+          if (data.success) {
+            console.log('Certificate data:', data.certificate);
+            console.log('Debug info:', data.certificate.debug_info);
+            showCertificateDetails(data.certificate);
           } else {
-            showError();
+            showError(data.message);
           }
-        }, 1500);
+        } catch (error) {
+          console.error('Verification error:', error);
+          showError('An error occurred while verifying the certificate. Please try again.');
+        }
       }
 
       // Event listeners
