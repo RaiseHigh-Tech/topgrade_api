@@ -25,15 +25,15 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
     """
     # Set completion date
     if completion_date:
-        completion_date_str = completion_date.strftime("%B %d, %Y")
+        completion_date_str = completion_date.strftime("%d %B %Y")
     else:
-        completion_date_str = datetime.now().strftime("%B %d, %Y")
+        completion_date_str = datetime.now().strftime("%d %B %Y")
     
     # Set purchase date (start date)
     if purchase_date:
-        purchase_date_str = purchase_date.strftime("%B %d, %Y")
+        purchase_date_str = purchase_date.strftime("%d %B %Y")
     else:
-        purchase_date_str = datetime.now().strftime("%B %d, %Y")
+        purchase_date_str = datetime.now().strftime("%d %B %Y")
     
     # Student name
     student_name = user.fullname or user.email.split('@')[0]
