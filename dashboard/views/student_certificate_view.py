@@ -37,6 +37,7 @@ def student_certificates_view(request):
                         program=course_progress.purchase.program,
                         base_certificate_number=base_certificate_number,
                         completion_date=course_progress.completed_at,
+                        purchase_date=course_progress.purchase.purchase_date,
                         include_placement=require_goldpass
                     )
                     

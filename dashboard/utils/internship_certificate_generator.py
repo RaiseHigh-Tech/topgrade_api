@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 
 
-def generate_certificate_pdf(user, program, certificate_number, completion_date=None, certificate_type='internship'):
+def generate_certificate_pdf(user, program, certificate_number, completion_date=None, purchase_date=None, certificate_type='internship'):
     """
     Generate a PDF certificate for a student using HTML template
     
@@ -17,6 +17,7 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
         program: Program object
         certificate_number: Unique certificate number
         completion_date: Date of course completion (defaults to today)
+        purchase_date: Date when the program was purchased
         certificate_type: Type of certificate ('internship', 'training', 'credit', 'recommendation', 'placement')
     
     Returns:
@@ -24,9 +25,15 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
     """
     # Set completion date
     if completion_date:
-        date_str = completion_date.strftime("%B %d, %Y")
+        completion_date_str = completion_date.strftime("%B %d, %Y")
     else:
-        date_str = datetime.now().strftime("%B %d, %Y")
+        completion_date_str = datetime.now().strftime("%B %d, %Y")
+    
+    # Set purchase date (start date)
+    if purchase_date:
+        purchase_date_str = purchase_date.strftime("%B %d, %Y")
+    else:
+        purchase_date_str = datetime.now().strftime("%B %d, %Y")
     
     # Student name
     student_name = user.fullname or user.email.split('@')[0]
@@ -48,7 +55,8 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
         'student_name': student_name,
         'program_name': program_name,
         'certificate_number': certificate_number,
-        'completion_date': date_str,
+        'completion_date': completion_date_str,
+        'purchase_date': purchase_date_str,
     }
     
     # Get template based on certificate type
@@ -66,7 +74,7 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
     return ContentFile(pdf_bytes, name=filename)
 
 
-def generate_bulk_certificates(user, program, base_certificate_number, completion_date=None, include_placement=True):
+def generate_bulk_certificates(user, program, base_certificate_number, completion_date=None, purchase_date=None, include_placement=True):
     """
     Generate multiple certificates for a student with the same certificate number
     
@@ -75,6 +83,7 @@ def generate_bulk_certificates(user, program, base_certificate_number, completio
         program: Program object
         base_certificate_number: Base certificate number (same for all certificates)
         completion_date: Date of course completion (defaults to today)
+        purchase_date: Date when the program was purchased
         include_placement: Whether to include placement certificate (based on require_goldpass)
     
     Returns:
@@ -97,6 +106,7 @@ def generate_bulk_certificates(user, program, base_certificate_number, completio
                 program=program,
                 certificate_number=base_certificate_number,
                 completion_date=completion_date,
+                purchase_date=purchase_date,
                 certificate_type=cert_type
             )
             certificates[cert_type] = pdf_file
