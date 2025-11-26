@@ -430,14 +430,12 @@ def verify_certificate(request):
         
         if certificates.exists():
             # Debug: Log the certificates found
-            print(f"DEBUG: Found {certificates.count()} certificates for number: {certificate_number}")
             for cert in certificates:
                 print(f"DEBUG: Certificate - Type: {cert.certificate_type}, Status: {cert.status}, Has File: {bool(cert.certificate_file)}")
             
             # Check if this is a Gold Pass user by looking at the purchase
             first_cert = certificates.first()
             is_goldpass_purchase = first_cert.course_progress.purchase.require_goldpass
-            print(f"DEBUG: Is Gold Pass purchase: {is_goldpass_purchase}")
             
             # Group certificates by student (since one number can have multiple certificate types)
             certificate_data = []
@@ -449,6 +447,7 @@ def verify_certificate(request):
             student_name = first_cert.user.fullname or first_cert.user.email
             program_name = f"{first_cert.program.title} - {first_cert.program.subtitle}"
             program_description = first_cert.program.description or f"Course in {first_cert.program.category.name}"
+            program_duration = first_cert.program.duration  # Get duration from program model
             issue_date = first_cert.issued_date.strftime('%B %d, %Y')
             completion_date = first_cert.course_progress.completed_at.strftime('%B %d, %Y') if first_cert.course_progress.completed_at else 'N/A'
             
@@ -493,6 +492,7 @@ def verify_certificate(request):
                     'student_name': student_name,
                     'program_name': program_name,
                     'program_description': program_description,
+                    'program_duration': program_duration,
                     'provider': 'TopGrade Education Pvt. Ltd.',
                     'issue_date': issue_date,
                     'completion_date': completion_date,

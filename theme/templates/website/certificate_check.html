@@ -280,7 +280,7 @@
                 <i class="fa-solid fa-check-circle mr-2"></i>
                 Verified Certificate
               </div>
-              <h2 class="text-3xl font-bold mb-2">TopGrade Education</h2>
+              <h2 class="text-3xl font-bold mb-2">TopGrade Innovation</h2>
               <p class="text-white/90">Certificate of Completion</p>
             </div>
 
@@ -332,8 +332,8 @@
                     <i class="fa-solid fa-building text-[#f07c00] text-xl mr-3"></i>
                     <h3 class="font-semibold text-gray-800">Certified By</h3>
                   </div>
-                  <p class="text-lg font-semibold text-gray-900" id="provider">TopGrade Education Pvt. Ltd.</p>
-                  <p class="text-sm text-gray-600">Authorized Training Institute</p>
+                  <p class="text-lg font-semibold text-gray-900" id="provider">TopGrade Innovation Pvt. Ltd.</p>
+                  <p class="text-sm text-gray-600">A Government-Recognized Training & Skill Development Organization</p>
                 </div>
               </div>
 
@@ -518,6 +518,12 @@
         document.getElementById('programDescription').textContent = certificate.program_description;
         document.getElementById('provider').textContent = certificate.provider;
         document.getElementById('issueDate').textContent = certificate.issue_date;
+        
+        // Update program duration
+        const durationElement = document.getElementById('duration');
+        if (durationElement && certificate.program_duration) {
+          durationElement.textContent = certificate.program_duration;
+        }
         
         // Update completion date (new field)
         const completionDateElement = document.getElementById('completionDate');

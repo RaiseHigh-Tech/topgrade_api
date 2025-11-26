@@ -37,48 +37,36 @@ def send_certificates_email_task(self, course_progress_id):
         # Prepare email
         student_name = course_progress.user.fullname or course_progress.user.email
         student_email = course_progress.user.email
-        program_name = course_progress.purchase.program.title
+        program_title = course_progress.purchase.program.title
+        program_subtitle = course_progress.purchase.program.subtitle
+        program_full_name = f"{program_title} - {program_subtitle}"
         
-        subject = f"Certificates of Completion - {program_name} - TopGrade Innovation"
+        subject = f"Certificates of Completion - {program_full_name} - TopGrade Innovation"
         
         message = f"""Dear {student_name},
 
-Congratulations on successfully completing the "{program_name}" program with TopGrade 
-Innovation Pvt. Ltd. We appreciate your dedication and commitment throughout the training 
-or internship period.
+Congratulations on successfully completing the "{program_full_name}" program with TopGrade Innovation Pvt. Ltd. 
+We appreciate your dedication and commitment throughout the training or internship period.
 
-Your Certificates of Completion are attached to this email. Every certificate issued by 
-TopGrade Innovation includes a unique verification ID.
+Your Certificates of Completion are attached to this email. Every certificate issued by TopGrade Innovation 
+includes a unique verification ID.
 
 To confirm the authenticity of your certificate, please visit our official verification portal:
-
     🔗 https://www.topgradeinnovation.com/certificate-verification/
 
 You may enter the verification ID shown on your certificate to validate its authenticity.
 
-
-═══════════════════════════════════════════════════════════════════════════════
-
-                                ⚠️  IMPORTANT NOTICE
-
-═══════════════════════════════════════════════════════════════════════════════
+**IMPORTANT NOTICE**
 
 This is an automated message sent from noreply@topgradeinnovations.com
 Please do not reply to this email.
 
-
 For any assistance or queries, kindly contact our support team:
-
-    📧  Email   : support@topgradeinnovations.com
-    📞  Phone   : +91 76194 68135  |  +91 89044 65305
-
-
-═══════════════════════════════════════════════════════════════════════════════
-
+    📧  Email : support@topgradeinnovations.com
+    📞  Phone : +91 76194 68135  |  +91 89044 65305
 
 Thank you for being a part of TopGrade Innovation.
 We wish you continued success in your future endeavors.
-
 
 Best regards,
 TopGrade Innovation Pvt. Ltd.
