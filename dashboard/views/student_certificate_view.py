@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from topgrade_api.models import CustomUser, UserCourseProgress, UserCertificate
 from .auth_view import admin_required
 from dashboard.utils import generate_certificate_pdf, generate_bulk_certificates
+from dashboard.tasks import send_certificates_email_task
 
 
 @admin_required
@@ -111,41 +112,48 @@ def send_certificate_ajax(request):
     try:
         course_progress = UserCourseProgress.objects.get(id=course_progress_id, is_completed=True)
         
-        # Update all certificates for this course progress to sent
+        # Check if certificates exist
         certificates = UserCertificate.objects.filter(
             user=course_progress.user,
             course_progress=course_progress,
             program=course_progress.purchase.program,
         )
         
-        if certificates.exists():
-            updated_count = 0
-            for certificate in certificates:
-                if certificate.status == 'pending':
-                    certificate.status = 'sent'
-                    certificate.sent_date = timezone.now()
-                    certificate.save()
-                    updated_count += 1
-            
-            if updated_count > 0:
-                student_name = course_progress.user.fullname or course_progress.user.email
-                sent_date = timezone.now().strftime('%d/%m/%Y')
-                return JsonResponse({
-                    'success': True,
-                    'message': f'Successfully sent {updated_count} certificates to {student_name}',
-                    'sent_date': sent_date
-                })
-            else:
-                return JsonResponse({
-                    'success': True,
-                    'message': f'All certificates already sent to {course_progress.user.fullname or course_progress.user.email}',
-                    'already_sent': True
-                })
-        else:
+        if not certificates.exists():
             return JsonResponse({
                 'success': False,
                 'message': 'No certificates found for this student'
             }, status=404)
+        
+        # Check if already sent
+        pending_certificates = certificates.filter(status='pending')
+        if not pending_certificates.exists():
+            return JsonResponse({
+                'success': True,
+                'message': f'All certificates already sent to {course_progress.user.fullname or course_progress.user.email}',
+                'already_sent': True
+            })
+        
+        # Update certificate status to 'sent' and set sent_date
+        updated_count = 0
+        for certificate in pending_certificates:
+            certificate.status = 'sent'
+            certificate.sent_date = timezone.now()
+            certificate.save()
+            updated_count += 1
+        
+        # Trigger Celery task to send email in background
+        send_certificates_email_task.delay(course_progress_id)
+        
+        student_name = course_progress.user.fullname or course_progress.user.email
+        sent_date = timezone.now().strftime('%d/%m/%Y')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Certificates marked as sent and email is being sent to {student_name}',
+            'sent_date': sent_date,
+            'email_queued': True
+        })
         
     except UserCourseProgress.DoesNotExist:
         return JsonResponse({
