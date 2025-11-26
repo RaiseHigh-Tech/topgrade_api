@@ -4,7 +4,7 @@ from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
-    ProgramEnquiry, Contact
+    ProgramEnquiry, Contact, UserCertificate
 )
 
 # Restrict admin access to superusers only
@@ -168,10 +168,24 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(UserPurchase)
 class UserPurchaseAdmin(admin.ModelAdmin):
-    list_display = ['user', 'get_program_title', 'get_program_type', 'purchase_date', 'status', 'amount_paid']
-    list_filter = ['status', 'purchase_date', 'program__category']
+    list_display = ['user', 'get_program_title', 'get_program_type', 'purchase_date', 'status', 'amount_paid', 'require_goldpass', 'get_goldpass_status']
+    list_filter = ['status', 'purchase_date', 'program__category', 'require_goldpass']
     search_fields = ['user__email', 'program__title']
     ordering = ['-purchase_date']
+    list_editable = ['require_goldpass']
+    
+    fieldsets = (
+        ('Purchase Information', {
+            'fields': ('user', 'program', 'status', 'amount_paid')
+        }),
+        ('Additional Options', {
+            'fields': ('require_goldpass',)
+        }),
+        ('Timestamps', {
+            'fields': ('purchase_date',),
+            'classes': ('collapse',)
+        }),
+    )
     
     def get_program_title(self, obj):
         return obj.program.title if obj.program else "N/A"
@@ -180,6 +194,10 @@ class UserPurchaseAdmin(admin.ModelAdmin):
     def get_program_type(self, obj):
         return 'Advanced' if obj.program and obj.program.is_advanced else 'Regular'
     get_program_type.short_description = 'Program Type'
+    
+    def get_goldpass_status(self, obj):
+        return "🌟 GoldPass" if obj.require_goldpass else "Regular"
+    get_goldpass_status.short_description = 'Pass Type'
 
 
 @admin.register(UserBookmark)
@@ -464,3 +482,114 @@ class ContactAdmin(admin.ModelAdmin):
         if obj:  # editing an existing object
             return ['full_name', 'email', 'contact_no', 'subject', 'message', 'created_at', 'updated_at']
         return self.readonly_fields
+
+
+@admin.register(UserCertificate)
+class UserCertificateAdmin(admin.ModelAdmin):
+    """
+    Admin interface for User Certificate model
+    """
+    list_display = ['certificate_number', 'get_student_name', 'get_program_title', 'certificate_type', 'status', 'get_goldpass_status', 'issued_date', 'sent_date']
+    list_filter = ['certificate_type', 'status', 'issued_date', 'program', 'course_progress__purchase__require_goldpass']
+    search_fields = ['certificate_number', 'user__email', 'user__fullname', 'program__title']
+    readonly_fields = ['certificate_number', 'issued_date', 'created_at', 'updated_at']
+    ordering = ['-issued_date', 'certificate_number', 'certificate_type']
+    list_editable = ['status']
+    list_per_page = 50
+    
+    fieldsets = (
+        ('Certificate Information', {
+            'fields': ('certificate_number', 'user', 'program', 'course_progress', 'certificate_type')
+        }),
+        ('Certificate File', {
+            'fields': ('certificate_file',)
+        }),
+        ('Status & Dates', {
+            'fields': ('status', 'issued_date', 'sent_date')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    actions = ['mark_as_sent', 'mark_as_pending', 'bulk_download_certificates']
+    
+    def get_student_name(self, obj):
+        return obj.user.fullname or obj.user.email
+    get_student_name.short_description = 'Student Name'
+    get_student_name.admin_order_field = 'user__fullname'
+    
+    def get_program_title(self, obj):
+        return obj.program.subtitle
+    get_program_title.short_description = 'Program__Subtitle'
+    get_program_title.admin_order_field = 'program__subtitle'
+    
+    def get_goldpass_status(self, obj):
+        """Show if this certificate is part of a Gold Pass purchase"""
+        try:
+            is_goldpass = obj.course_progress.purchase.require_goldpass
+            return "🌟 Gold Pass" if is_goldpass else "Standard"
+        except:
+            return "Unknown"
+    get_goldpass_status.short_description = 'Pass Type'
+    
+    def get_certificate_type_display(self, obj):
+        """Display certificate type with icon"""
+        type_icons = {
+            'internship': '💼',
+            'training': '🎓',
+            'credit': '🏅',
+            'recommendation': '👍',
+            'placement': '🏢'
+        }
+        icon = type_icons.get(obj.certificate_type, '📜')
+        return f"{icon} {obj.get_certificate_type_display()}"
+    get_certificate_type_display.short_description = 'Certificate Type'
+    
+    def get_queryset(self, request):
+        """Optimize query with related data"""
+        qs = super().get_queryset(request)
+        return qs.select_related('user', 'program', 'course_progress', 'course_progress__purchase')
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """Customize form fields"""
+        if db_field.name == "user":
+            kwargs["queryset"] = CustomUser.objects.all().order_by('fullname', 'email')
+        elif db_field.name == "program":
+            kwargs["queryset"] = Program.objects.all().order_by('title')
+        elif db_field.name == "course_progress":
+            kwargs["queryset"] = UserCourseProgress.objects.filter(is_completed=True).order_by('-completed_at')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    # Custom admin actions
+    def mark_as_sent(self, request, queryset):
+        """Mark selected certificates as sent"""
+        from django.utils import timezone
+        updated = queryset.update(status='sent', sent_date=timezone.now())
+        self.message_user(request, f"{updated} certificates marked as sent.")
+    mark_as_sent.short_description = "Mark selected certificates as sent"
+    
+    def mark_as_pending(self, request, queryset):
+        """Mark selected certificates as pending"""
+        updated = queryset.update(status='pending', sent_date=None)
+        self.message_user(request, f"{updated} certificates marked as pending.")
+    mark_as_pending.short_description = "Mark selected certificates as pending"
+    
+    def bulk_download_certificates(self, request, queryset):
+        """Provide download links for selected certificates"""
+        certificates_with_files = queryset.filter(certificate_file__isnull=False)
+        if certificates_with_files.exists():
+            self.message_user(
+                request, 
+                f"Found {certificates_with_files.count()} certificates with files. "
+                f"Use individual certificate links to download files.",
+                level='INFO'
+            )
+        else:
+            self.message_user(
+                request, 
+                "No certificates with files found in selection.",
+                level='WARNING'
+            )
+    bulk_download_certificates.short_description = "Check certificate files for download"

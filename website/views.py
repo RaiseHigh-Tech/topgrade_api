@@ -419,44 +419,100 @@ def verify_certificate(request):
                 'message': 'Certificate number is required'
             }, status=400)
         
-        # Sample certificate data - replace with actual database lookup
-        valid_certificates = {
-            'TG-2024-WD-001234': {
-                'student_name': 'Rajesh Kumar Sharma',
-                'program_name': 'Full Stack Web Development',
-                'program_description': 'Comprehensive course covering HTML, CSS, JavaScript, React, Node.js, and MongoDB',
-                'duration': '6 Months',
-                'provider': 'TopGrade Education Pvt. Ltd.',
-                'issue_date': 'March 15, 2024',
-                'grade': 'A+ (95%)',
-                'certificate_number': certificate_number
-            },
-            'TG-2024-DS-002156': {
-                'student_name': 'Priya Patel',
-                'program_name': 'Data Science & Machine Learning',
-                'program_description': 'Advanced course in Python, Statistics, ML algorithms, and Data Visualization',
-                'duration': '8 Months',
-                'provider': 'TopGrade Education Pvt. Ltd.',
-                'issue_date': 'February 28, 2024',
-                'grade': 'A (92%)',
-                'certificate_number': certificate_number
-            },
-            'TG-2024-CS-003789': {
-                'student_name': 'Amit Singh',
-                'program_name': 'Cybersecurity Specialist',
-                'program_description': 'Complete cybersecurity training including ethical hacking and network security',
-                'duration': '4 Months',
-                'provider': 'TopGrade Education Pvt. Ltd.',
-                'issue_date': 'April 10, 2024',
-                'grade': 'A+ (96%)',
-                'certificate_number': certificate_number
-            }
-        }
+        # Import UserCertificate model
+        from topgrade_api.models import UserCertificate
         
-        if certificate_number in valid_certificates:
+        # Search for certificates with the given certificate number
+        certificates = UserCertificate.objects.filter(
+            certificate_number=certificate_number
+            # Removing status filter to see all certificates
+        ).select_related('user', 'program', 'course_progress')
+        
+        if certificates.exists():
+            # Debug: Log the certificates found
+            print(f"DEBUG: Found {certificates.count()} certificates for number: {certificate_number}")
+            for cert in certificates:
+                print(f"DEBUG: Certificate - Type: {cert.certificate_type}, Status: {cert.status}, Has File: {bool(cert.certificate_file)}")
+            
+            # Check if this is a Gold Pass user by looking at the purchase
+            first_cert = certificates.first()
+            is_goldpass_purchase = first_cert.course_progress.purchase.require_goldpass
+            print(f"DEBUG: Is Gold Pass purchase: {is_goldpass_purchase}")
+            
+            # Group certificates by student (since one number can have multiple certificate types)
+            certificate_data = []
+            student_name = None
+            program_name = None
+            issue_date = None
+            
+            # Get basic info from first certificate
+            student_name = first_cert.user.fullname or first_cert.user.email
+            program_name = f"{first_cert.program.title} - {first_cert.program.subtitle}"
+            program_description = first_cert.program.description or f"Course in {first_cert.program.category.name}"
+            issue_date = first_cert.issued_date.strftime('%B %d, %Y')
+            completion_date = first_cert.course_progress.completed_at.strftime('%B %d, %Y') if first_cert.course_progress.completed_at else 'N/A'
+            
+            # Determine certificate package type first
+            has_placement = any(cert.certificate_type == 'placement' for cert in certificates)
+            package_type = "Gold Pass Package" if has_placement else "Standard Package"
+            
+            # Collect all certificate types and files
+            certificate_types = []
+            for cert in certificates:
+                cert_info = {
+                    'type': cert.get_certificate_type_display(),
+                    'type_code': cert.certificate_type,
+                    'file_url': cert.certificate_file.url if cert.certificate_file else None,
+                    'status': cert.get_status_display(),
+                    'issued_date': cert.issued_date.strftime('%B %d, %Y'),
+                    'has_file': bool(cert.certificate_file),
+                }
+                certificate_types.append(cert_info)
+            
+            # Debug information
+            cert_types_found = [cert.certificate_type for cert in certificates]
+            expected_types = ['internship', 'training', 'credit', 'recommendation']
+            if has_placement:
+                expected_types.append('placement')
+            missing_types = [t for t in expected_types if t not in cert_types_found]
+            
+            print(f"DEBUG: Certificate types found: {cert_types_found}")
+            print(f"DEBUG: Expected types: {expected_types}")
+            print(f"DEBUG: Missing types: {missing_types}")
+            print(f"DEBUG: Has placement certificate in results: {has_placement}")
+            print(f"DEBUG: Is Gold Pass purchase: {is_goldpass_purchase}")
+            
+            # Check if expected certificates are missing for Gold Pass users
+            if is_goldpass_purchase and len(missing_types) > 0:
+                print(f"WARNING: Gold Pass user missing certificates: {missing_types}")
+                
+            if not is_goldpass_purchase and len(cert_types_found) != 4:
+                print(f"WARNING: Standard user should have 4 certificates, but found: {len(cert_types_found)}")
+                
+            if is_goldpass_purchase and len(cert_types_found) != 5:
+                print(f"WARNING: Gold Pass user should have 5 certificates, but found: {len(cert_types_found)}")
+            
             return JsonResponse({
                 'success': True,
-                'certificate': valid_certificates[certificate_number]
+                'certificate': {
+                    'student_name': student_name,
+                    'program_name': program_name,
+                    'program_description': program_description,
+                    'provider': 'TopGrade Education Pvt. Ltd.',
+                    'issue_date': issue_date,
+                    'completion_date': completion_date,
+                    'certificate_number': certificate_number,
+                    'package_type': package_type,
+                    'certificate_count': len(certificate_types),
+                    'certificates': certificate_types,
+                    'debug_info': {
+                        'found_types': cert_types_found,
+                        'expected_types': expected_types,
+                        'missing_types': missing_types,
+                        'total_found': len(cert_types_found),
+                        'total_expected': len(expected_types),
+                    }
+                }
             })
         else:
             return JsonResponse({

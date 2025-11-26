@@ -242,6 +242,7 @@ class UserPurchase(models.Model):
     purchase_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=PURCHASE_STATUS_CHOICES, default='pending')
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Amount actually paid after discounts")
+    require_goldpass = models.BooleanField(default=False, help_text="Indicates if this is a GoldPass program")
     
     class Meta:
         ordering = ['-purchase_date']
@@ -659,7 +660,6 @@ class Contact(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.subject[:50]}..."
 
-
 class Gallery(models.Model):
     """
     Model to store gallery images for the website
@@ -696,3 +696,99 @@ class Gallery(models.Model):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url
         return None
+
+class UserCertificate(models.Model):
+    """
+    Model to track certificates issued to students for completed courses
+    """
+    CERTIFICATE_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('downloaded', 'Downloaded'),
+    ]
+    
+    CERTIFICATE_TYPE_CHOICES = [
+        ('internship', 'Internship Certificate'),
+        ('training', 'Training Certificate'),
+        ('credit', 'Credit Certificate'),
+        ('recommendation', 'Letter of Recommendation'),
+        ('placement', 'Placement Certificate'),
+    ]
+    
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='user_certificates',
+        help_text="Student who earned the certificate"
+    )
+    course_progress = models.ForeignKey(
+        UserCourseProgress,
+        on_delete=models.CASCADE,
+        related_name='certificates',
+        help_text="Course progress record for this certificate"
+    )
+    program = models.ForeignKey(
+        Program,
+        on_delete=models.CASCADE,
+        related_name='user_certificates',
+        help_text="Program for which certificate is issued"
+    )
+    certificate_type = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_TYPE_CHOICES,
+        default='internship',
+        help_text="Type of certificate"
+    )
+    certificate_file = models.FileField(
+        upload_to='user_certificates/',
+        blank=True,
+        null=True,
+        help_text="Generated certificate file"
+    )
+    certificate_number = models.CharField(
+        max_length=100,
+        help_text="Certificate number (same for all certificates of a student)"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=CERTIFICATE_STATUS_CHOICES,
+        default='pending',
+        help_text="Certificate delivery status"
+    )
+    issued_date = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Date when certificate was issued"
+    )
+    sent_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Date when certificate was sent to student"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-issued_date']
+        verbose_name = 'User Certificate'
+        verbose_name_plural = 'User Certificates'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'course_progress', 'certificate_type'],
+                name='unique_user_course_certificate_type'
+            )
+        ]
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['certificate_number']),
+            models.Index(fields=['course_progress', 'certificate_type']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.fullname or self.user.email} - {self.program.title} - {self.get_certificate_type_display()} - {self.certificate_number}"
+    
+    def save(self, *args, **kwargs):
+        # Generate certificate number if not exists
+        if not self.certificate_number:
+            import uuid
+            self.certificate_number = f"CERT-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)

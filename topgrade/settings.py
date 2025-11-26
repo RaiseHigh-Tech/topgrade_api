@@ -233,7 +233,7 @@ FILE_UPLOAD_HANDLERS = [
 ]
 
 # Temporary directory for file uploads (create this directory)
-FILE_UPLOAD_TEMP_DIR = '/home/ubuntu/topgrade_api/tmp'
+FILE_UPLOAD_TEMP_DIR = BASE_DIR / 'topgrade_api/tmp'
 
 # ============================================
 # AWS S3 CONFIGURATION FOR LARGE FILE UPLOADS

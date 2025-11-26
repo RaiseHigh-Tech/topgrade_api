@@ -166,14 +166,14 @@
                         </div>
                         <div class="d-flex align-items-end justify-content-between mt-4">
                             <div>
-                                <h4 class="fs-22 fw-semibold ff-secondary mb-4">${{ total_spent }}</h4>
+                                <h4 class="fs-22 fw-semibold ff-secondary mb-4">&#8377;{{ total_spent }}</h4>
                                 <p class="mb-0 text-muted">
                                     <span class="text-primary">Avg Rating: {{ avg_program_rating }}/5</span>
                                 </p>
                             </div>
                             <div class="avatar-sm flex-shrink-0">
                                 <span class="avatar-title bg-primary-subtle rounded fs-3">
-                                    <i class="bx bx-dollar text-primary"></i>
+                                    <i class="bx bx-rupee text-primary"></i>
                                 </span>
                             </div>
                         </div>
@@ -253,7 +253,7 @@
                                             {% if enrollment.amount_paid == 0 %}
                                                 <span class="text-success fw-medium">Free</span>
                                             {% else %}
-                                                ${{ enrollment.amount_paid }}
+                                                &#8377;{{ enrollment.amount_paid }}
                                             {% endif %}
                                         </td>
                                     </tr>
