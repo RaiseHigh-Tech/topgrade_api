@@ -226,6 +226,15 @@
       text-align: center;
     }
 
+    .text-justify {
+      text-align: justify;
+    }
+
+    .text-base {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+
     .border-b-2 {
       border-bottom-width: 2px;
       border-bottom-style: solid;
@@ -369,7 +378,7 @@
         </defs>
       </svg>
       <p>
-        <span class="text-orange font-bold">CER. NO :</span>{{ certificate_number }}
+        <span class="text-orange font-bold">CER. NO : </span>{{ certificate_number }}
       </p>
     </div>
 
@@ -425,9 +434,9 @@
           <p
             class="mt-5 font-serif text-4xl uppercase tracking-wider text-navy text-center border-b-2 pb-2 border-orange w-11-12">
             {{ student_name }}</p>
-          <p class="mt-4 text-center text-2xl w-4-5 leading-normal">
+          <p class="mt-4 text-justify text-base w-4-5 leading-normal">
             This is to certify that the above-mentioned candidate has successfully completed their internship in
-            <strong>{{ program_name }}</strong> from {{ purchase_date }} to {{ completion_date }}.During this period, they
+            <strong>{{ program_name }}</strong> from  <strong>{{ purchase_date }} to {{ completion_date }}</strong>. During this period, they
             demonstrated
             diligence, consistency,
             determination, active participation, and innovation throughout the internship.

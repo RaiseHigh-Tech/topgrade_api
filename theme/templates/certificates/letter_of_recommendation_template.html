@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Certificate of Internship</title>
+  <title>Letter of Recommendation</title>
   <style>
     @page {
       size: A4 portrait;
@@ -238,6 +238,15 @@
       text-align: center;
     }
 
+    .text-justify {
+      text-align: justify;
+    }
+
+    .text-base {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+
     .border-b-2 {
       border-bottom-width: 2px;
       border-bottom-style: solid;
@@ -418,26 +427,14 @@
             of
             Recommendation
           </h1>
-          <p class="mt-6 leading-normal" style="font-size: 20px;">
-            This is to certify that {{ student_name|title }} has successfully completed her internship in
-            the
-            domain of <strong>{{ program_name }}</strong>
-            with TopGrade Innovation
-            from {{ purchase_date }} to {{ completion_date }}.
+          <p class="mt-6 leading-normal text-justify" style="font-size: 20px;">
+            This is to certify that <strong>{{ student_name|title }}</strong> has successfully completed their internship in the domain of <strong>{{ program_name }}</strong> with TopGrade Innovation from <strong>{{ purchase_date }} to {{ completion_date }}</strong>.
           </p>
-          <p class="leading-normal mt-5" style="font-size: 20px;">
-            During the course of her internship, she displayed excellent technical knowledge,
-            problem-solving abilities,
-            and a strong commitment to her work. Her sincere efforts and professional attitude were evident
-            in the
-            successful completion of industrial projects assigned to her, which she delivered with precision
-            and
-            quality.
+          <p class="leading-normal mt-5 text-justify" style="font-size: 20px;">
+            During the internship, the candidate demonstrated excellent technical knowledge, problem-solving abilities, professional discipline, and a strong commitment to assigned responsibilities. Their sincere efforts and positive attitude were consistently reflected in the successful completion of project tasks, delivered with accuracy, quality, and dedication.
           </p>
-          <p class="leading-normal mt-5" style="font-size: 20px;">
-            We truly appreciate her dedication and performance throughout the internship. We strongly
-            recommend Ms.
-            Poojashree for any future academic or professional endeavors she wishes to pursue.
+          <p class="leading-normal mt-5 text-justify" style="font-size: 20px;">
+            We truly appreciate the candidate’s performance and contribution throughout the internship. We confidently recommend <strong>{{ student_name }}</strong> for any future academic or professional endeavors they choose to pursue.
             <br><br>
             For any further information, please feel free to reach out to us.
           </p>
