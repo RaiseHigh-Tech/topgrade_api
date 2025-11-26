@@ -476,11 +476,6 @@ def verify_certificate(request):
                 expected_types.append('placement')
             missing_types = [t for t in expected_types if t not in cert_types_found]
             
-            print(f"DEBUG: Certificate types found: {cert_types_found}")
-            print(f"DEBUG: Expected types: {expected_types}")
-            print(f"DEBUG: Missing types: {missing_types}")
-            print(f"DEBUG: Has placement certificate in results: {has_placement}")
-            print(f"DEBUG: Is Gold Pass purchase: {is_goldpass_purchase}")
             
             # Check if expected certificates are missing for Gold Pass users
             if is_goldpass_purchase and len(missing_types) > 0:
