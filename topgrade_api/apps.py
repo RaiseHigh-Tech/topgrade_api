@@ -9,7 +9,7 @@ class TopgradeApiConfig(AppConfig):
     def ready(self):
         """
         This method is called when Django starts.
-        Create default categories automatically.
+        Create default categories automatically and initialize Firebase.
         """
         # Only run this in production/server environments, not during migrations
         import os
@@ -34,3 +34,11 @@ class TopgradeApiConfig(AppConfig):
             # Fail silently during startup to avoid breaking the app
             # Categories can be created manually using the management command
             pass
+        
+        # Initialize Firebase
+        try:
+            from topgrade_api.firebase_config import initialize_firebase
+            initialize_firebase()
+        except Exception as e:
+            print(f"Warning: Firebase initialization failed: {e}")
+            print("Phone OTP with Firebase will not work until Firebase is properly configured.")

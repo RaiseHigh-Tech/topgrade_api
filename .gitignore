@@ -270,3 +270,4 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/django,python
 /topgrade_api/migrations
+firebase-credentials.json

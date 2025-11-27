@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-+_q9s&%ws-35^#a@k8fkwc)u3mt&uc+mrxf_ns!(eans)d^w3g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'www.topgradeinnovation.com', 'topgradeinnovation.com' '13.127.233.16', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', 'www.topgradeinnovation.com', 'topgradeinnovation.com', '13.127.233.16', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -328,3 +328,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes max per task
+
+# ============================================
+# FIREBASE CONFIGURATION
+# ============================================
+FIREBASE_CREDENTIALS_PATH = os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json')
