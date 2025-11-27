@@ -28,6 +28,7 @@ class RequestPhoneOtpSchema(Schema):
 class PhoneSigninSchema(Schema):
     phone_number: str
     otp: str
+    fullname: str = None  # Optional for existing users, required for new users
 
 class RefreshTokenSchema(Schema):
     refresh_token: str

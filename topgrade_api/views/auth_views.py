@@ -244,39 +244,32 @@ def phone_signin(request, phone_data: PhoneSigninSchema):
         
     except CustomUser.DoesNotExist:
         # Create new user if doesn't exist
+        # Validate that fullname is provided for new users
+        if not phone_data.fullname or not phone_data.fullname.strip():
+            return JsonResponse({
+                "message": "Full name is required for new users. Please provide your name.",
+                "user_exists": False
+            }, status=400)
+        
         try:
             # Clean phone number for email generation
             clean_phone = phone_data.phone_number.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
             
             # Generate unique email with timestamp to ensure uniqueness
             timestamp = str(int(time.time()))
-            temp_email = f"phone_{clean_phone}_{timestamp}@tempuser.com"
+            temp_email = f"{clean_phone}+{timestamp}@phone.com"
             
             # Double check email uniqueness
             counter = 1
             while CustomUser.objects.filter(email=temp_email).exists():
-                temp_email = f"phone_{clean_phone}_{timestamp}_{counter}@tempuser.com"
+                temp_email = f"{clean_phone}+{timestamp}_{counter}@phone.com"
                 counter += 1
             
-            # Create masked fullname for privacy (e.g., 86XXXXXXX1)
-            def mask_phone_number(phone):
-                # Clean phone number
-                clean = phone.replace('+', '').replace('-', '').replace(' ', '').replace('(', '').replace(')', '')
-                if len(clean) >= 4:
-                    # Show first 2 and last 1 digits, mask the rest
-                    masked = clean[:2] + 'X' * (len(clean) - 3) + clean[-1:]
-                else:
-                    # If phone is too short, just mask middle
-                    masked = clean[0] + 'X' * (len(clean) - 2) + clean[-1] if len(clean) > 2 else clean
-                return masked
-            
-            masked_fullname = mask_phone_number(phone_data.phone_number)
-            
-            # Create user with masked phone as fullname and auto-generated password
+            # Create user with provided fullname
             user = CustomUser.objects.create_user(
                 email=temp_email,
                 phone_number=phone_data.phone_number,
-                fullname=masked_fullname,
+                fullname=phone_data.fullname.strip(),
                 password=phone_data.phone_number  # Use phone number as password
             )
             message = "User created and signed in successfully"
