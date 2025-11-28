@@ -4,8 +4,9 @@ Celery tasks for dashboard operations
 from celery import shared_task
 from django.core.mail import EmailMessage
 from django.conf import settings
-from topgrade_api.models import UserCertificate, UserCourseProgress
+from topgrade_api.models import UserCertificate, UserCourseProgress, OTPVerification
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -129,3 +130,279 @@ TopGrade Innovation Pvt. Ltd.
         logger.error(f"Error sending certificates email: {str(e)}")
         # Retry the task
         raise self.retry(exc=e, countdown=60)  # Retry after 60 seconds
+
+
+@shared_task(bind=True, max_retries=3)
+def send_otp_email_task(self, email, otp_code, otp_type='signup', full_name='User'):
+    """
+    Send OTP via email for signup or password reset.
+    This task runs in the background using Celery.
+    
+    Args:
+        email: User's email address
+        otp_code: 6-digit OTP code
+        otp_type: Type of OTP - 'signup' or 'password_reset'
+        full_name: User's full name (optional)
+    """
+    try:
+        # Prepare email subject and title based on OTP type
+        if otp_type == 'signup':
+            subject = "Email Verification - OTP for TopGrade Innovation Signup"
+            title = "Email Verification"
+        else:
+            subject = "Password Reset - OTP for TopGrade Innovation"
+            title = "Password Reset Verification"
+        
+        # HTML Email Template
+        html_message = f"""<!DOCTYPE html>
+        <html lang="en">
+        
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>OTP Verification</title>
+            <style>
+                * {{
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }}
+        
+                body {{
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                    background-color: #F4F5F7;
+                    color: #172B4D;
+                    line-height: 1.6;
+                    padding: 20px;
+                }}
+        
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                }}
+        
+                .header {{
+                    border-bottom: 1px solid #E5E7EB;
+                    padding: 24px;
+                    text-align: center;
+                }}
+        
+                .logo-container {{
+                    display: inline-flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 8px;
+                }}
+        
+                .brand-name {{ 
+                    font-weight: 600;
+                    font-size: 18px;
+                    display: block;
+                    margin-left: 8px;
+                }}
+        
+                .content {{
+                    padding: 16px;
+                }}
+        
+                .title {{
+                    font-size: 18px;
+                    font-weight: 600;
+                    text-align: center;
+                    margin: 16px 0;
+                }}
+        
+                .greeting {{
+                    font-size: 14px;
+                    margin: 8px 0;
+                    font-weight: 600;
+                }}
+        
+                .text {{
+                    font-size: 14px;
+                    margin: 8px 0;
+                }}
+        
+                .otp-box {{
+                    margin: 16px 0;
+                    border: 1px solid #E5E7EB;
+                    padding: 16px;
+                    border-radius: 8px;
+                    text-align: center;
+                }}
+        
+                .otp-label {{
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                }}
+        
+                .otp-code {{
+                    font-size: 24px;
+                    font-weight: 600;
+                    color: #ed7d05;
+                    letter-spacing: 0.1em;
+                    margin: 8px 0;
+                }}
+        
+                .otp-expiry {{
+                    font-size: 12px;
+                    color: #666;
+                }}
+        
+                .security-section {{
+                    margin: 16px 0;
+                }}
+        
+                .security-title {{
+                    font-weight: 600;
+                    font-size: 14px;
+                    margin-bottom: 8px;
+                }}
+        
+                .instructions-list {{
+                    list-style-type: disc;
+                    margin: 8px 0;
+                    padding-left: 32px;
+                }}
+        
+                .instructions-list li {{
+                    font-size: 14px;
+                    margin: 4px 0;
+                }}
+        
+                .signature {{
+                    font-size: 14px;
+                    margin: 8px 0;
+                }}
+        
+                .footer {{
+                    padding: 16px;
+                    border-top: 1px solid #E5E7EB;
+                    text-align: center;
+                }}
+        
+                .footer-text {{
+                    font-size: 14px;
+                    color: #666;
+                    margin: 0 0 8px 0;
+                    display: block;
+                }}
+        
+                .footer-brand {{
+                    font-weight: 600;
+                    font-size: 14px;
+                    color: #6B7280;
+                    margin: 0;
+                    display: block;
+                }}
+            </style>
+        </head>
+        
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo-container">
+                        <img src="https://raw.githubusercontent.com/dhineshio/icons/main/logo.png" alt="Creator Scribe Logo"
+                            class="logo">
+                        <p class="brand-name">Topgrade Innovation</p>
+                    </div>
+                </div>
+        
+                <div class="content">
+                    <h1 class="title">{title}</h1>
+                    <p class="greeting">Hi {full_name},</p>
+                    <p class="text">
+                        You recently requested an OTP. This code can be used to access your account and perform authenticated
+                        operations, and as such should be kept secret.
+                    </p>
+                    <div class="otp-box">
+                        <div class="otp-label">Your OTP Code</div>
+                        <div class="otp-code">{otp_code}</div>
+                        <div class="otp-expiry">This code will expire in 10 minutes</div>
+                    </div>
+        
+                    <div class="security-section">
+                        <p class="security-title">Did not request this change?</p>
+                        <p class="text">
+                            If you did not request this action you should immediately:
+                        </p>
+                        <ol class="instructions-list">
+                            <li>Visit your security settings and revoke the OTP.</li>
+                            <li>Change your Topgrade Innovation account password.</li>
+                        </ol>
+                    </div>
+        
+                    <p class="signature">
+                        Cheers,<br>
+                        The Topgrade Innovation Team
+                    </p>
+                </div>
+                <div class="footer">
+                    <p class="footer-text">This message was sent to you by Topgrade Innovation</p>
+                    <p class="footer-brand">Topgrade Innovation</p>
+                </div>
+            </div>
+        </body>
+        
+        </html>"""
+        
+        # Plain text fallback
+        plain_message = f"""
+Hi {full_name},
+
+You recently requested an OTP. This code can be used to access your account and perform authenticated operations, and as such should be kept secret.
+
+Your OTP Code: {otp_code}
+
+This code will expire in 10 minutes.
+
+Did not request this change?
+If you did not request this action you should immediately:
+1. Visit your security settings and revoke the OTP.
+2. Change your Topgrade Innovation account password.
+
+Cheers,
+The Topgrade Innovation Team
+
+---
+This message was sent to you by Topgrade Innovation
+"""
+        
+        # Create email with HTML content
+        from django.core.mail import EmailMultiAlternatives
+        
+        email_message = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[email],
+        )
+        
+        # Attach HTML version
+        email_message.attach_alternative(html_message, "text/html")
+        
+        # Send email
+        email_message.send(fail_silently=False)
+        
+        logger.info(f"Successfully sent OTP email to {email}")
+        
+        return {
+            'success': True,
+            'message': f'OTP email sent successfully to {email}',
+            'email': email
+        }
+        
+    except Exception as e:
+        logger.error(f"Error sending OTP email to {email}: {str(e)}")
+        # Retry the task
+        raise self.retry(exc=e, countdown=30)  # Retry after 30 seconds
+
+
+def generate_otp():
+    """
+    Generate a random 6-digit OTP code
+    """
+    return str(random.randint(100000, 999999))

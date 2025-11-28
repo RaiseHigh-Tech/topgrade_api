@@ -18,7 +18,9 @@ urlpatterns = [
     path('api/verify-certificate/', views.verify_certificate, name='verify_certificate'),
     path('terms-and-conditions/', views.terms, name='terms'),
     path('privacy-policy/', views.privacy, name='privacy'),
-    path('refund-policy/', views.refund_policy, name='refund')
+    path('refund-policy/', views.refund_policy, name='refund'),
+    path('terms-app/', views.terms_app, name='terms_app'),
+    path('privacy-app/', views.privacy_app, name='privacy_app'),
 ]
     
     

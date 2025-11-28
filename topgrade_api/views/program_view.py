@@ -2,9 +2,10 @@
 Program-related API views
 """
 from django.http import JsonResponse
-from ..models import Program, Category, UserPurchase, UserBookmark, UserCourseProgress, UserTopicProgress, Topic
+from ..models import Program, Category, UserPurchase, UserBookmark, UserCourseProgress, UserTopicProgress, Topic, ProgramEnquiry
 from django.db import models
 from .common import api, AuthBearer
+import random
 
 @api.get("/landing", auth=AuthBearer())
 def get_landing_data(request):
@@ -57,12 +58,14 @@ def get_landing_data(request):
         user = request.auth
         
         # Top Courses - Highest rated programs (both regular and advanced)
-        top_course_programs = Program.objects.filter(
+        top_course_programs = list(Program.objects.filter(
             program_rating__gte=4.0
-        ).order_by('-program_rating', '-id')[:5]
+        ).order_by('-program_rating', '-id')[:10])  # Get 10 to shuffle from
         
+        # Shuffle and take 5
+        random.shuffle(top_course_programs)
         top_course = []
-        for program in top_course_programs:
+        for program in top_course_programs[:5]:
             top_course.append(format_program_data(program, user))
         
         # Recently Added - Latest programs by created_at/ID
@@ -73,18 +76,23 @@ def get_landing_data(request):
             recently_added.append(format_program_data(program, user))
         
         # Featured - Best seller programs
-        featured_programs = Program.objects.filter(
+        featured_programs = list(Program.objects.filter(
             is_best_seller=True
-        ).order_by('-program_rating', '-id')[:5]
+        ).order_by('-program_rating', '-id')[:10])  # Get 10 to shuffle from
         
+        # Shuffle and take 5
+        random.shuffle(featured_programs)
         featured = []
-        for program in featured_programs:
+        for program in featured_programs[:5]:
             featured.append(format_program_data(program, user))
         
         # Programs - Regular programs only (not Advanced Program category)
-        regular_programs = Program.get_regular_programs().order_by('-program_rating', '-id')[:5]
+        regular_programs = list(Program.get_regular_programs().order_by('-program_rating', '-id')[:10])  # Get 10 to shuffle from
+        
+        # Shuffle and take 5
+        random.shuffle(regular_programs)
         programs = []
-        for program in regular_programs:
+        for program in regular_programs[:5]:
             programs.append(format_program_data(program, user))
         
         # Advanced Programs - Advanced programs only (Advanced Program category)
@@ -323,6 +331,7 @@ def get_program_details(request, program_id: int):
         has_purchased = False
         purchase_id = None
         is_bookmarked = False
+        has_program_requested = False
         
         if user:
             purchase = UserPurchase.objects.filter(
@@ -338,6 +347,12 @@ def get_program_details(request, program_id: int):
             # Check if user has bookmarked this program
             is_bookmarked = UserBookmark.objects.filter(
                 user=user,
+                program=program
+            ).exists()
+            
+            # Check if user has requested/enquired about this program
+            has_program_requested = ProgramEnquiry.objects.filter(
+                email=user.email,
                 program=program
             ).exists()
         
@@ -413,6 +428,7 @@ def get_program_details(request, program_id: int):
             "is_best_seller": program.is_best_seller,
             "is_bookmarked": is_bookmarked,
             "has_purchased": has_purchased,
+            "has_program_requested": has_program_requested,
             "purchase_id": purchase_id,
             "enrolled_students": enrolled_students,
             "pricing": {

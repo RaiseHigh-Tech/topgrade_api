@@ -56,9 +56,11 @@ class CustomUser(AbstractUser):
 
 class OTPVerification(models.Model):
     email = models.EmailField()
+    otp_code = models.CharField(max_length=6, default='000000', help_text="6-digit OTP code")
     is_verified = models.BooleanField(default=False)
     verified_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(default=timezone.now)
     
     class Meta:
         unique_together = ['email']

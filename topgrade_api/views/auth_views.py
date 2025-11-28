@@ -6,6 +6,7 @@ from topgrade_api.schemas import LoginSchema, SignupSchema, RequestOtpSchema, Ve
 from topgrade_api.models import CustomUser, OTPVerification
 from topgrade_api.utils.firebase_helper import validate_firebase_phone_auth
 from django.utils import timezone
+from dashboard.tasks import send_otp_email_task, generate_otp
 import time
 
 # Initialize Django Ninja API for authentication
@@ -14,7 +15,7 @@ auth_api = NinjaAPI(version="1.0.0", title="Authentication API", urls_namespace=
 @auth_api.post("/signin")
 def signin(request, credentials: LoginSchema):
     """
-    Simple signin API that returns access_token and refresh_token
+    Simple signin API that returns access_token and refresh_token with user data
     """
     user = authenticate(username=credentials.email, password=credentials.password)
     
@@ -25,6 +26,11 @@ def signin(request, credentials: LoginSchema):
             "message": "Signin successful",
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh),
+            "user": {
+                "fullname": user.fullname if user.fullname else "",
+                "email": user.email,
+                "phone_number": user.phone_number if user.phone_number else "",
+            },
             "has_area_of_intrest": bool(user.area_of_intrest and user.area_of_intrest.strip())
         }
     else:
@@ -33,7 +39,7 @@ def signin(request, credentials: LoginSchema):
 @auth_api.post("/signup")
 def signup(request, user_data: SignupSchema):
     """
-    User registration API
+    User registration API with user data in response
     """
     # Check if passwords match
     if user_data.password != user_data.confirm_password:
@@ -59,6 +65,11 @@ def signup(request, user_data: SignupSchema):
             "message": "User created successfully",
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh),
+            "user": {
+                "fullname": user.fullname if user.fullname else "",
+                "email": user.email,
+                "phone_number": user.phone_number if user.phone_number else "",
+            },
             "has_area_of_intrest": bool(user.area_of_intrest and user.area_of_intrest.strip())
         }
     except Exception as e:
@@ -67,39 +78,53 @@ def signup(request, user_data: SignupSchema):
 @auth_api.post("/request-otp")
 def request_otp(request, otp_data: RequestOtpSchema):
     """
-    Request OTP for password reset
+    Request OTP for password reset - sends OTP via email
     """
     try:
         # Check if user exists
         user = CustomUser.objects.get(email=otp_data.email)
         
+        # Generate 6-digit OTP
+        otp_code = generate_otp()
+        
         # Create or update OTP verification record
         otp_verification, created = OTPVerification.objects.get_or_create(
             email=otp_data.email,
-            defaults={'is_verified': False}
+            defaults={
+                'otp_code': otp_code,
+                'is_verified': False,
+                'expires_at': timezone.now() + timezone.timedelta(minutes=10)
+            }
         )
         
         # Reset verification status for new OTP request
         if not created:
+            otp_verification.otp_code = otp_code
             otp_verification.is_verified = False
             otp_verification.verified_at = None
             otp_verification.expires_at = timezone.now() + timezone.timedelta(minutes=10)
             otp_verification.save()
         
+        # Get user's full name
+        full_name = user.fullname if user.fullname else user.email.split('@')[0]
+        
+        # Send OTP email asynchronously using Celery
+        send_otp_email_task.delay(otp_data.email, otp_code, 'password_reset', full_name)
+        
         return {
             "success": True,
-            "message": "OTP sent successfully",
+            "message": "OTP sent to your email. Please check your inbox.",
         }
         
     except CustomUser.DoesNotExist:
         return JsonResponse({"message": "User with this email does not exist"}, status=404)
     except Exception as e:
-        return JsonResponse({"message": "Error sending OTP"}, status=500)
+        return JsonResponse({"message": f"Error sending OTP: {str(e)}"}, status=500)
 
 @auth_api.post("/verify-otp")
 def verify_otp(request, verify_data: VerifyOtpSchema):
     """
-    Verify OTP for password reset
+    Verify OTP for password reset - verifies the OTP sent via email
     """
     try:
         # Check if user exists
@@ -115,9 +140,9 @@ def verify_otp(request, verify_data: VerifyOtpSchema):
         if otp_verification.is_expired():
             return JsonResponse({"message": "OTP has expired. Please request a new OTP."}, status=400)
         
-        # Check if OTP is correct (static OTP: 654321)
-        if verify_data.otp != "654321":
-            return JsonResponse({"message": "Invalid OTP"}, status=400)
+        # Check if OTP is correct
+        if verify_data.otp != otp_verification.otp_code:
+            return JsonResponse({"message": "Invalid OTP. Please check your email and try again."}, status=400)
         
         # Mark OTP as verified
         otp_verification.is_verified = True
@@ -126,13 +151,13 @@ def verify_otp(request, verify_data: VerifyOtpSchema):
         
         return {
             "success": True,
-            "message": "OTP verified successfully",
+            "message": "OTP verified successfully. You can now reset your password.",
         }
         
     except CustomUser.DoesNotExist:
         return JsonResponse({"message": "User with this email does not exist"}, status=404)
     except Exception as e:
-        return JsonResponse({"message": "Error verifying OTP"}, status=500)
+        return JsonResponse({"message": f"Error verifying OTP: {str(e)}"}, status=500)
 
 @auth_api.post("/reset-password")
 def reset_password(request, reset_data: ResetPasswordSchema):
@@ -244,6 +269,11 @@ def phone_signin(request, phone_data: PhoneSigninSchema):
             "message": message,
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh),
+            "user": {
+                "fullname": user.fullname if user.fullname else "",
+                "email": user.email,
+                "phone_number": user.phone_number if user.phone_number else "",
+            },
             "has_area_of_intrest": bool(user.area_of_intrest and user.area_of_intrest.strip())
         }
         

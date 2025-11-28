@@ -4,11 +4,11 @@ from . import (
     category_view,
     program_view,
     bookmark_view,
-    purchase_view,
     learning_view,
     carousel_view,
     area_of_interest_view,
     profile_view,
+    enquiry_view,
 )
 
 # Export the API instances for URL configuration
@@ -22,9 +22,9 @@ __all__ = [
     'category_view',
     'program_view',
     'bookmark_view',
-    'purchase_view',
     'learning_view',
     'carousel_view',
     'area_of_interest_view',
     'profile_view',
+    'enquiry_view',
 ]

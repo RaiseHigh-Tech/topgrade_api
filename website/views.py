@@ -570,3 +570,9 @@ def refund_policy(request):
         'advance_programs': advance_programs,
     }
     return render(request, 'website/refund.html', context)
+
+def terms_app(request):
+    return render(request, 'website/terms_app.html')
+
+def privacy_app(request):
+    return render(request, 'website/privacy_app.html')
