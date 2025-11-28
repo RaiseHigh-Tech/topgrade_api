@@ -193,6 +193,9 @@
                         <table class="table table-nowrap table-striped-columns mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th scope="col">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th scope="col">Student</th>
                                     <th scope="col">Contact</th>
                                     <th scope="col">Program</th>
@@ -200,11 +203,19 @@
                                     <th scope="col">Assigned To</th>
                                     <th scope="col">Days Since</th>
                                     <th scope="col">Follow-up</th>
+                                    <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for enquiry in page_obj %}
                                 <tr data-enquiry-id="{{ enquiry.id }}">
+                                    <td>
+                                        <input type="checkbox" class="form-check-input enquiry-checkbox" 
+                                               data-enquiry-id="{{ enquiry.id }}"
+                                               data-email="{{ enquiry.email }}"
+                                               data-program-id="{{ enquiry.program.id }}"
+                                               {% if enquiry.follow_up_status == 'enrolled' %}disabled{% endif %}>
+                                    </td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div>
@@ -270,10 +281,25 @@
                                             </span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        {% if enquiry.follow_up_status == 'enrolled' %}
+                                            <span class="badge bg-success-subtle text-success fs-12">
+                                                <i class="ri-checkbox-circle-line align-bottom"></i> Assigned
+                                            </span>
+                                        {% else %}
+                                            <button type="button" class="btn btn-sm btn-success assign-single-btn" 
+                                                    data-enquiry-id="{{ enquiry.id }}"
+                                                    data-email="{{ enquiry.email }}"
+                                                    data-program-id="{{ enquiry.program.id }}"
+                                                    data-program-name="{{ enquiry.program.title }} - {{ enquiry.program.subtitle }}">
+                                                <i class="ri-user-add-line align-bottom"></i> Assign
+                                            </button>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" class="text-center py-4">
+                                    <td colspan="9" class="text-center py-4">
                                         <div class="d-flex flex-column align-items-center">
                                             <i class="ri-inbox-line fs-1 text-muted mb-3"></i>
                                             <h5 class="text-muted">No enquiries found</h5>
@@ -284,6 +310,24 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Bulk Actions Bar -->
+                    <div class="d-flex justify-content-between align-items-center mt-3 p-3 bg-light rounded" id="bulk-actions-bar" style="display: none !important;">
+                        <div>
+                            <span id="selected-count">0</span> enquirie(s) selected
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="require-goldpass-bulk">
+                                <label class="form-check-label" for="require-goldpass-bulk">
+                                    Require Gold Pass
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-success" id="assign-selected-btn">
+                                <i class="ri-user-add-line align-bottom"></i> Assign Programs to Selected
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Pagination -->
@@ -325,6 +369,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Assign Program Modal -->
+    <div class="modal fade" id="assignProgramModal" tabindex="-1" aria-labelledby="assignProgramModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignProgramModalLabel">Assign Program to Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Student Email:</label>
+                        <p class="fw-semibold" id="modal-student-email"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Program:</label>
+                        <p class="fw-semibold" id="modal-program-name"></p>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="require-goldpass-single">
+                        <label class="form-check-label" for="require-goldpass-single">
+                            <strong>Require Gold Pass</strong>
+                            <br>
+                            <small class="text-muted">Check this if the student needs a Gold Pass to access this program</small>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="confirm-assign-btn">
+                        <i class="ri-user-add-line align-bottom"></i> Assign Program
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block js %}
@@ -342,6 +422,236 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
+    }
+
+    // Variables for single assignment
+    let currentEnquiryId = null;
+    let currentEmail = null;
+    let currentProgramId = null;
+
+    // Handle checkbox selection
+    const selectAllCheckbox = document.getElementById('select-all');
+    const enquiryCheckboxes = document.querySelectorAll('.enquiry-checkbox');
+    const bulkActionsBar = document.getElementById('bulk-actions-bar');
+    const selectedCountSpan = document.getElementById('selected-count');
+
+    function updateBulkActionsBar() {
+        const checkedBoxes = document.querySelectorAll('.enquiry-checkbox:checked');
+        const count = checkedBoxes.length;
+        
+        if (count > 0) {
+            bulkActionsBar.style.display = 'flex';
+            selectedCountSpan.textContent = count;
+        } else {
+            bulkActionsBar.style.display = 'none';
+        }
+    }
+
+    // Select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            enquiryCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActionsBar();
+        });
+    }
+
+    // Individual checkbox selection
+    enquiryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateBulkActionsBar();
+            
+            // Update select all checkbox state
+            const allChecked = Array.from(enquiryCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(enquiryCheckboxes).some(cb => cb.checked);
+            
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            }
+        });
+    });
+
+    // Handle single assignment button
+    document.querySelectorAll('.assign-single-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            currentEnquiryId = this.dataset.enquiryId;
+            currentEmail = this.dataset.email;
+            currentProgramId = this.dataset.programId;
+            const programName = this.dataset.programName;
+            
+            document.getElementById('modal-student-email').textContent = currentEmail;
+            document.getElementById('modal-program-name').textContent = programName;
+            document.getElementById('require-goldpass-single').checked = false;
+            
+            const modal = new bootstrap.Modal(document.getElementById('assignProgramModal'));
+            modal.show();
+        });
+    });
+
+    // Handle confirm assign button in modal
+    document.getElementById('confirm-assign-btn')?.addEventListener('click', function() {
+        const requireGoldpass = document.getElementById('require-goldpass-single').checked;
+        
+        assignProgramToStudent(currentEnquiryId, currentEmail, currentProgramId, requireGoldpass);
+    });
+
+    // Handle bulk assignment
+    document.getElementById('assign-selected-btn')?.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.enquiry-checkbox:checked');
+        const requireGoldpass = document.getElementById('require-goldpass-bulk').checked;
+        
+        if (checkedBoxes.length === 0) {
+            showMessage('Please select at least one enquiry', 'error');
+            return;
+        }
+        
+        if (!confirm(`Assign programs to ${checkedBoxes.length} student(s)?${requireGoldpass ? ' (Gold Pass required)' : ''}`)) {
+            return;
+        }
+        
+        const assignments = Array.from(checkedBoxes).map(cb => ({
+            enquiry_id: cb.dataset.enquiryId,
+            email: cb.dataset.email,
+            program_id: cb.dataset.programId
+        }));
+        
+        assignBulkPrograms(assignments, requireGoldpass);
+    });
+
+    // Function to assign program to single student
+    function assignProgramToStudent(enquiryId, email, programId, requireGoldpass) {
+        const btn = document.getElementById('confirm-assign-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Assigning...';
+        
+        fetch('{% url "dashboard:assign_program_from_enquiry" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                enquiry_id: enquiryId,
+                email: email,
+                program_id: programId,
+                require_goldpass: requireGoldpass
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-user-add-line align-bottom"></i> Assign Program';
+            
+            if (data.success) {
+                showMessage(data.message, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('assignProgramModal')).hide();
+                
+                // Update the button to show "Assigned" badge
+                const row = document.querySelector(`tr[data-enquiry-id="${currentEnquiryId}"]`);
+                if (row) {
+                    const actionCell = row.querySelector('td:last-child');
+                    if (actionCell) {
+                        actionCell.innerHTML = '<span class="badge bg-success-subtle text-success fs-12"><i class="ri-checkbox-circle-line align-bottom"></i> Assigned</span>';
+                    }
+                    
+                    // Disable and uncheck the checkbox
+                    const checkbox = row.querySelector('.enquiry-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = false;
+                        checkbox.disabled = true;
+                    }
+                    
+                    // Update status dropdown to "enrolled"
+                    const statusSelect = row.querySelector('.status-select');
+                    if (statusSelect) {
+                        statusSelect.value = 'enrolled';
+                        statusSelect.querySelectorAll('option').forEach(opt => opt.removeAttribute('selected'));
+                        const enrolledOption = statusSelect.querySelector('option[value="enrolled"]');
+                        if (enrolledOption) {
+                            enrolledOption.setAttribute('selected', 'selected');
+                        }
+                    }
+                }
+            } else {
+                showMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-user-add-line align-bottom"></i> Assign Program';
+            showMessage('Error assigning program: ' + error.message, 'error');
+        });
+    }
+
+    // Function to assign programs in bulk
+    function assignBulkPrograms(assignments, requireGoldpass) {
+        const btn = document.getElementById('assign-selected-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Assigning...';
+        
+        fetch('{% url "dashboard:assign_programs_bulk" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                assignments: assignments,
+                require_goldpass: requireGoldpass
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-user-add-line align-bottom"></i> Assign Programs to Selected';
+            
+            if (data.success) {
+                showMessage(data.message, 'success');
+                
+                // Update each assigned row
+                const checkedBoxes = document.querySelectorAll('.enquiry-checkbox:checked');
+                checkedBoxes.forEach(checkbox => {
+                    const enquiryId = checkbox.dataset.enquiryId;
+                    const row = document.querySelector(`tr[data-enquiry-id="${enquiryId}"]`);
+                    
+                    if (row) {
+                        // Update the action cell to show "Assigned" badge
+                        const actionCell = row.querySelector('td:last-child');
+                        if (actionCell) {
+                            actionCell.innerHTML = '<span class="badge bg-success-subtle text-success fs-12"><i class="ri-checkbox-circle-line align-bottom"></i> Assigned</span>';
+                        }
+                        
+                        // Disable the checkbox
+                        checkbox.disabled = true;
+                        
+                        // Update status dropdown to "enrolled"
+                        const statusSelect = row.querySelector('.status-select');
+                        if (statusSelect) {
+                            statusSelect.value = 'enrolled';
+                            statusSelect.querySelectorAll('option').forEach(opt => opt.removeAttribute('selected'));
+                            const enrolledOption = statusSelect.querySelector('option[value="enrolled"]');
+                            if (enrolledOption) {
+                                enrolledOption.setAttribute('selected', 'selected');
+                            }
+                        }
+                    }
+                });
+                
+                // Uncheck all checkboxes
+                document.querySelectorAll('.enquiry-checkbox').forEach(cb => cb.checked = false);
+                if (selectAllCheckbox) selectAllCheckbox.checked = false;
+                updateBulkActionsBar();
+            } else {
+                showMessage(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ri-user-add-line align-bottom"></i> Assign Programs to Selected';
+            showMessage('Error assigning programs: ' + error.message, 'error');
+        });
     }
 
     // Handle status updates

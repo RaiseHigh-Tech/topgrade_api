@@ -196,3 +196,200 @@ def assign_enquiry(request):
             'success': False,
             'message': f'Error assigning enquiry: {str(e)}'
         })
+
+
+@admin_required
+@require_POST
+@csrf_exempt
+def assign_program_from_enquiry(request):
+    """Assign program to student from enquiry"""
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get('enquiry_id')
+        email = data.get('email')
+        program_id = data.get('program_id')
+        require_goldpass = data.get('require_goldpass', False)
+        
+        if not email or not program_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Email and Program ID are required'
+            })
+        
+        from django.contrib.auth import get_user_model
+        from topgrade_api.models import Program, UserPurchase
+        
+        User = get_user_model()
+        
+        # Get or create user
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={'role': 'student'}
+        )
+        
+        # Get program
+        try:
+            program = Program.objects.get(id=program_id)
+        except Program.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Program not found'
+            })
+        
+        # Check if already assigned
+        existing_purchase = UserPurchase.objects.filter(
+            user=user,
+            program=program
+        ).first()
+        
+        if existing_purchase:
+            return JsonResponse({
+                'success': False,
+                'message': f'Program already assigned to {email}'
+            })
+        
+        # Create purchase/assignment
+        UserPurchase.objects.create(
+            user=user,
+            program=program,
+            status='completed',
+            amount_paid=program.discounted_price,
+            require_goldpass=require_goldpass
+        )
+        
+        # Update enquiry status if enquiry_id provided
+        if enquiry_id:
+            try:
+                enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
+                enquiry.follow_up_status = 'enrolled'
+                enquiry.save()
+            except ProgramEnquiry.DoesNotExist:
+                pass
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Program "{program.title}" assigned to {email} successfully' + 
+                      (' (Gold Pass required)' if require_goldpass else '')
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error assigning program: {str(e)}'
+        })
+
+
+@admin_required
+@require_POST
+@csrf_exempt
+def assign_programs_bulk(request):
+    """Assign programs to multiple students in bulk"""
+    try:
+        data = json.loads(request.body)
+        assignments = data.get('assignments', [])
+        require_goldpass = data.get('require_goldpass', False)
+        
+        if not assignments:
+            return JsonResponse({
+                'success': False,
+                'message': 'No assignments provided'
+            })
+        
+        from django.contrib.auth import get_user_model
+        from topgrade_api.models import Program, UserPurchase
+        from django.db import transaction
+        
+        User = get_user_model()
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        with transaction.atomic():
+            for assignment in assignments:
+                email = assignment.get('email')
+                program_id = assignment.get('program_id')
+                enquiry_id = assignment.get('enquiry_id')
+                
+                if not email or not program_id:
+                    error_count += 1
+                    errors.append(f'Missing email or program_id')
+                    continue
+                
+                try:
+                    # Get or create user
+                    user, created = User.objects.get_or_create(
+                        email=email,
+                        defaults={'role': 'student'}
+                    )
+                    
+                    # Get program
+                    program = Program.objects.get(id=program_id)
+                    
+                    # Check if already assigned
+                    existing_purchase = UserPurchase.objects.filter(
+                        user=user,
+                        program=program
+                    ).first()
+                    
+                    if existing_purchase:
+                        error_count += 1
+                        errors.append(f'{email}: Already assigned')
+                        continue
+                    
+                    # Create purchase/assignment
+                    UserPurchase.objects.create(
+                        user=user,
+                        program=program,
+                        status='completed',
+                        amount_paid=program.discounted_price,
+                        require_goldpass=require_goldpass
+                    )
+                    
+                    # Update enquiry status
+                    if enquiry_id:
+                        try:
+                            enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
+                            enquiry.follow_up_status = 'enrolled'
+                            enquiry.save()
+                        except ProgramEnquiry.DoesNotExist:
+                            pass
+                    
+                    success_count += 1
+                    
+                except Program.DoesNotExist:
+                    error_count += 1
+                    errors.append(f'{email}: Program not found')
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f'{email}: {str(e)}')
+        
+        message = f'Successfully assigned {success_count} program(s)'
+        if error_count > 0:
+            message += f', {error_count} failed'
+        if require_goldpass:
+            message += ' (Gold Pass required)'
+        
+        return JsonResponse({
+            'success': True if success_count > 0 else False,
+            'message': message,
+            'success_count': success_count,
+            'error_count': error_count,
+            'errors': errors
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error assigning programs: {str(e)}'
+        })
