@@ -40,8 +40,30 @@
               </button>
             </div>
           </div>
+          <!-- Search Bar -->
+          <div class="row mt-3">
+            <div class="col-12">
+              <form method="get" action="{% url 'dashboard:programs' %}" class="d-flex gap-2">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="ri-search-line"></i></span>
+                  <input type="text" class="form-control" name="search" placeholder="Search by title, subtitle, or category..." value="{{ search_query|default:'' }}" />
+                </div>
+                <button type="submit" class="btn btn-success">Search</button>
+                {% if search_query %}
+                  <a href="{% url 'dashboard:programs' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+              </form>
+            </div>
+          </div>
         </div>
         <div class="card-body" style="height: 75vh; overflow-y: scroll; scrollbar-width: none;">
+          {% if search_query %}
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+              <i class="ri-information-line me-2"></i>
+              Showing search results for: <strong>"{{ search_query }}"</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endif %}
           <div class="row">
             {% for program in programs %}
               <div class="col-4 mb-3">
@@ -82,7 +104,7 @@
                     </small>
                   </div>
                   <div class="card-footer d-flex gap-1">
-                    <a href="{% url 'dashboard:delete_program' program.id %}?programs_page={{ programs_current_page }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this program?')"><i class="bx bx-trash fs-18"></i></a>
+                    <a href="{% url 'dashboard:delete_program' program.id %}?programs_page={{ programs_current_page }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-icon btn-danger" onclick="return confirm('Are you sure you want to delete this program?')"><i class="bx bx-trash fs-18"></i></a>
                     <button type="button" class="btn btn-icon btn-warning" onclick="openEditModal({{ program.id }})"><i class="bx bx-edit fs-18"></i></button>
                     <a href=" {% url 'dashboard:program_details' program.id %}" class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center">View</a>
                   </div>
@@ -107,7 +129,7 @@
                     <!-- Previous Button -->
                     {% if programs.has_previous %}
                       <li class="page-item">
-                        <a class="page-link" href="?programs_page={{ programs.previous_page_number }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}" aria-label="Previous">
+                        <a class="page-link" href="?programs_page={{ programs.previous_page_number }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Previous">
                           <span aria-hidden="true">Previous</span>
                         </a>
                       </li>
@@ -127,7 +149,7 @@
                         </li>
                       {% else %}
                         <li class="page-item">
-                          <a class="page-link" href="?programs_page={{ page_num }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}">{{ page_num }}</a>
+                          <a class="page-link" href="?programs_page={{ page_num }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ page_num }}</a>
                         </li>
                       {% endif %}
                     {% endfor %}
@@ -135,7 +157,7 @@
                     <!-- Next Button -->
                     {% if programs.has_next %}
                       <li class="page-item">
-                        <a class="page-link" href="?programs_page={{ programs.next_page_number }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}" aria-label="Next">
+                        <a class="page-link" href="?programs_page={{ programs.next_page_number }}{% if categories_current_page %}&categories_page={{ categories_current_page }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" aria-label="Next">
                           <span aria-hidden="true">Next</span>
                         </a>
                       </li>

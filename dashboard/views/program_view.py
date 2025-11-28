@@ -248,7 +248,22 @@ def programs_view(request):
 
     user = request.user
     categories_list = Category.objects.all().order_by('-id')
-    programs_list = Program.objects.all().order_by('-id')
+    
+    # Get search query
+    search_query = request.GET.get('search', '').strip()
+    
+    # Filter programs based on search query
+    if search_query:
+        programs_list = Program.objects.filter(
+            title__icontains=search_query
+        ) | Program.objects.filter(
+            subtitle__icontains=search_query
+        ) | Program.objects.filter(
+            category__name__icontains=search_query
+        )
+        programs_list = programs_list.distinct().order_by('-id')
+    else:
+        programs_list = Program.objects.all().order_by('-id')
     
     # Programs Pagination
     programs_paginator = Paginator(programs_list, 9)
@@ -311,7 +326,8 @@ def programs_view(request):
         'programs_current_page': programs_current_page,
         'categories_page_range': categories_page_range,
         'categories_total_pages': categories_total_pages,
-        'categories_current_page': categories_current_page
+        'categories_current_page': categories_current_page,
+        'search_query': search_query
     }
     return render(request, 'dashboard/programs.html', context)
 
@@ -538,10 +554,16 @@ def delete_program_view(request, id):
     except Program.DoesNotExist:
         messages.error(request, 'Program not found')
     
-    # Preserve pagination parameters when redirecting
+    # Preserve pagination and search parameters when redirecting
     programs_page = request.GET.get('programs_page', 1)
     categories_page = request.GET.get('categories_page', 1)
-    return redirect(f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}')
+    search_query = request.GET.get('search', '')
+    
+    redirect_url = f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}'
+    if search_query:
+        redirect_url += f'&search={search_query}'
+    
+    return redirect(redirect_url)
 
 @admin_required
 def program_details_view(request, program_id):
