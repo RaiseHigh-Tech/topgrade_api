@@ -4,7 +4,7 @@ from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
-    ProgramEnquiry, Contact, UserCertificate
+    ProgramEnquiry, Contact, UserCertificate, FCMToken, Notification, NotificationLog
 )
 
 # Restrict admin access to superusers only
@@ -593,3 +593,91 @@ class UserCertificateAdmin(admin.ModelAdmin):
                 level='WARNING'
             )
     bulk_download_certificates.short_description = "Check certificate files for download"
+
+@admin.register(FCMToken)
+class FCMTokenAdmin(admin.ModelAdmin):
+    list_display = ['user', 'device_type', 'is_active', 'last_used', 'created_at']
+    list_filter = ['device_type', 'is_active', 'created_at']
+    search_fields = ['user__email', 'user__fullname', 'token', 'device_id']
+    readonly_fields = ['created_at', 'updated_at', 'last_used']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('User Information', {
+            'fields': ('user',)
+        }),
+        ('Device Information', {
+            'fields': ('token', 'device_type', 'device_id', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at', 'last_used'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'notification_type', 'status', 'total_recipients', 'sent_count', 'failed_count', 'created_at']
+    list_filter = ['notification_type', 'status', 'created_at']
+    search_fields = ['title', 'message', 'created_by__email']
+    readonly_fields = ['total_recipients', 'sent_count', 'failed_count', 'sent_at', 'created_at', 'updated_at']
+    filter_horizontal = ['recipients']
+    ordering = ['-created_at']
+    
+    fieldsets = (
+        ('Notification Content', {
+            'fields': ('title', 'message', 'notification_type', 'image_url')
+        }),
+        ('Recipients', {
+            'fields': ('recipients', 'total_recipients')
+        }),
+        ('Related Information', {
+            'fields': ('program', 'data')
+        }),
+        ('Status & Delivery', {
+            'fields': ('status', 'sent_count', 'failed_count', 'sent_at')
+        }),
+        ('Scheduling', {
+            'fields': ('scheduled_at',)
+        }),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+@admin.register(NotificationLog)
+class NotificationLogAdmin(admin.ModelAdmin):
+    list_display = ['notification_title', 'user', 'status', 'is_read', 'sent_at']
+    list_filter = ['status', 'is_read', 'sent_at']
+    search_fields = ['notification__title', 'user__email', 'user__fullname', 'error_message']
+    readonly_fields = ['notification', 'user', 'fcm_token', 'status', 'error_message', 'sent_at', 'read_at']
+    ordering = ['-sent_at']
+    
+    fieldsets = (
+        ('Notification Information', {
+            'fields': ('notification', 'user', 'fcm_token')
+        }),
+        ('Delivery Status', {
+            'fields': ('status', 'error_message')
+        }),
+        ('Read Status', {
+            'fields': ('is_read', 'read_at')
+        }),
+        ('Timestamp', {
+            'fields': ('sent_at',)
+        }),
+    )
+    
+    def notification_title(self, obj):
+        return obj.notification.title
+    notification_title.short_description = 'Notification'
+    
+    def has_module_permission(self, request):
+        return request.user.is_superuser

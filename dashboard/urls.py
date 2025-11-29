@@ -48,4 +48,13 @@ urlpatterns = [
 
     # Contact management
     path('contact/', views.contact_view, name='contact'),
+    
+    # Notification management
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('notifications/<int:notification_id>/', views.notification_details, name='notification_details'),
+    path('api/send-notification/', views.send_notification, name='send_notification'),
+    path('api/delete-notification/<int:notification_id>/', views.delete_notification, name='delete_notification'),
+    path('api/send-test-notification/', views.send_test_notification, name='send_test_notification'),
+    path('api/get-program-students/<int:program_id>/', views.get_program_students, name='get_program_students'),
+    path('fcm-tokens/', views.fcm_tokens_view, name='fcm_tokens'),
 ]   

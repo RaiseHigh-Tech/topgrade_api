@@ -49,3 +49,12 @@ class UpdateProfileSchema(Schema):
     fullname: str = None
     phone_number: str = None
     email: str = None
+
+# Notification Schemas
+class RegisterFCMTokenSchema(Schema):
+    token: str
+    device_type: str = 'android'  # android, ios, web
+    device_id: str = None
+
+class MarkNotificationReadSchema(Schema):
+    notification_id: int

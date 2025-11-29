@@ -1,0 +1,397 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Push Notifications</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Notifications</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Total Notifications</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ total_notifications }}</h4>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-success-subtle rounded fs-3">
+                            <i class="bx bx-bell text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Sent</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ sent_notifications }}</h4>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle rounded fs-3">
+                            <i class="bx bx-check-circle text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Active Devices</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ total_active_tokens }}</h4>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-warning-subtle rounded fs-3">
+                            <i class="bx bx-mobile text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Failed</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ failed_notifications }}</h4>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-danger-subtle rounded fs-3">
+                            <i class="bx bx-error text-danger"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Send Notification Form -->
+    <div class="col-xl-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="ri-send-plane-fill align-middle me-1"></i> Send New Notification
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="sendNotificationForm">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="notificationTitle" class="form-label">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="notificationTitle" name="title" 
+                               placeholder="Enter notification title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notificationMessage" class="form-label">Message <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="notificationMessage" name="message" rows="5" 
+                                  placeholder="Enter notification message" required></textarea>
+                        <div class="form-text">
+                            <span id="charCount">0</span> characters
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imageUrl" class="form-label">Image URL (Optional)</label>
+                        <input type="url" class="form-control" id="imageUrl" name="image_url" 
+                               placeholder="https://example.com/image.jpg">
+                        <div class="form-text">Image to display in notification</div>
+                    </div>
+
+                    <div class="alert alert-info mb-3">
+                        <i class="ri-information-line me-1"></i>
+                        <strong>Will send to {{ students.count }} students</strong> with active FCM tokens
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="sendBtn">
+                            <i class="ri-send-plane-fill me-1"></i> Send to All Students ({{ students.count }})
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications -->
+    <div class="col-xl-7">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="card-title mb-0">
+                    <i class="ri-history-line align-middle me-1"></i> Recent Notifications
+                </h5>
+                <a href="{% url 'dashboard:fcm_tokens' %}" class="btn btn-sm btn-soft-primary">
+                    <i class="ri-device-line me-1"></i> View Devices
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-nowrap align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Recipients</th>
+                                <th>Status</th>
+                                <th>Sent</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notification in notifications %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ notification.title }}</h6>
+                                            <small class="text-muted">{{ notification.message|truncatewords:8 }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ notification.get_notification_type_display }}</span>
+                                </td>
+                                <td>{{ notification.total_recipients }}</td>
+                                <td>
+                                    {% if notification.status == 'sent' %}
+                                        <span class="badge bg-success">Sent</span>
+                                    {% elif notification.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-success">{{ notification.sent_count }}</span> / 
+                                    <span class="text-danger">{{ notification.failed_count }}</span>
+                                </td>
+                                <td>
+                                    <small>{{ notification.created_at|date:"M d, Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-soft-secondary dropdown-toggle" type="button" 
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="ri-more-fill"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{% url 'dashboard:notification_details' notification.id %}">
+                                                    <i class="ri-eye-line me-1"></i> View Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item text-danger delete-notification" 
+                                                   href="#" data-id="{{ notification.id }}">
+                                                    <i class="ri-delete-bin-line me-1"></i> Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="ri-notification-off-line fs-2 d-block mb-2"></i>
+                                        No notifications sent yet
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Character counter
+    $('#notificationMessage').on('input', function() {
+        $('#charCount').text($(this).val().length);
+    });
+
+    // Send notification form - SIMPLE VERSION
+    $('#sendNotificationForm').submit(function(e) {
+        e.preventDefault();
+        
+        const btn = $('#sendBtn');
+        const originalText = btn.html();
+        const title = $('#notificationTitle').val();
+        const message = $('#notificationMessage').val();
+        const imageUrl = $('#imageUrl').val();
+        
+        // Validation
+        if (!title || !message) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Fields',
+                text: 'Please enter both title and message'
+            });
+            return;
+        }
+        
+        console.log('=== Sending Notification ===');
+        console.log('Title:', title);
+        console.log('Message:', message);
+        console.log('Image URL:', imageUrl);
+        
+        btn.prop('disabled', true).html('<i class="ri-loader-4-line me-1"></i> Sending...');
+        
+        // Simple form data - always send to all FCM users
+        $.ajax({
+            url: '{% url "dashboard:send_notification" %}',
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+                'title': title,
+                'message': message,
+                'notification_type': 'general',
+                'recipient_type': 'all',
+                'image_url': imageUrl
+            },
+            success: function(response) {
+                console.log('Response:', response);
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        // Clear form
+                        $('#notificationTitle').val('');
+                        $('#notificationMessage').val('');
+                        $('#imageUrl').val('');
+                        $('#charCount').text('0');
+                        
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message
+                    });
+                }
+            },
+            error: function(xhr) {
+                console.error('AJAX Error:', xhr);
+                console.error('Status:', xhr.status);
+                console.error('Response:', xhr.responseText);
+                
+                let errorMsg = 'Failed to send notification';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMsg
+                });
+            },
+            complete: function() {
+                btn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Delete notification
+    $('.delete-notification').click(function(e) {
+        e.preventDefault();
+        const notificationId = $(this).data('id');
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will delete the notification and all its logs!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/dashboard/api/delete-notification/${notificationId}/`,
+                    type: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

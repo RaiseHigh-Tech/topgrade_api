@@ -11,3 +11,4 @@ from .student_view import *
 from .student_certificate_view import *
 from .contact_view import *
 from .gallery_view import *
+from .notification_view import *

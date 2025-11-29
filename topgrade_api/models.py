@@ -794,3 +794,239 @@ class UserCertificate(models.Model):
             import uuid
             self.certificate_number = f"CERT-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
+
+class FCMToken(models.Model):
+    """
+    Model to store Firebase Cloud Messaging tokens for push notifications
+    """
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='fcm_tokens',
+        help_text="User associated with this FCM token"
+    )
+    token = models.TextField(
+        unique=True,
+        help_text="Firebase Cloud Messaging token"
+    )
+    device_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('android', 'Android'),
+            ('ios', 'iOS'),
+            ('web', 'Web'),
+        ],
+        default='android',
+        help_text="Device platform"
+    )
+    device_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Unique device identifier"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this token is active"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_used = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last time this token was used for sending notification"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'FCM Token'
+        verbose_name_plural = 'FCM Tokens'
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['token']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.device_type} - {self.token[:20]}..."
+
+class Notification(models.Model):
+    """
+    Model to store notifications sent to users
+    """
+    NOTIFICATION_TYPE_CHOICES = [
+        ('general', 'General Announcement'),
+        ('program', 'Program Update'),
+        ('certificate', 'Certificate Available'),
+        ('enrollment', 'Enrollment Confirmation'),
+        ('reminder', 'Reminder'),
+        ('promotional', 'Promotional'),
+        ('system', 'System Notification'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('sent', 'Sent'),
+        ('failed', 'Failed'),
+    ]
+    
+    # Notification content
+    title = models.CharField(
+        max_length=255,
+        help_text="Notification title"
+    )
+    message = models.TextField(
+        help_text="Notification message/body"
+    )
+    notification_type = models.CharField(
+        max_length=20,
+        choices=NOTIFICATION_TYPE_CHOICES,
+        default='general',
+        help_text="Type of notification"
+    )
+    
+    # Recipient information
+    recipients = models.ManyToManyField(
+        CustomUser,
+        related_name='notifications',
+        help_text="Users who will receive this notification"
+    )
+    
+    # Optional: Related objects
+    program = models.ForeignKey(
+        Program,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='notifications',
+        help_text="Related program (if applicable)"
+    )
+    
+    # Notification metadata
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        help_text="Notification sending status"
+    )
+    total_recipients = models.PositiveIntegerField(
+        default=0,
+        help_text="Total number of recipients"
+    )
+    sent_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of successfully sent notifications"
+    )
+    failed_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of failed notifications"
+    )
+    
+    # Additional data (JSON format for custom payload)
+    data = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional data to send with notification (JSON format)"
+    )
+    
+    # Image/media support
+    image_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="URL of image to display in notification"
+    )
+    
+    # Scheduling
+    scheduled_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Schedule notification for future delivery"
+    )
+    sent_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When notification was actually sent"
+    )
+    
+    # Tracking
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_notifications',
+        help_text="Admin user who created this notification"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+        indexes = [
+            models.Index(fields=['status', 'scheduled_at']),
+            models.Index(fields=['notification_type', 'created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} - {self.get_notification_type_display()} ({self.status})"
+
+class NotificationLog(models.Model):
+    """
+    Model to track individual notification delivery attempts
+    """
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+        related_name='logs',
+        help_text="Parent notification"
+    )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='notification_logs',
+        help_text="Recipient user"
+    )
+    fcm_token = models.ForeignKey(
+        FCMToken,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="FCM token used for delivery"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('success', 'Success'),
+            ('failed', 'Failed'),
+        ],
+        default='success',
+        help_text="Delivery status"
+    )
+    error_message = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Error message if delivery failed"
+    )
+    is_read = models.BooleanField(
+        default=False,
+        help_text="Whether user has read this notification"
+    )
+    read_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When notification was read"
+    )
+    sent_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-sent_at']
+        verbose_name = 'Notification Log'
+        verbose_name_plural = 'Notification Logs'
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+            models.Index(fields=['notification', 'status']),
+        ]
+    
+    def __str__(self):
+        return f"{self.notification.title} -> {self.user.email} ({self.status})"
