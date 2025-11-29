@@ -70,41 +70,44 @@
                     <table class="table table-nowrap table-striped-columns mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col">Contact Info</th>
-                                <th scope="col">Contact Number</th>
-                                <th scope="col">Subject</th>
-                                <th scope="col">Message</th>
-                                <th scope="col">Submitted</th>
+                                <th scope="col" style="width: 180px;">Contact Info</th>
+                                <th scope="col" style="width: 130px;">Contact Number</th>
+                                <th scope="col" style="width: 150px;">Subject</th>
+                                <th scope="col" style="width: 250px;">Message</th>
+                                <th scope="col" style="width: 120px;">Submitted</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for contact in page_obj %}
                             <tr>
-                                <td>
+                                <td style="width: 180px; max-width: 180px; word-wrap: break-word; white-space: normal;">
                                     <div class="d-flex flex-column">
-                                        <h6 class="mb-1">{{ contact.full_name }}</h6>
-                                        <span class="text-muted small">
+                                        <h6 class="mb-1" style="word-break: break-word;">
+                                            {{ contact.full_name }}
+                                        </h6>
+                                        <span class="text-muted small" style="word-break: break-all;">
                                             <i class="ri-mail-line me-1"></i>{{ contact.email }}
                                         </span>
                                     </div>
                                 </td>
-                                <td>
+                                <td style="width: 130px; max-width: 130px; word-wrap: break-word; white-space: normal;">
                                     {% if contact.contact_no %}
-                                    <a href="tel:{{ contact.contact_no }}" target="_blank">
+                                    <a href="tel:{{ contact.contact_no }}" style="word-break: break-all;">
                                         <i class="ri-phone-line me-1"></i>{{ contact.contact_no }}
                                     </a>
                                     {% else %}
-                                    <span class="text-muted small mt-1">
+                                    <span class="text-muted small">
                                         <i class="ri-phone-line me-1"></i>Not Provided
                                     </span>
                                     {% endif %}
-
                                 </td>
-                                <td>
-                                    <span class="fw-medium">{{ contact.subject }}</span>
+                                <td style="width: 150px; max-width: 150px; word-wrap: break-word; white-space: normal;">
+                                    <span class="fw-medium" style="word-break: break-word;">
+                                        {{ contact.subject }}
+                                    </span>
                                 </td>
-                                <td>
-                                    <div class="message-preview" style="max-width: 300px;">
+                                <td style="width: 250px; max-width: 250px; word-wrap: break-word; white-space: normal;">
+                                    <div class="message-preview" style="word-break: break-word;">
                                         {% if contact.message|length > 100 %}
                                             <span class="message-short">{{ contact.message|slice:":100" }}...</span>
                                             <span class="message-full d-none">{{ contact.message }}</span>
@@ -116,9 +119,9 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td>
+                                <td style="width: 120px; max-width: 120px; word-wrap: break-word; white-space: normal;">
                                     <div class="d-flex flex-column">
-                                        <span class="fw-medium">{{ contact.created_at|date:"M d, Y" }}</span>
+                                        <span class="fw-medium" style="word-break: break-word;">{{ contact.created_at|date:"M d, Y" }}</span>
                                         <span class="text-muted small">{{ contact.created_at|date:"g:i A" }}</span>
                                     </div>
                                 </td>

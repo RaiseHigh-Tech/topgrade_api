@@ -48,6 +48,7 @@ urlpatterns = [
 
     # Contact management
     path('contact/', views.contact_view, name='contact'),
+    path('api/delete-contact/', views.delete_contact, name='delete_contact'),
     
     # Notification management
     path('notifications/', views.notifications_view, name='notifications'),

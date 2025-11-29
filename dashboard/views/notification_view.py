@@ -73,10 +73,31 @@ def send_notification(request):
         title = request.POST.get('title', '').strip()
         message = request.POST.get('message', '').strip()
         notification_type = request.POST.get('notification_type', 'general')
-        image_url = request.POST.get('image_url', '').strip()
         program_id = request.POST.get('program_id')
         recipient_type = request.POST.get('recipient_type', 'all')
         selected_students = request.POST.getlist('selected_students[]')
+        
+        # Handle image upload
+        image_url = None
+        notification_image = request.FILES.get('notification_image')
+        
+        if notification_image:
+            # Save image to media folder
+            from django.core.files.storage import default_storage
+            from django.core.files.base import ContentFile
+            import os
+            from datetime import datetime
+            
+            # Generate unique filename
+            ext = os.path.splitext(notification_image.name)[1]
+            filename = f"notifications/{datetime.now().strftime('%Y%m%d_%H%M%S')}_{notification_image.name}"
+            
+            # Save file
+            path = default_storage.save(filename, ContentFile(notification_image.read()))
+            
+            # Get full URL
+            image_url = request.build_absolute_uri(default_storage.url(path))
+            print(f"Image uploaded: {image_url}")
         
         # Debug logging
         print(f"=== Send Notification Debug ===")
@@ -84,6 +105,7 @@ def send_notification(request):
         print(f"Message: {message}")
         print(f"Recipient Type: {recipient_type}")
         print(f"Notification Type: {notification_type}")
+        print(f"Image URL: {image_url}")
         
         # Validation
         if not title or not message:
