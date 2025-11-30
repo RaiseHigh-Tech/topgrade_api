@@ -393,3 +393,175 @@ def assign_programs_bulk(request):
             'success': False,
             'message': f'Error assigning programs: {str(e)}'
         })
+
+
+@admin_required
+@require_POST
+@csrf_exempt
+def unassign_enquiry(request):
+    """Unassign staff member from enquiry via AJAX"""
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get('enquiry_id')
+        
+        if not enquiry_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Enquiry ID is required'
+            })
+        
+        enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
+        enquiry.assigned_to = None
+        enquiry.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Enquiry unassigned successfully'
+        })
+        
+    except ProgramEnquiry.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Enquiry not found'
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error unassigning enquiry: {str(e)}'
+        })
+
+
+@admin_required
+@require_POST
+@csrf_exempt
+def unassign_program_from_student(request):
+    """Unassign/remove program from student via AJAX"""
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get('enquiry_id')
+        
+        if not enquiry_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Enquiry ID is required'
+            })
+        
+        enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
+        
+        # Find and delete the UserPurchase record
+        from django.contrib.auth import get_user_model
+        from topgrade_api.models import UserPurchase
+        
+        User = get_user_model()
+        
+        try:
+            user = User.objects.get(email=enquiry.email)
+            purchase = UserPurchase.objects.filter(
+                user=user,
+                program=enquiry.program
+            ).first()
+            
+            if purchase:
+                purchase.delete()
+                
+                # Update enquiry status back to interested
+                enquiry.follow_up_status = 'interested'
+                enquiry.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Program "{enquiry.program.title}" unassigned from {enquiry.email} successfully'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No program assignment found for this student'
+                })
+                
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Student not found'
+            })
+        
+    except ProgramEnquiry.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Enquiry not found'
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error unassigning program: {str(e)}'
+        })
+
+
+@admin_required
+@require_POST
+@csrf_exempt
+def delete_enquiry(request):
+    """Delete enquiry via AJAX - also unassigns program if assigned"""
+    try:
+        data = json.loads(request.body)
+        enquiry_id = data.get('enquiry_id')
+        
+        if not enquiry_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Enquiry ID is required'
+            })
+        
+        enquiry = ProgramEnquiry.objects.get(id=enquiry_id)
+        
+        # If enquiry is in enrolled status, unassign the program first
+        if enquiry.follow_up_status == 'enrolled':
+            from django.contrib.auth import get_user_model
+            from topgrade_api.models import UserPurchase
+            
+            User = get_user_model()
+            
+            try:
+                user = User.objects.get(email=enquiry.email)
+                purchase = UserPurchase.objects.filter(
+                    user=user,
+                    program=enquiry.program
+                ).first()
+                
+                if purchase:
+                    purchase.delete()
+            except User.DoesNotExist:
+                pass  # User doesn't exist, continue with deletion
+        
+        # Delete the enquiry
+        enquiry.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Enquiry deleted successfully (program unassigned if it was assigned)'
+        })
+        
+    except ProgramEnquiry.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Enquiry not found'
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Error deleting enquiry: {str(e)}'
+        })

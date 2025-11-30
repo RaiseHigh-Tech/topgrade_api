@@ -75,6 +75,7 @@
                                 <th scope="col" style="width: 150px;">Subject</th>
                                 <th scope="col" style="width: 250px;">Message</th>
                                 <th scope="col" style="width: 120px;">Submitted</th>
+                                <th scope="col" style="width: 100px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -125,10 +126,20 @@
                                         <span class="text-muted small">{{ contact.created_at|date:"g:i A" }}</span>
                                     </div>
                                 </td>
+                                <td style="width: 100px;">
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-soft-danger delete-contact" 
+                                                data-contact-id="{{ contact.id }}"
+                                                data-name="{{ contact.full_name }}"
+                                                title="Delete Contact">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     <div class="d-flex flex-column align-items-center">
                                         <i class="ri-mail-line text-muted mb-2" style="font-size: 3rem;"></i>
                                         <h5 class="text-muted">No contact submissions found</h5>

@@ -43,6 +43,9 @@ urlpatterns = [
     path('enquiries/', views.program_enquiries, name='program_enquiries'),
     path('api/update-enquiry-status/', views.update_enquiry_status, name='update_enquiry_status'),
     path('api/assign-enquiry/', views.assign_enquiry, name='assign_enquiry'),
+    path('api/unassign-enquiry/', views.unassign_enquiry, name='unassign_enquiry'),
+    path('api/unassign-program-from-student/', views.unassign_program_from_student, name='unassign_program_from_student'),
+    path('api/delete-enquiry/', views.delete_enquiry, name='delete_enquiry'),
     path('api/assign-program-from-enquiry/', views.assign_program_from_enquiry, name='assign_program_from_enquiry'),
     path('api/assign-programs-bulk/', views.assign_programs_bulk, name='assign_programs_bulk'),
 
