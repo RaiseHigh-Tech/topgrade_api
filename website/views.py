@@ -493,7 +493,7 @@ def verify_certificate(request):
                     'program_name': program_name,
                     'program_description': program_description,
                     'program_duration': program_duration,
-                    'provider': 'TopGrade Education Pvt. Ltd.',
+                    'provider': 'TopGrade Innovation Pvt. Ltd.',
                     'issue_date': issue_date,
                     'completion_date': completion_date,
                     'certificate_number': certificate_number,
