@@ -217,34 +217,57 @@
     .cert-icon-placement { color: #ef4444; }
 
     /* Swiper Custom Styles */
-    .certificatesSwiper {
+    .certificatesSwiper,
+    .certificatesSwiperDesktop {
       padding: 40px 50px;
     }
 
     .certificatesSwiper .swiper-button-next,
-    .certificatesSwiper .swiper-button-prev {
+    .certificatesSwiper .swiper-button-prev,
+    .certificatesSwiperDesktop .swiper-button-next,
+    .certificatesSwiperDesktop .swiper-button-prev {
       color: #f07c00;
       background: white;
       width: 44px;
       height: 44px;
       border-radius: 50%;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .certificatesSwiper .swiper-button-next:after,
-    .certificatesSwiper .swiper-button-prev:after {
+    .certificatesSwiper .swiper-button-prev:after,
+    .certificatesSwiperDesktop .swiper-button-next:after,
+    .certificatesSwiperDesktop .swiper-button-prev:after {
       font-size: 18px;
       font-weight: bold;
     }
 
-    .certificatesSwiper .swiper-pagination-bullet {
-      width: 8px;
-      height: 8px;
+    .certificatesSwiper .swiper-pagination-bullet,
+    .certificatesSwiperDesktop .swiper-pagination-bullet {
+      width: 10px;
+      height: 10px;
       background: #d1d5db;
       opacity: 1;
     }
 
-    .certificatesSwiper .swiper-pagination-bullet-active {
+    .certificatesSwiper .swiper-pagination-bullet-active,
+    .certificatesSwiperDesktop .swiper-pagination-bullet-active {
       background: #f07c00;
+      width: 12px;
+      height: 12px;
+    }
+
+    /* Responsive visibility */
+    @media (min-width: 1024px) {
+      .certificatesSwiper {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 1023px) {
+      .certificatesSwiperDesktop {
+        display: none !important;
+      }
     }
   </style>
 
@@ -487,12 +510,74 @@
 
       <!-- Certificates Carousel Container -->
       <div class="relative max-w-6xl mx-auto">
-        <!-- Swiper Container -->
-        <div class="swiper certificatesSwiper">
+        <!-- Swiper Container for Mobile (5 slides) -->
+        <div class="swiper certificatesSwiper lg:hidden">
           <div class="swiper-wrapper">
-            <!-- Slide 1: Internship + Training -->
+            <!-- Mobile Slide 1: Internship -->
             <div class="swiper-slide">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="text-center max-w-md mx-auto">
+                <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                  <img src="{% static 'assets/website/images/samples/internship_sample.webp' %}" alt="Certificate Internship" class="w-full h-full object-contain" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Internship Certificate</h3>
+              </div>
+            </div>
+            
+            <!-- Mobile Slide 2: Training -->
+            <div class="swiper-slide">
+              <div class="text-center max-w-md mx-auto">
+                <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                  <img src="{% static 'assets/website/images/samples/training_sample.webp' %}" alt="Certificate Training" class="w-full h-full object-contain" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Industrial Training Certificate</h3>
+              </div>
+            </div>
+            
+            <!-- Mobile Slide 3: Recommendation -->
+            <div class="swiper-slide">
+              <div class="text-center max-w-md mx-auto">
+                <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                  <img src="{% static 'assets/website/images/samples/recommendation_sample.webp' %}" alt="Certificate Recommendation" class="w-full h-full object-contain" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Letter of Recommendation</h3>
+              </div>
+            </div>
+            
+            <!-- Mobile Slide 4: Placement -->
+            <div class="swiper-slide">
+              <div class="text-center max-w-md mx-auto">
+                <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                  <img src="{% static 'assets/website/images/samples/placement_sample.webp' %}" alt="Certificate Placement" class="w-full h-full object-contain" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Placement Guidance</h3>
+              </div>
+            </div>
+            
+            <!-- Mobile Slide 5: Credit -->
+            <div class="swiper-slide">
+              <div class="text-center max-w-md mx-auto">
+                <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                  <img src="{% static 'assets/website/images/samples/credit_sample.webp' %}" alt="Certificate Credit" class="w-full h-full object-contain" />
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Internship Credit Point Certificate</h3>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Navigation Buttons -->
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
+          
+          <!-- Pagination -->
+          <div class="swiper-pagination"></div>
+        </div>
+
+        <!-- Swiper Container for Desktop (3 slides) -->
+        <div class="swiper certificatesSwiperDesktop hidden lg:block">
+          <div class="swiper-wrapper">
+            <!-- Desktop Slide 1: Internship + Training -->
+            <div class="swiper-slide">
+              <div class="grid grid-cols-2 gap-6">
                 <div class="text-center">
                   <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
                     <img src="{% static 'assets/website/images/samples/internship_sample.webp' %}" alt="Certificate Internship" class="w-full h-full object-contain" />
@@ -508,9 +593,9 @@
               </div>
             </div>
             
-            <!-- Slide 2: Recommendation + Placement -->
+            <!-- Desktop Slide 2: Recommendation + Placement -->
             <div class="swiper-slide">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="grid grid-cols-2 gap-6">
                 <div class="text-center">
                   <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
                     <img src="{% static 'assets/website/images/samples/recommendation_sample.webp' %}" alt="Certificate Recommendation" class="w-full h-full object-contain" />
@@ -526,10 +611,10 @@
               </div>
             </div>
             
-            <!-- Slide 3: Credit only (centered) -->
+            <!-- Desktop Slide 3: Credit (centered) -->
             <div class="swiper-slide">
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="text-center lg:col-start-1 lg:col-end-3 mx-auto max-w-md lg:max-w-lg">
+              <div class="grid grid-cols-2 gap-6">
+                <div class="text-center col-start-1 col-end-3 mx-auto max-w-lg">
                   <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
                     <img src="{% static 'assets/website/images/samples/credit_sample.webp' %}" alt="Certificate Credit" class="w-full h-full object-contain" />
                   </div>
@@ -750,8 +835,27 @@
         e.target.value = e.target.value.toUpperCase();
       });
 
-      // Initialize Swiper for Certificates
-      const certificatesSwiper = new Swiper('.certificatesSwiper', {
+      // Initialize Swiper for Mobile (5 slides)
+      const certificatesSwiperMobile = new Swiper('.certificatesSwiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        autoplay: {
+          delay: 4000,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.certificatesSwiper .swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.certificatesSwiper .swiper-button-next',
+          prevEl: '.certificatesSwiper .swiper-button-prev',
+        },
+      });
+
+      // Initialize Swiper for Desktop (3 slides)
+      const certificatesSwiperDesktop = new Swiper('.certificatesSwiperDesktop', {
         slidesPerView: 1,
         spaceBetween: 30,
         loop: true,
@@ -760,12 +864,12 @@
           disableOnInteraction: false,
         },
         pagination: {
-          el: '.swiper-pagination',
+          el: '.certificatesSwiperDesktop .swiper-pagination',
           clickable: true,
         },
         navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
+          nextEl: '.certificatesSwiperDesktop .swiper-button-next',
+          prevEl: '.certificatesSwiperDesktop .swiper-button-prev',
         },
       });
     });
