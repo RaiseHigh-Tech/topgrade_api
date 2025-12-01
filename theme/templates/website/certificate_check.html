@@ -490,29 +490,51 @@
         <!-- Swiper Container -->
         <div class="swiper certificatesSwiper">
           <div class="swiper-wrapper">
+            <!-- Slide 1: Internship + Training -->
             <div class="swiper-slide">
-              <div class="aspect-[4/3] rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
-                <img src="{% static 'assets/website/images/samples/recommendation_sample.webp' %}" alt="Certificate Recommendation" class="w-full h-full object-contain" />
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="text-center">
+                  <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                    <img src="{% static 'assets/website/images/samples/internship_sample.webp' %}" alt="Certificate Internship" class="w-full h-full object-contain" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-800">Internship Certificate</h3>
+                </div>
+                <div class="text-center">
+                  <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                    <img src="{% static 'assets/website/images/samples/training_sample.webp' %}" alt="Certificate Training" class="w-full h-full object-contain" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-800">Industrial Training Certificate</h3>
+                </div>
               </div>
             </div>
+            
+            <!-- Slide 2: Recommendation + Placement -->
             <div class="swiper-slide">
-              <div class="aspect-[4/3] rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
-                <img src="{% static 'assets/website/images/samples/internship_sample.webp' %}" alt="Certificate Internship" class="w-full h-full object-contain" />
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="text-center">
+                  <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                    <img src="{% static 'assets/website/images/samples/recommendation_sample.webp' %}" alt="Certificate Recommendation" class="w-full h-full object-contain" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-800">Letter of Recommendation</h3>
+                </div>
+                <div class="text-center">
+                  <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                    <img src="{% static 'assets/website/images/samples/placement_sample.webp' %}" alt="Certificate Placement" class="w-full h-full object-contain" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-800">Placement Guidance</h3>
+                </div>
               </div>
             </div>
+            
+            <!-- Slide 3: Credit only (centered) -->
             <div class="swiper-slide">
-              <div class="aspect-[4/3] rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
-                <img src="{% static 'assets/website/images/samples/training_sample.webp' %}" alt="Certificate Training" class="w-full h-full object-contain" />
-              </div>
-            </div>
-            <div class="swiper-slide">
-              <div class="aspect-[4/3] bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
-                <img src="{% static 'assets/website/images/samples/credit_sample.webp' %}" alt="Certificate Credit" class="w-full h-full object-contain" />
-              </div>
-            </div>
-            <div class="swiper-slide">
-              <div class="aspect-[4/3] bg-gray-100 rounded-lg border border-gray-200 overflow-hidden flex items-center justify-center">
-                <img src="{% static 'assets/website/images/samples/placement_sample.webp' %}" alt="Certificate Placement" class="w-full h-full object-contain" />
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="text-center lg:col-start-1 lg:col-end-3 mx-auto max-w-md lg:max-w-lg">
+                  <div class="aspect-[4/3] bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden flex items-center justify-center mb-4">
+                    <img src="{% static 'assets/website/images/samples/credit_sample.webp' %}" alt="Certificate Credit" class="w-full h-full object-contain" />
+                  </div>
+                  <h3 class="text-lg font-semibold text-gray-800">Internship Credit Point Certificate</h3>
+                </div>
               </div>
             </div>
           </div>
@@ -731,10 +753,10 @@
       // Initialize Swiper for Certificates
       const certificatesSwiper = new Swiper('.certificatesSwiper', {
         slidesPerView: 1,
-        spaceBetween: 20,
+        spaceBetween: 30,
         loop: true,
         autoplay: {
-          delay: 3000,
+          delay: 4000,
           disableOnInteraction: false,
         },
         pagination: {
@@ -744,20 +766,6 @@
         navigation: {
           nextEl: '.swiper-button-next',
           prevEl: '.swiper-button-prev',
-        },
-        breakpoints: {
-          640: {
-            slidesPerView: 1.5,
-            spaceBetween: 20,
-          },
-          768: {
-            slidesPerView: 2,
-            spaceBetween: 20,
-          },
-          1024: {
-            slidesPerView: 2.5,
-            spaceBetween: 20,
-          },
         },
       });
     });
