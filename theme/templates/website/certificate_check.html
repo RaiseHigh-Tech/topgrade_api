@@ -29,6 +29,21 @@
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       animation: pulse 2s infinite;
     }
+
+    .curved-background-shape {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 200px;
+      /* Controls the height of the curve */
+      background-color: #2c1e12;
+      /* The dark, warm brown color */
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      transform: scaleX(1);
+      /* Stretches the curve horizontally */
+    }
     
     @keyframes pulse {
       0%, 100% {
@@ -426,6 +441,43 @@
       </div>
     </div>
   </section>
+
+    <!-- CERTIFICATION SECTION -->
+  <section id="certifications" class="relative bg-orange-50/50 pt-16 md:pt-24 pb-32 overflow-hidden">
+    <!-- The dark curved shape at the bottom -->
+    <div class="curved-background-shape"></div>
+
+    <div class="container mx-auto px-4 relative z-10">
+      <!-- Section Title -->
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Certify your Success</h2>
+
+      <!-- Certificates Container -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6">
+          <div class="w-full max-w-md aspect-[4/3] bg-gray-100 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden flex items-center justify-center">
+            <img src="{% static 'assets/website/images/samples/recommendation_sample.webp' %}" alt="Certificate Recommendation" class="w-full h-full object-cover" />
+          </div>
+          <div class="w-full max-w-md aspect-[4/3] bg-gray-100 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden flex items-center justify-center">
+            <img src="{% static 'assets/website/images/samples/internship_sample.webp' %}" alt="Certificate Internship" class="w-full h-full object-cover" />
+          </div>
+          <div class="w-full max-w-md aspect-[4/3] bg-gray-100 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden flex items-center justify-center">
+            <img src="{% static 'assets/website/images/samples/training_sample.webp' %}" alt="Certificate Training" class="w-full h-full object-cover" />
+          </div>
+          <div class="w-full max-w-md aspect-[4/3] bg-gray-100 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden flex items-center justify-center">
+            <img src="{% static 'assets/website/images/samples/credit_sample.webp' %}" alt="Certificate Credit" class="w-full h-full object-cover" />
+          </div>
+          <div class="w-full max-w-md aspect-[4/3] bg-gray-100 rounded-lg shadow-2xl border border-gray-200 transform md:-rotate-3 hover:rotate-0 hover:scale-105 transition-transform duration-300 overflow-hidden flex items-center justify-center">
+            <img src="{% static 'assets/website/images/samples/placement_sample.webp' %}" alt="Certificate Placement" class="w-full h-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+            </svg>
+          </div>
+      </div>
+    </div>
+  </section>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
