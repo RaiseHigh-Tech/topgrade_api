@@ -45,16 +45,21 @@ def signup(request, user_data: SignupSchema):
     if user_data.password != user_data.confirm_password:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
     
-    # Check if user already exists
+    # Check if user already exists with this email
     if CustomUser.objects.filter(email=user_data.email).exists():
         return JsonResponse({"message": "User with this email already exists"}, status=400)
+    
+    # Check if phone number is already registered
+    if user_data.phone_number and CustomUser.objects.filter(phone_number=user_data.phone_number).exists():
+        return JsonResponse({"message": "User with this phone number already exists"}, status=400)
     
     try:
         # Create new user
         user = CustomUser.objects.create_user(
             email=user_data.email,
             password=user_data.password,
-            fullname=user_data.fullname
+            fullname=user_data.fullname,
+            phone_number=user_data.phone_number
         )
         
         # Generate tokens for immediate login
@@ -205,13 +210,14 @@ def reset_password(request, reset_data: ResetPasswordSchema):
 @auth_api.post("/phone-signin")
 def phone_signin(request, phone_data: PhoneSigninSchema):
     """
-    Firebase Phone Authentication - Verify Firebase token and create/login user
-    This endpoint is used by Flutter mobile app after Firebase OTP verification
+    Firebase Phone Authentication with Account Linking
+    Automatically links accounts if email exists with different phone or vice versa
     
     Request format:
     {
         "name": "User Full Name",
         "phoneNumber": "+911234567890",
+        "email": "user@example.com",
         "firebaseToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlMDNkN..."
     }
     """
@@ -223,42 +229,70 @@ def phone_signin(request, phone_data: PhoneSigninSchema):
     
     phone_number = result['phone_number']
     
+    # Validate required fields
+    if not phone_data.email or not phone_data.email.strip():
+        return JsonResponse({
+            "message": "Email is required. Please provide your email address.",
+            "user_exists": False
+        }, status=400)
+    
+    email = phone_data.email.strip()
+    user = None
+    message = None
+    
+    # Try to find existing user by phone number OR email
     try:
-        # Check if user exists with this phone number
+        # First, try to find by phone number
         user = CustomUser.objects.get(phone_number=phone_number)
         message = "Phone signin successful"
         
+        # If email is different, update it (if not taken by another user)
+        if user.email != email:
+            if CustomUser.objects.filter(email=email).exclude(id=user.id).exists():
+                return JsonResponse({
+                    "message": "This email is registered to a different account. Please use the email associated with your phone number."
+                }, status=400)
+            user.email = email
+            user.username = email
+            user.save()
+            message = "Phone signin successful - email updated"
+    
     except CustomUser.DoesNotExist:
-        # Create new user if doesn't exist
-        # Validate that name is provided for new users
-        if not phone_data.name or not phone_data.name.strip():
-            return JsonResponse({
-                "message": "Full name is required for new users. Please provide your name.",
-                "user_exists": False
-            }, status=400)
-        
+        # Phone not found, try to find by email
         try:
-            # Generate unique email with Firebase UID
-            firebase_uid = result.get('uid', str(int(time.time())))
-            temp_email = f"{phone_number}+{firebase_uid}@phone.com"
+            user = CustomUser.objects.get(email=email)
             
-            # Double check email uniqueness
-            counter = 1
-            while CustomUser.objects.filter(email=temp_email).exists():
-                temp_email = f"{phone_number}+{firebase_uid}_{counter}@phone.com"
-                counter += 1
+            # Check if user already has a different phone number
+            if user.phone_number and user.phone_number != phone_number:
+                return JsonResponse({
+                    "message": f"This email is already linked to phone number {user.phone_number}. Please use that number or contact support."
+                }, status=400)
             
-            # Create user with provided name
-            user = CustomUser.objects.create_user(
-                email=temp_email,
-                phone_number=phone_number,
-                fullname=phone_data.name.strip(),
-                password=phone_number  # Use phone number as password
-            )
-            message = "User created and signed in successfully"
+            # Link phone number to existing account
+            user.phone_number = phone_number
+            user.save()
+            message = "Account linked with phone number successfully"
             
-        except Exception as e:
-            return JsonResponse({"message": f"Error creating user: {str(e)}"}, status=500)
+        except CustomUser.DoesNotExist:
+            # Neither phone nor email exists - create new account
+            if not phone_data.name or not phone_data.name.strip():
+                return JsonResponse({
+                    "message": "Full name is required for new users. Please provide your name.",
+                    "user_exists": False
+                }, status=400)
+            
+            try:
+                # Create new user
+                user = CustomUser.objects.create_user(
+                    email=email,
+                    phone_number=phone_number,
+                    fullname=phone_data.name.strip(),
+                    password=phone_number  # Use phone number as password
+                )
+                message = "Account created and signed in successfully"
+                
+            except Exception as e:
+                return JsonResponse({"message": f"Error creating user: {str(e)}"}, status=500)
     
     try:
         # Generate JWT tokens for login

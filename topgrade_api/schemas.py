@@ -7,6 +7,7 @@ class LoginSchema(Schema):
 class SignupSchema(Schema):
     fullname: str
     email: str
+    phone_number: str
     password: str
     confirm_password: str
 
@@ -25,6 +26,7 @@ class ResetPasswordSchema(Schema):
 class PhoneSigninSchema(Schema):
     name: str  # User's full name
     phoneNumber: str  # Phone number with country code
+    email: str  # User's email address
     firebaseToken: str  # Firebase ID token from Flutter
 
 class RefreshTokenSchema(Schema):

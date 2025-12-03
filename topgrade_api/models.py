@@ -36,7 +36,7 @@ class CustomUser(AbstractUser):
     
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=False, blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, unique=True, blank=False, null=False)
     fullname = models.CharField(max_length=255, blank=True, null=True)
     area_of_intrest = models.CharField(max_length=255, blank=True, null=True)
     role = models.CharField(max_length=20, choices=USER_ROLES, default='student')

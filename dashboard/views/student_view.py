@@ -21,29 +21,68 @@ def students_view(request):
             fullname = request.POST.get('fullname')
             email = request.POST.get('email')
             phone_number = request.POST.get('phone_number')
-            password = request.POST.get('password')
             area_of_intrest = request.POST.get('area_of_intrest')
             
-            if fullname and email and password:
+            if fullname and email and phone_number:
                 try:
                     # Check if email already exists
                     if CustomUser.objects.filter(email=email).exists():
                         messages.error(request, 'A user with this email already exists.')
+                    # Check if phone number already exists
+                    elif CustomUser.objects.filter(phone_number=phone_number).exists():
+                        messages.error(request, 'A user with this phone number already exists.')
                     else:
+                        # Generate password: Name (4 prefix) + Phone (4 suffix)
+                        # Example: Dhinesh + 8610360491 => DHIN0491
+                        name_prefix = fullname.replace(' ', '')[:4].upper()
+                        phone_suffix = phone_number[-4:]
+                        auto_password = f"{name_prefix}{phone_suffix}"
+                        
                         # Create new student
                         student = CustomUser.objects.create_user(
                             email=email,
-                            password=password,
+                            password=auto_password,
                             fullname=fullname,
                             phone_number=phone_number,
                             area_of_intrest=area_of_intrest,
                             role='student'
                         )
-                        messages.success(request, f'Student "{fullname}" has been added successfully.')
+                        messages.success(request, f'Student "{fullname}" has been added successfully. Default password: {auto_password}')
                 except Exception as e:
                     messages.error(request, f'Error creating student: {str(e)}')
             else:
-                messages.error(request, 'Full name, email, and password are required.')
+                messages.error(request, 'Full name, email, and phone number are required.')
+        
+        elif form_type == 'edit_student':
+            student_id = request.POST.get('student_id')
+            fullname = request.POST.get('fullname')
+            email = request.POST.get('email')
+            phone_number = request.POST.get('phone_number')
+            
+            if student_id and fullname and email and phone_number:
+                try:
+                    student = CustomUser.objects.get(id=student_id, role='student')
+                    
+                    # Check if email is being changed to one that already exists
+                    if student.email != email and CustomUser.objects.filter(email=email).exists():
+                        messages.error(request, 'A user with this email already exists.')
+                    # Check if phone is being changed to one that already exists
+                    elif student.phone_number != phone_number and CustomUser.objects.filter(phone_number=phone_number).exists():
+                        messages.error(request, 'A user with this phone number already exists.')
+                    else:
+                        # Update student information
+                        student.fullname = fullname
+                        student.email = email
+                        student.username = email  # Update username to match email
+                        student.phone_number = phone_number
+                        student.save()
+                        messages.success(request, f'Student "{fullname}" has been updated successfully.')
+                except CustomUser.DoesNotExist:
+                    messages.error(request, 'Student not found.')
+                except Exception as e:
+                    messages.error(request, f'Error updating student: {str(e)}')
+            else:
+                messages.error(request, 'All fields are required for updating student.')
         
         elif form_type == 'delete_student':
             student_id = request.POST.get('student_id')
