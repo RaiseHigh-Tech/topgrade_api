@@ -25,6 +25,10 @@ def students_view(request):
             
             if fullname and email and phone_number:
                 try:
+                    # Add +91 prefix if not already present
+                    if not phone_number.startswith('+'):
+                        phone_number = f"+91{phone_number}"
+                    
                     # Check if email already exists
                     if CustomUser.objects.filter(email=email).exists():
                         messages.error(request, 'A user with this email already exists.')
@@ -61,6 +65,10 @@ def students_view(request):
             
             if student_id and fullname and email and phone_number:
                 try:
+                    # Add +91 prefix if not already present
+                    if not phone_number.startswith('+'):
+                        phone_number = f"+91{phone_number}"
+                    
                     student = CustomUser.objects.get(id=student_id, role='student')
                     
                     # Check if email is being changed to one that already exists

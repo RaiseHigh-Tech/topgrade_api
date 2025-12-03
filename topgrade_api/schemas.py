@@ -24,10 +24,12 @@ class ResetPasswordSchema(Schema):
     confirm_password: str
 
 class PhoneSigninSchema(Schema):
-    name: str  # User's full name
     phoneNumber: str  # Phone number with country code
-    email: str  # User's email address
     firebaseToken: str  # Firebase ID token from Flutter
+
+class CompleteProfileSchema(Schema):
+    email: str
+    fullname: str
 
 class RefreshTokenSchema(Schema):
     refresh_token: str

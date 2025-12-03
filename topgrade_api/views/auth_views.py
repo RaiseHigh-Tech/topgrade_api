@@ -2,9 +2,10 @@ from ninja import NinjaAPI
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
-from topgrade_api.schemas import LoginSchema, SignupSchema, RequestOtpSchema, VerifyOtpSchema, ResetPasswordSchema, PhoneSigninSchema, RefreshTokenSchema
+from topgrade_api.schemas import LoginSchema, SignupSchema, RequestOtpSchema, VerifyOtpSchema, ResetPasswordSchema, PhoneSigninSchema, RefreshTokenSchema, CompleteProfileSchema
 from topgrade_api.models import CustomUser, OTPVerification
 from topgrade_api.utils.firebase_helper import validate_firebase_phone_auth
+from topgrade_api.views.common import AuthBearer
 from django.utils import timezone
 from dashboard.tasks import send_otp_email_task, generate_otp
 import time
@@ -45,12 +46,17 @@ def signup(request, user_data: SignupSchema):
     if user_data.password != user_data.confirm_password:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
     
+    # Add +91 prefix to phone number if not already present
+    phone_number = user_data.phone_number
+    if phone_number and not phone_number.startswith('+'):
+        phone_number = f"+91{phone_number}"
+    
     # Check if user already exists with this email
     if CustomUser.objects.filter(email=user_data.email).exists():
         return JsonResponse({"message": "User with this email already exists"}, status=400)
     
     # Check if phone number is already registered
-    if user_data.phone_number and CustomUser.objects.filter(phone_number=user_data.phone_number).exists():
+    if phone_number and CustomUser.objects.filter(phone_number=phone_number).exists():
         return JsonResponse({"message": "User with this phone number already exists"}, status=400)
     
     try:
@@ -59,7 +65,7 @@ def signup(request, user_data: SignupSchema):
             email=user_data.email,
             password=user_data.password,
             fullname=user_data.fullname,
-            phone_number=user_data.phone_number
+            phone_number=phone_number
         )
         
         # Generate tokens for immediate login
@@ -210,14 +216,11 @@ def reset_password(request, reset_data: ResetPasswordSchema):
 @auth_api.post("/phone-signin")
 def phone_signin(request, phone_data: PhoneSigninSchema):
     """
-    Firebase Phone Authentication with Account Linking
-    Automatically links accounts if email exists with different phone or vice versa
+    Firebase Phone Authentication - Minimal phone + token only
     
     Request format:
     {
-        "name": "User Full Name",
         "phoneNumber": "+911234567890",
-        "email": "user@example.com",
         "firebaseToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjFlMDNkN..."
     }
     """
@@ -229,70 +232,32 @@ def phone_signin(request, phone_data: PhoneSigninSchema):
     
     phone_number = result['phone_number']
     
-    # Validate required fields
-    if not phone_data.email or not phone_data.email.strip():
-        return JsonResponse({
-            "message": "Email is required. Please provide your email address.",
-            "user_exists": False
-        }, status=400)
+    # Ensure phone number has +91 prefix if not already present
+    if not phone_number.startswith('+'):
+        phone_number = f"+91{phone_number}"
     
-    email = phone_data.email.strip()
     user = None
-    message = None
     
-    # Try to find existing user by phone number OR email
+    # Try to find existing user by phone number
     try:
-        # First, try to find by phone number
         user = CustomUser.objects.get(phone_number=phone_number)
-        message = "Phone signin successful"
-        
-        # If email is different, update it (if not taken by another user)
-        if user.email != email:
-            if CustomUser.objects.filter(email=email).exclude(id=user.id).exists():
-                return JsonResponse({
-                    "message": "This email is registered to a different account. Please use the email associated with your phone number."
-                }, status=400)
-            user.email = email
-            user.username = email
-            user.save()
-            message = "Phone signin successful - email updated"
-    
     except CustomUser.DoesNotExist:
-        # Phone not found, try to find by email
+        # Create new user with phone number only
         try:
-            user = CustomUser.objects.get(email=email)
+            # Generate temporary email for new user
+            temp_email = f"{phone_number.replace('+', '')}@temp.phone.com"
             
-            # Check if user already has a different phone number
-            if user.phone_number and user.phone_number != phone_number:
-                return JsonResponse({
-                    "message": f"This email is already linked to phone number {user.phone_number}. Please use that number or contact support."
-                }, status=400)
+            # Use phone number without prefix as password
+            password_for_user = phone_number.replace('+91', '') if phone_number.startswith('+91') else phone_number
             
-            # Link phone number to existing account
-            user.phone_number = phone_number
-            user.save()
-            message = "Account linked with phone number successfully"
-            
-        except CustomUser.DoesNotExist:
-            # Neither phone nor email exists - create new account
-            if not phone_data.name or not phone_data.name.strip():
-                return JsonResponse({
-                    "message": "Full name is required for new users. Please provide your name.",
-                    "user_exists": False
-                }, status=400)
-            
-            try:
-                # Create new user
-                user = CustomUser.objects.create_user(
-                    email=email,
-                    phone_number=phone_number,
-                    fullname=phone_data.name.strip(),
-                    password=phone_number  # Use phone number as password
-                )
-                message = "Account created and signed in successfully"
-                
-            except Exception as e:
-                return JsonResponse({"message": f"Error creating user: {str(e)}"}, status=500)
+            user = CustomUser.objects.create_user(
+                email=temp_email,  # Temporary email
+                phone_number=phone_number,
+                fullname="",  # Empty, will be filled later
+                password=password_for_user
+            )
+        except Exception as e:
+            return JsonResponse({"message": f"Error creating user: {str(e)}"}, status=500)
     
     try:
         # Generate JWT tokens for login
@@ -300,19 +265,84 @@ def phone_signin(request, phone_data: PhoneSigninSchema):
         
         return {
             "success": True,
-            "message": message,
             "access_token": str(refresh.access_token),
             "refresh_token": str(refresh),
-            "user": {
-                "fullname": user.fullname if user.fullname else "",
-                "email": user.email,
-                "phone_number": user.phone_number if user.phone_number else "",
-            },
             "has_area_of_intrest": bool(user.area_of_intrest and user.area_of_intrest.strip())
         }
         
     except Exception as e:
         return JsonResponse({"message": f"Error during phone signin: {str(e)}"}, status=500)
+
+@auth_api.get("/profile-status", auth=AuthBearer())
+def profile_status(request):
+    """
+    Check if user has completed their profile (email, name, and area of interest)
+    Requires authentication: Bearer token in Authorization header
+    """
+    user = request.auth
+    
+    # Check if email is temporary (not real)
+    is_temp_email = user.email.endswith('@temp.phone.com')
+    has_email = not is_temp_email and bool(user.email)
+    has_name = bool(user.fullname and user.fullname.strip())
+    has_area_of_intrest = bool(user.area_of_intrest and user.area_of_intrest.strip())
+    
+    response_data = {
+        "hasEmail": has_email,
+        "hasName": has_name,
+        "hasAreaOfInterest": has_area_of_intrest,
+        "isProfileComplete": has_email and has_name  # Email + Name are mandatory
+    }
+    
+    # If profile is complete, return user data
+    if has_email and has_name:
+        response_data["user"] = {
+            "email": user.email,
+            "fullname": user.fullname,
+            "phone_number": user.phone_number if user.phone_number else "",
+            "area_of_intrest": user.area_of_intrest if user.area_of_intrest else ""
+        }
+    
+    return response_data
+
+@auth_api.post("/profile-update", auth=AuthBearer())
+def profile_update(request, profile_data: CompleteProfileSchema):
+    """
+    Update user profile with email and fullname
+    Requires authentication: Bearer token in Authorization header
+    """
+    user = request.auth
+    email = profile_data.email.strip()
+    fullname = profile_data.fullname.strip()
+    
+    # Validate email and fullname are provided
+    if not email or not fullname:
+        return JsonResponse({"message": "Email and full name are required"}, status=400)
+    
+    # Check if email already exists (excluding current user and temp emails)
+    if CustomUser.objects.filter(email=email).exclude(id=user.id).exclude(email__endswith='@temp.phone.com').exists():
+        return JsonResponse({"message": "This email is already registered"}, status=400)
+    
+    try:
+        # Update user profile
+        user.email = email
+        user.username = email
+        user.fullname = fullname
+        user.save()
+        
+        return {
+            "success": True,
+            "message": "Profile updated successfully",
+            "user": {
+                "email": user.email,
+                "fullname": user.fullname,
+                "phone_number": user.phone_number if user.phone_number else "",
+                "area_of_intrest": user.area_of_intrest if user.area_of_intrest else ""
+            },
+            "hasAreaOfInterest": bool(user.area_of_intrest and user.area_of_intrest.strip())
+        }
+    except Exception as e:
+        return JsonResponse({"message": f"Error updating profile: {str(e)}"}, status=500)
 
 @auth_api.post("/refresh")
 def refresh_token(request, token_data: RefreshTokenSchema):
