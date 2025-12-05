@@ -431,6 +431,7 @@ def get_program_details(request, program_id: int):
             "has_program_requested": has_program_requested,
             "purchase_id": purchase_id,
             "enrolled_students": enrolled_students,
+            "skills": program.skills if program.skills else [],
             "pricing": {
                 "original_price": float(program.price),
                 "discount_percentage": float(program.discount_percentage),

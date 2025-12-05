@@ -132,6 +132,13 @@ def programs_view(request):
             icon = request.POST.get('program_icon')
             price = request.POST.get('price')
             discount_percentage = request.POST.get('discount_percentage')
+            skills_input = request.POST.get('program_skills', '')
+            
+            # Process skills input
+            skills = None
+            if skills_input and skills_input.strip():
+                # Split by comma and clean up
+                skills = [skill.strip() for skill in skills_input.split(',') if skill.strip()]
             
             if title and category_id and batch_starts and available_slots and duration:
                 try:
@@ -152,7 +159,8 @@ def programs_view(request):
                         is_best_seller=is_best_seller,
                         icon=icon,
                         price=float(price) if price else 0.0,
-                        discount_percentage=float(discount_percentage) if discount_percentage else 0.0
+                        discount_percentage=float(discount_percentage) if discount_percentage else 0.0,
+                        skills=skills
                     )
                     
                     # Handle syllabus and topics creation
@@ -358,6 +366,13 @@ def edit_program_view(request, id):
         icon = request.POST.get('program_icon')
         price = request.POST.get('price')
         discount_percentage = request.POST.get('discount_percentage')
+        skills_input = request.POST.get('program_skills', '')
+        
+        # Process skills input
+        skills = None
+        if skills_input and skills_input.strip():
+            # Split by comma and clean up
+            skills = [skill.strip() for skill in skills_input.split(',') if skill.strip()]
         
         if title and category_id and batch_starts and available_slots and duration:
             try:
@@ -379,6 +394,7 @@ def edit_program_view(request, id):
                 program.icon = icon
                 program.price = float(price) if price else 0.0
                 program.discount_percentage = float(discount_percentage) if discount_percentage else 0.0
+                program.skills = skills
                 program.save()
                 
                 # Handle syllabus and topics update WITHOUT deleting existing data

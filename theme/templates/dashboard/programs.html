@@ -512,6 +512,14 @@
                                     <div class="invalid-feedback">Please enter a description</div>
                                 </div>
                             </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="program-skills-input">Program Skills</label>
+                                    <input type="text" class="form-control" id="program-skills-input" name="program_skills" placeholder="e.g., Django, Flask, REST API (comma separated)">
+                                    <div class="form-text">Enter skills separated by commas</div>
+                                    <div id="skills-preview" class="mt-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -854,6 +862,14 @@
                                     <label class="form-label" for="edit-steparrow-gen-info-description-input">Description</label>
                                     <textarea class="form-control" id="edit-steparrow-gen-info-description-input" name="program_description" placeholder="Enter description" rows="3">{{ edit_program.description }}</textarea>
                                     <div class="invalid-feedback">Please enter a description</div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label class="form-label" for="edit-program-skills-input">Program Skills</label>
+                                    <input type="text" class="form-control" id="edit-program-skills-input" name="program_skills" placeholder="e.g., Django, Flask, REST API (comma separated)">
+                                    <div class="form-text">Enter skills separated by commas</div>
+                                    <div id="edit-skills-preview" class="mt-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -3014,6 +3030,7 @@ function openEditModal(programId) {
             icon: "{{ program.icon|escapejs }}",
             price: {{ program.price }},
             discount_percentage: {{ program.discount_percentage }},
+            skills: {% if program.skills %}{{ program.skills|safe }}{% else %}null{% endif %},
             image_url: "{% if program.image %}{{ program.image.url }}{% endif %}",
             syllabuses: [
                 {% for syllabus in program.syllabuses.all %}
@@ -3065,6 +3082,15 @@ function openEditModal(programId) {
     document.getElementById('edit-program-icon').value = program.icon;
     document.getElementById('edit-price-input').value = program.price;
     document.getElementById('edit-discount-input').value = program.discount_percentage;
+    
+    // Set skills field and trigger preview
+    const editSkillsInput = document.getElementById('edit-program-skills-input');
+    if (program.skills && Array.isArray(program.skills)) {
+        editSkillsInput.value = program.skills.join(', ');
+    } else {
+        editSkillsInput.value = '';
+    }
+    updateSkillsPreview('edit-program-skills-input', 'edit-skills-preview');
     
     // Update image preview if exists
     const imagePreview = document.getElementById('editImagePreview');
@@ -3295,5 +3321,50 @@ function updateEditDeleteButtonVisibility() {
         });
     });
 }
+
+// Skills input handling with badge preview
+function updateSkillsPreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    
+    if (!input || !preview) return;
+    
+    const skillsText = input.value.trim();
+    
+    if (skillsText === '') {
+        preview.innerHTML = '';
+        return;
+    }
+    
+    // Split by comma and clean up
+    const skills = skillsText.split(',').map(skill => skill.trim()).filter(skill => skill !== '');
+    
+    // Create badge HTML
+    let badgesHTML = '<div class="d-flex flex-wrap gap-2">';
+    skills.forEach(skill => {
+        badgesHTML += `<span class="badge bg-primary-subtle text-primary fs-12">${skill}</span>`;
+    });
+    badgesHTML += '</div>';
+    
+    preview.innerHTML = badgesHTML;
+}
+
+// Add event listeners for skills inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const skillsInput = document.getElementById('program-skills-input');
+    const editSkillsInput = document.getElementById('edit-program-skills-input');
+    
+    if (skillsInput) {
+        skillsInput.addEventListener('input', function() {
+            updateSkillsPreview('program-skills-input', 'skills-preview');
+        });
+    }
+    
+    if (editSkillsInput) {
+        editSkillsInput.addEventListener('input', function() {
+            updateSkillsPreview('edit-program-skills-input', 'edit-skills-preview');
+        });
+    }
+});
 </script>
 {% endblock %}

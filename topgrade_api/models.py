@@ -153,6 +153,7 @@ class Program(models.Model):
     icon = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Program price")
     discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Discount percentage (0-100)")
+    skills = models.JSONField(blank=True, null=True, help_text="Program-related skills (e.g., ['Django', 'Flask', 'REST API'])")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
