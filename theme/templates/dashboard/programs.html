@@ -1392,6 +1392,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
                 
+                // Special validation: Check if moving to Review tab
+                if (nextTabId === 'pills-experience-tab') {
+                    // Validate that all selected videos are uploaded
+                    if (!validateVideosUploaded('programWizardForm')) {
+                        return false;
+                    }
+                }
+                
                 if (nextTabId) {
                     // Activate next tab
                     const nextTab = document.getElementById(nextTabId);
@@ -1796,6 +1804,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Validate current tab before proceeding
                 if (!validateEditCurrentTab(currentTabContent)) {
                     return false;
+                }
+                
+                // Special validation: Check if moving to Review tab
+                if (nextTabId === 'edit-pills-experience-tab') {
+                    // Validate that all selected videos are uploaded
+                    if (!validateVideosUploaded('editProgramWizardForm')) {
+                        return false;
+                    }
                 }
                 
                 if (nextTabId) {

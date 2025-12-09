@@ -52,8 +52,12 @@ def generate_presigned_url(request):
         file_extension = os.path.splitext(file_name)[1]
         unique_file_name = f"{uuid.uuid4()}{file_extension}"
         
-        # Organize by: programs/{advanced|regular}/{program_subtitle}/{unique_filename.ext}
-        # Note: No "media/" prefix - Django's MEDIA_URL will handle that
+        # S3 upload path: media/programs/{advanced|regular}/{program_subtitle}/{unique_filename.ext}
+        # This matches your S3 bucket structure: topgrade-media-files/media/programs/...
+        s3_upload_key = f"media/programs/{program_type}/{safe_program_subtitle}/{unique_file_name}"
+        
+        # Database storage path: programs/{advanced|regular}/{program_subtitle}/{unique_filename.ext}
+        # Django's MEDIA_URL (/media/) will be prepended, resulting in correct URL
         s3_key = f"programs/{program_type}/{safe_program_subtitle}/{unique_file_name}"
         
         # Initialize S3 client
@@ -65,24 +69,26 @@ def generate_presigned_url(request):
             config=boto3.session.Config(signature_version='s3v4')
         )
         
-        # Generate presigned URL for PUT operation
+        # Generate presigned URL for PUT operation (using full S3 path)
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
             Params={
                 'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-                'Key': s3_key,
+                'Key': s3_upload_key,  # Upload to media/programs/...
                 'ContentType': file_type,
             },
             ExpiresIn=3600  # URL valid for 1 hour
         )
         
         # Return the presigned URL and file path
-        # Store only the S3 key (relative path) to work with CloudFront/media domain
+        # presigned_url: For uploading to S3 (media/programs/...)
+        # s3_key: For storing in database (programs/...) - MEDIA_URL will add /media/
         return JsonResponse({
             'success': True,
             'presigned_url': presigned_url,
-            's3_key': s3_key,
-            'file_url': s3_key  # Store only the key, not the full URL
+            's3_upload_key': s3_upload_key,  # Full S3 path for display
+            's3_key': s3_key,  # Database path (without media/)
+            'file_url': s3_key  # Store in DB without media/ prefix
         })
         
     except Exception as e:
