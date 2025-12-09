@@ -52,8 +52,9 @@ def generate_presigned_url(request):
         file_extension = os.path.splitext(file_name)[1]
         unique_file_name = f"{uuid.uuid4()}{file_extension}"
         
-        # Organize by: media/programs/{advanced|regular}/{program_subtitle}/{unique_filename.ext}
-        s3_key = f"media/programs/{program_type}/{safe_program_subtitle}/{unique_file_name}"
+        # Organize by: programs/{advanced|regular}/{program_subtitle}/{unique_filename.ext}
+        # Note: No "media/" prefix - Django's MEDIA_URL will handle that
+        s3_key = f"programs/{program_type}/{safe_program_subtitle}/{unique_file_name}"
         
         # Initialize S3 client
         s3_client = boto3.client(
@@ -76,11 +77,12 @@ def generate_presigned_url(request):
         )
         
         # Return the presigned URL and file path
+        # Store only the S3 key (relative path) to work with CloudFront/media domain
         return JsonResponse({
             'success': True,
             'presigned_url': presigned_url,
             's3_key': s3_key,
-            'file_url': f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{s3_key}"
+            'file_url': s3_key  # Store only the key, not the full URL
         })
         
     except Exception as e:
@@ -105,17 +107,11 @@ def confirm_upload(request):
                 'error': 'S3 key is required'
             }, status=400)
         
-        # Generate the final file URL
-        use_cloudfront = getattr(settings, 'USE_CLOUDFRONT', False)
-        
-        if use_cloudfront and hasattr(settings, 'AWS_CLOUDFRONT_DOMAIN') and settings.AWS_CLOUDFRONT_DOMAIN:
-            file_url = f"https://{settings.AWS_CLOUDFRONT_DOMAIN}/{s3_key}"
-        else:
-            file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{s3_key}"
-        
+        # Return only the S3 key (relative path)
+        # Django's MEDIA_URL will handle the full URL construction
         return JsonResponse({
             'success': True,
-            'file_url': file_url,
+            'file_url': s3_key,  # Store only the key, not the full URL
             's3_key': s3_key
         })
         
