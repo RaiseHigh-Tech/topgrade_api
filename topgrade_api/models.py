@@ -212,7 +212,7 @@ class Topic(models.Model):
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='topics')
     topic_title = models.CharField(max_length=500)
     description = models.TextField(blank=True, null=True)
-    video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, help_text="Upload video file")
+    video_file = models.FileField(upload_to=get_topic_video_path, blank=True, null=True, max_length=500, help_text="Upload video file")
     video_duration = models.CharField(max_length=10, blank=True, null=True, help_text="Video duration in MM:SS or HH:MM:SS format")
     is_intro = models.BooleanField(default=False, help_text="Mark as intro video")
     is_free_trial = models.BooleanField(default=False, help_text="Available in free trial")
