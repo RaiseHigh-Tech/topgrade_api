@@ -207,7 +207,17 @@ def programs_view(request):
                                     # Handle video file upload and duration calculation
                                     video_file = None
                                     video_duration = None
-                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                    video_s3_url = topic_data.get('video_s3_url', '')
+                                    
+                                    # Check if S3 URL was provided (direct upload)
+                                    if video_s3_url:
+                                        # Video was uploaded directly to S3
+                                        # Store the S3 URL in the video_file field
+                                        video_file = video_s3_url
+                                        # Note: Duration calculation for S3 videos would require downloading
+                                        # which is not efficient. Consider calculating on client side or skipping.
+                                    elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        # Traditional file upload (fallback)
                                         video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
                                         # Calculate video duration with error handling
                                         try:

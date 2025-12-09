@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views.video_upload_view import generate_presigned_url, confirm_upload
 
 app_name = 'dashboard'
 
@@ -25,6 +26,10 @@ urlpatterns = [
     path('carousel/', views.carousel_view, name='carousel'),
     path('gallery/', views.gallery_view, name='gallery'),
     path('program/<int:program_id>/', views.program_details_view, name='program_details'),
+    
+    # Video upload endpoints
+    path('api/generate-presigned-url/', generate_presigned_url, name='generate_presigned_url'),
+    path('api/confirm-upload/', confirm_upload, name='confirm_upload'),
     
     # Testimonials management
     path('testimonials/', views.testimonials_view, name='testimonials'),

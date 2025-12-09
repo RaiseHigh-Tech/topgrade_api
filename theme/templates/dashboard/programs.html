@@ -681,7 +681,47 @@
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm" name="modules[0][topics][0][video_file]" accept="video/*">
+                                                    <input type="file" 
+                                                           class="form-control form-control-sm video-file-input" 
+                                                           data-module-index="0" 
+                                                           data-topic-index="0"
+                                                           accept="video/*"
+                                                           onchange="handleVideoSelection(this)">
+                                                    
+                                                    <!-- Hidden input to store S3 URL after upload -->
+                                                    <input type="hidden" 
+                                                           class="video-s3-url" 
+                                                           name="modules[0][topics][0][video_s3_url]">
+                                                    
+                                                    <!-- Upload button -->
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
+                                                            style="display: none;"
+                                                            onclick="uploadVideoToS3(this)">
+                                                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                                                    </button>
+                                                    
+                                                    <!-- Progress bar -->
+                                                    <div class="upload-progress-container mt-2" style="display: none;">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <small class="text-muted upload-status">Uploading...</small>
+                                                            <small class="text-muted upload-percentage">0%</small>
+                                                        </div>
+                                                        <div class="progress" style="height: 6px;">
+                                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
+                                                                 role="progressbar" 
+                                                                 style="width: 0%;" 
+                                                                 aria-valuenow="0" 
+                                                                 aria-valuemin="0" 
+                                                                 aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Success message -->
+                                                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                                                        <i class="ri-checkbox-circle-line me-1"></i>
+                                                        <small>Video uploaded successfully!</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
@@ -1035,28 +1075,68 @@
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" class="form-control form-control-sm"  name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_file]" accept="video/*">
+                                                    <input type="file" 
+                                                           class="form-control form-control-sm video-file-input" 
+                                                           data-module-index="{{ forloop.parentloop.counter0 }}" 
+                                                           data-topic-index="{{ forloop.counter0 }}"
+                                                           accept="video/*"
+                                                           onchange="handleVideoSelection(this)">
+                                                    
+                                                    <!-- Hidden input to store S3 URL after upload -->
+                                                    <input type="hidden" 
+                                                           class="video-s3-url" 
+                                                           name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_s3_url]">
                                                     
                                                     <!-- Hidden input to preserve existing video file -->
                                                     {% if topic.video_file %}
                                                         <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][existing_video_file]" value="{{ topic.video_file.name }}">
                                                         <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][topic_id]" value="{{ topic.id }}">
-                                                        <div class="mt-1">
+                                                        <div class="mt-1 existing-video-info">
                                                             <small class="text-muted d-block">
                                                                 <i class="ri-video-line me-1 text-success"></i>
                                                                 <strong>Current video:</strong> {{ topic.video_file.name }}
                                                             </small>
                                                             <small class="text-info d-block">
                                                                 <i class="ri-information-line me-1"></i>
-                                                                Leave empty to keep current video, or choose a new file to replace it
+                                                                Leave empty to keep current video, or upload a new file to replace it
                                                             </small>
                                                         </div>
                                                     {% else %}
-                                                        <small class="text-muted d-block mt-1">
+                                                        <small class="text-muted d-block mt-1 existing-video-info">
                                                             <i class="ri-upload-line me-1"></i>
                                                             No video file uploaded for this topic
                                                         </small>
                                                     {% endif %}
+                                                    
+                                                    <!-- Upload button -->
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
+                                                            style="display: none;"
+                                                            onclick="uploadVideoToS3(this)">
+                                                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                                                    </button>
+                                                    
+                                                    <!-- Progress bar -->
+                                                    <div class="upload-progress-container mt-2" style="display: none;">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <small class="text-muted upload-status">Uploading...</small>
+                                                            <small class="text-muted upload-percentage">0%</small>
+                                                        </div>
+                                                        <div class="progress" style="height: 6px;">
+                                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
+                                                                 role="progressbar" 
+                                                                 style="width: 0%;" 
+                                                                 aria-valuenow="0" 
+                                                                 aria-valuemin="0" 
+                                                                 aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Success message -->
+                                                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                                                        <i class="ri-checkbox-circle-line me-1"></i>
+                                                        <small>Video uploaded successfully!</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row mt-2">
@@ -2508,7 +2588,43 @@ function addTopic(button) {
             <div class="row mt-2">
                 <div class="col-12">
                     <label class="form-label form-label-sm">Video File:</label>
-                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicCount}][video_file]" accept="video/*">
+                    <input type="file" 
+                           class="form-control form-control-sm video-file-input" 
+                           data-module-index="${moduleIndex}" 
+                           data-topic-index="${topicCount}"
+                           accept="video/*"
+                           onchange="handleVideoSelection(this)">
+                    
+                    <input type="hidden" 
+                           class="video-s3-url" 
+                           name="modules[${moduleIndex}][topics][${topicCount}][video_s3_url]">
+                    
+                    <button type="button" 
+                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
+                            style="display: none;"
+                            onclick="uploadVideoToS3(this)">
+                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                    </button>
+                    
+                    <div class="upload-progress-container mt-2" style="display: none;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted upload-status">Uploading...</small>
+                            <small class="text-muted upload-percentage">0%</small>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
+                                 role="progressbar" 
+                                 style="width: 0%;" 
+                                 aria-valuenow="0" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                        <i class="ri-checkbox-circle-line me-1"></i>
+                        <small>Video uploaded successfully!</small>
+                    </div>
                 </div>
             </div>
             <div class="row mt-2">
@@ -3191,8 +3307,45 @@ function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescrip
             <div class="row mt-2">
                 <div class="col-12">
                     <label class="form-label form-label-sm">Video File:</label>
-                    <input type="file" class="form-control form-control-sm" name="modules[${moduleIndex}][topics][${topicIndex}][video_file]" accept="video/*">
-                    ${topicVideoFile ? `<small class="text-muted">Current: ${topicVideoFile}</small>` : ''}
+                    <input type="file" 
+                           class="form-control form-control-sm video-file-input" 
+                           data-module-index="${moduleIndex}" 
+                           data-topic-index="${topicIndex}"
+                           accept="video/*"
+                           onchange="handleVideoSelection(this)">
+                    
+                    <input type="hidden" 
+                           class="video-s3-url" 
+                           name="modules[${moduleIndex}][topics][${topicIndex}][video_s3_url]">
+                    
+                    ${topicVideoFile ? `<small class="text-muted d-block mt-1 existing-video-info"><i class="ri-video-line me-1 text-success"></i>Current: ${topicVideoFile}</small>` : ''}
+                    
+                    <button type="button" 
+                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
+                            style="display: none;"
+                            onclick="uploadVideoToS3(this)">
+                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                    </button>
+                    
+                    <div class="upload-progress-container mt-2" style="display: none;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted upload-status">Uploading...</small>
+                            <small class="text-muted upload-percentage">0%</small>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
+                                 role="progressbar" 
+                                 style="width: 0%;" 
+                                 aria-valuenow="0" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                        <i class="ri-checkbox-circle-line me-1"></i>
+                        <small>Video uploaded successfully!</small>
+                    </div>
                 </div>
             </div>
             <div class="row mt-2">
@@ -3366,5 +3519,332 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ==================== VIDEO UPLOAD TO S3 WITH PROGRESS ====================
+
+/**
+ * Handle video file selection
+ */
+function handleVideoSelection(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+        alert('Please select a valid video file');
+        input.value = '';
+        return;
+    }
+    
+    // Get the container
+    const container = input.closest('.col-12');
+    const uploadBtn = container.querySelector('.upload-video-btn');
+    const successAlert = container.querySelector('.upload-success');
+    const hiddenInput = container.querySelector('.video-s3-url');
+    
+    // Clear any previous S3 URL
+    if (hiddenInput) {
+        hiddenInput.value = '';
+        hiddenInput.removeAttribute('data-uploaded');
+    }
+    
+    // Show upload button
+    if (uploadBtn) {
+        uploadBtn.style.display = 'inline-block';
+    }
+    
+    // Hide success message if visible
+    if (successAlert) {
+        successAlert.style.display = 'none';
+    }
+    
+    console.log('Video file selected:', file.name, 'Size:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
+}
+
+/**
+ * Get program subtitle from the form (uses subtitle for folder organization)
+ */
+function getProgramSubtitle() {
+    // Try to get subtitle from add program modal first
+    let programSubtitle = document.getElementById('steparrow-gen-info-subtitle-input');
+    if (programSubtitle && programSubtitle.value.trim()) {
+        return programSubtitle.value.trim();
+    }
+    
+    // Try to get subtitle from edit program modal
+    programSubtitle = document.getElementById('edit-steparrow-gen-info-subtitle-input');
+    if (programSubtitle && programSubtitle.value.trim()) {
+        return programSubtitle.value.trim();
+    }
+    
+    // Fallback to title if subtitle is empty
+    let programTitle = document.getElementById('steparrow-gen-info-title-input');
+    if (programTitle && programTitle.value.trim()) {
+        return programTitle.value.trim();
+    }
+    
+    // Try edit modal title
+    programTitle = document.getElementById('edit-steparrow-gen-info-title-input');
+    if (programTitle && programTitle.value.trim()) {
+        return programTitle.value.trim();
+    }
+    
+    // Default fallback
+    return 'untitled_program';
+}
+
+/**
+ * Get program type (advanced or regular) based on selected category
+ */
+function getProgramType() {
+    // Try to get category from add program modal first
+    let categorySelect = document.getElementById('program_category');
+    if (categorySelect && categorySelect.selectedOptions.length > 0) {
+        let categoryName = categorySelect.selectedOptions[0].text.trim();
+        return categoryName.toLowerCase().includes('advanced') ? 'advanced' : 'regular';
+    }
+    
+    // Try to get category from edit program modal
+    categorySelect = document.getElementById('edit_program_category');
+    if (categorySelect && categorySelect.selectedOptions.length > 0) {
+        let categoryName = categorySelect.selectedOptions[0].text.trim();
+        return categoryName.toLowerCase().includes('advanced') ? 'advanced' : 'regular';
+    }
+    
+    // Default fallback
+    return 'regular';
+}
+
+/**
+ * Upload video to S3 with progress tracking
+ */
+async function uploadVideoToS3(button) {
+    const container = button.closest('.col-12');
+    const fileInput = container.querySelector('.video-file-input');
+    const hiddenInput = container.querySelector('.video-s3-url');
+    const progressContainer = container.querySelector('.upload-progress-container');
+    const progressBar = container.querySelector('.upload-progress-bar');
+    const progressPercentage = container.querySelector('.upload-percentage');
+    const statusText = container.querySelector('.upload-status');
+    const successAlert = container.querySelector('.upload-success');
+    const existingVideoInfo = container.querySelector('.existing-video-info');
+    
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('Please select a video file first');
+        return;
+    }
+    
+    // Get program subtitle and type for folder organization
+    const programSubtitle = getProgramSubtitle();
+    const programType = getProgramType();
+    
+    // Disable button and show progress
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Uploading...';
+    progressContainer.style.display = 'block';
+    successAlert.style.display = 'none';
+    
+    try {
+        // Step 1: Get presigned URL from backend
+        const formData = new FormData();
+        formData.append('file_name', file.name);
+        formData.append('file_type', file.type);
+        formData.append('program_name', programSubtitle);  // Send program subtitle
+        formData.append('program_type', programType);  // Send program type (advanced/regular)
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        statusText.textContent = 'Preparing upload...';
+        
+        const response = await fetch('{% url "dashboard:generate_presigned_url" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to generate upload URL');
+        }
+        
+        statusText.textContent = 'Uploading to S3...';
+        
+        // Step 2: Upload directly to S3 with progress tracking
+        await uploadToS3WithProgress(file, data.presigned_url, (progress) => {
+            progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', progress);
+            progressPercentage.textContent = Math.round(progress) + '%';
+            
+            if (progress === 100) {
+                statusText.textContent = 'Upload complete!';
+            }
+        });
+        
+        // Step 3: Store S3 URL in hidden input
+        hiddenInput.value = data.file_url;
+        hiddenInput.setAttribute('data-uploaded', 'true');  // Mark as uploaded
+        
+        // Show success
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+            successAlert.style.display = 'block';
+            fileInput.classList.add('border-success');
+            button.style.display = 'none';
+            
+            // Hide existing video info since we're replacing it
+            if (existingVideoInfo) {
+                existingVideoInfo.style.display = 'none';
+            }
+            
+            console.log('Video uploaded successfully to:', data.file_url);
+        }, 500);
+        
+    } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading video: ' + error.message);
+        
+        // Reset UI
+        button.disabled = false;
+        button.innerHTML = '<i class="ri-upload-cloud-line me-1"></i>Upload to S3';
+        progressContainer.style.display = 'none';
+        statusText.textContent = 'Uploading...';
+        progressBar.style.width = '0%';
+        progressPercentage.textContent = '0%';
+    }
+}
+
+/**
+ * Upload file to S3 with progress tracking using XMLHttpRequest
+ */
+function uploadToS3WithProgress(file, presignedUrl, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = (event.loaded / event.total) * 100;
+                onProgress(percentComplete);
+            }
+        });
+        
+        // Handle completion
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                onProgress(100);
+                resolve();
+            } else {
+                reject(new Error(`Upload failed with status ${xhr.status}`));
+            }
+        });
+        
+        // Handle errors
+        xhr.addEventListener('error', () => {
+            reject(new Error('Network error during upload'));
+        });
+        
+        xhr.addEventListener('abort', () => {
+            reject(new Error('Upload was cancelled'));
+        });
+        
+        // Upload to S3
+        xhr.open('PUT', presignedUrl);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(file);
+    });
+}
+
+// ==================== END VIDEO UPLOAD ====================
+
+/**
+ * Validate that all selected videos are uploaded before form submission
+ */
+function validateVideosUploaded(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return true;
+    
+    // Find all video file inputs that have files selected
+    const videoInputs = form.querySelectorAll('.video-file-input');
+    const pendingUploads = [];
+    
+    videoInputs.forEach(input => {
+        if (input.files && input.files.length > 0) {
+            // Video file is selected
+            const container = input.closest('.col-12');
+            const hiddenInput = container.querySelector('.video-s3-url');
+            const isUploaded = hiddenInput && hiddenInput.getAttribute('data-uploaded') === 'true';
+            
+            if (!isUploaded) {
+                // Video selected but not uploaded
+                const moduleItem = input.closest('.module-item');
+                const topicItem = input.closest('.topic-item');
+                const moduleIndex = moduleItem ? moduleItem.getAttribute('data-module-index') : 'unknown';
+                const topicIndex = topicItem ? topicItem.getAttribute('data-topic-index') : 'unknown';
+                
+                pendingUploads.push({
+                    module: parseInt(moduleIndex) + 1,
+                    topic: parseInt(topicIndex) + 1,
+                    input: input,
+                    container: container
+                });
+            }
+        }
+    });
+    
+    if (pendingUploads.length > 0) {
+        // Show error message
+        let message = 'Please upload all selected videos before submitting:\n\n';
+        pendingUploads.forEach(item => {
+            message += `• Module ${item.module}, Topic ${item.topic}\n`;
+            
+            // Highlight the upload button
+            const uploadBtn = item.container.querySelector('.upload-video-btn');
+            if (uploadBtn && uploadBtn.style.display !== 'none') {
+                uploadBtn.classList.add('btn-danger');
+                uploadBtn.classList.remove('btn-success');
+                setTimeout(() => {
+                    uploadBtn.classList.remove('btn-danger');
+                    uploadBtn.classList.add('btn-success');
+                }, 3000);
+            }
+        });
+        
+        alert(message);
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Add form submission validation for add program form
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const addProgramForm = document.getElementById('programWizardForm');
+    if (addProgramForm) {
+        addProgramForm.addEventListener('submit', function(e) {
+            if (!validateVideosUploaded('programWizardForm')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+    
+    const editProgramForm = document.getElementById('editProgramWizardForm');
+    if (editProgramForm) {
+        editProgramForm.addEventListener('submit', function(e) {
+            if (!validateVideosUploaded('editProgramWizardForm')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+
+// ==================== END FORM VALIDATION ====================
 </script>
 {% endblock %}
