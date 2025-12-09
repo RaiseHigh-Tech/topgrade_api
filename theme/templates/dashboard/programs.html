@@ -3700,6 +3700,21 @@ async function uploadVideoToS3(button) {
                 existingVideoInfo.style.display = 'none';
             }
             
+            // Show new video path in success message
+            if (successAlert) {
+                // Extract just the path from the full URL
+                const s3Key = data.s3_key || '';
+                const pathParts = s3Key.split('/');
+                const fileName = pathParts[pathParts.length - 1];
+                successAlert.innerHTML = `
+                    <i class="ri-checkbox-circle-line me-1"></i>
+                    <strong>Video uploaded successfully!</strong><br>
+                    <small class="text-muted d-block mt-1">
+                        <i class="ri-folder-line me-1"></i>Path: ${s3Key}
+                    </small>
+                `;
+            }
+            
             console.log('Video uploaded successfully to:', data.file_url);
         }, 500);
         

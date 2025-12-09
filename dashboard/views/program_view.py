@@ -469,8 +469,14 @@ def edit_program_view(request, id):
                                     topic.description = topic_data.get('description', '')
                                     topic.is_intro = topic_data.get('is_intro') == 'on'
                                     
-                                    # Only update video if new one is uploaded
-                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                    # Check if S3 URL was provided (direct upload)
+                                    video_s3_url = topic_data.get('video_s3_url', '')
+                                    if video_s3_url:
+                                        # Video was uploaded directly to S3
+                                        topic.video_file = video_s3_url
+                                        # Note: Duration calculation for S3 videos would require downloading
+                                    elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        # Traditional file upload (fallback)
                                         topic.video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
                                         try:
                                             topic.video_duration = calculate_video_duration(topic.video_file)
@@ -485,8 +491,15 @@ def edit_program_view(request, id):
                                     # Create new topic
                                     video_file = None
                                     video_duration = None
+                                    video_s3_url = topic_data.get('video_s3_url', '')
                                     
-                                    if f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                    # Check if S3 URL was provided (direct upload)
+                                    if video_s3_url:
+                                        # Video was uploaded directly to S3
+                                        video_file = video_s3_url
+                                        # Note: Duration calculation for S3 videos would require downloading
+                                    elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
+                                        # Traditional file upload (fallback)
                                         video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
                                         try:
                                             video_duration = calculate_video_duration(video_file)
