@@ -1031,3 +1031,48 @@ class NotificationLog(models.Model):
     
     def __str__(self):
         return f"{self.notification.title} -> {self.user.email} ({self.status})"
+
+
+class DeleteAccountRequest(models.Model):
+    """Model to store account deletion requests from users"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    email = models.EmailField(blank=True, null=True, help_text="Email address for account deletion")
+    phone_number = models.CharField(max_length=15, blank=True, null=True, help_text="Phone number for account deletion")
+    reason = models.TextField(blank=True, null=True, help_text="Reason for account deletion (optional)")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    requested_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processed_deletion_requests',
+        help_text="Admin who processed this request"
+    )
+    admin_notes = models.TextField(blank=True, null=True, help_text="Internal notes from admin")
+    
+    class Meta:
+        ordering = ['-requested_at']
+        verbose_name = 'Delete Account Request'
+        verbose_name_plural = 'Delete Account Requests'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['phone_number']),
+            models.Index(fields=['status', 'requested_at']),
+        ]
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if not self.email and not self.phone_number:
+            raise ValidationError('Either email or phone number must be provided.')
+    
+    def __str__(self):
+        identifier = self.email or self.phone_number or 'Unknown'
+        return f"Delete Request: {identifier} - {self.status}"

@@ -109,10 +109,21 @@
             <div class="border-l-4 border-[#ef7d00] pl-6">
               <h3 class="text-xl font-bold text-gray-900 mb-3">7. Your Rights</h3>
               <p class="text-gray-700 leading-relaxed mb-3">You have the right to access, correct, or delete your personal data, withdraw consent, or object to certain processing activities.</p>
-              <p class="text-gray-700 leading-relaxed">
+              <p class="text-gray-700 leading-relaxed mb-3">
                 Requests may be sent to
                 <a href="mailto:support@topgradeinnovations.com" class="text-[#ef7d00] hover:underline">support@topgradeinnovations.com</a>, and we will act upon them in accordance with the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011.
               </p>
+              <div class="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <p class="text-gray-700 leading-relaxed mb-2">
+                  <strong>Delete Your Account:</strong> If you wish to permanently delete your TopGrade account and associated data, you can submit a request through our secure deletion request form.
+                </p>
+                <a href="{% url 'delete_account_request' %}" class="inline-flex items-center text-[#ef7d00] hover:text-[#d27306] font-semibold">
+                  Submit Account Deletion Request
+                  <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
             </div>
 
             <!-- Section 8 -->

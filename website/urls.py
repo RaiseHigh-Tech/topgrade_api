@@ -21,6 +21,7 @@ urlpatterns = [
     path('refund-policy/', views.refund_policy, name='refund'),
     path('terms-app/', views.terms_app, name='terms_app'),
     path('privacy-app/', views.privacy_app, name='privacy_app'),
+    path('delete-account-request/', views.delete_account_request, name='delete_account_request'),
 ]
     
     

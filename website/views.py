@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
-from topgrade_api.models import Category, Program, Carousel, Testimonial, ProgramEnquiry
+from topgrade_api.models import Category, Program, Carousel, Testimonial, ProgramEnquiry, DeleteAccountRequest
 
 # Create your views here.
 def index(request):
@@ -576,3 +576,46 @@ def terms_app(request):
 
 def privacy_app(request):
     return render(request, 'website/privacy_app.html')
+
+
+def delete_account_request(request):
+    """Page for users to request account deletion"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
+            phone_number = data.get('phone_number', '').strip()
+            reason = data.get('reason', '').strip()
+            
+            # Validate that at least one identifier is provided
+            if not email and not phone_number:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please provide either an email or phone number.'
+                }, status=400)
+            
+            # Create the deletion request
+            deletion_request = DeleteAccountRequest.objects.create(
+                email=email if email else None,
+                phone_number=phone_number if phone_number else None,
+                reason=reason if reason else None
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Your account deletion request has been submitted successfully. We will process it within 7-10 business days.'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid request data.'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'An error occurred: {str(e)}'
+            }, status=500)
+    
+    # GET request - render the form page
+    return render(request, 'website/delete_account_request.html')

@@ -4,7 +4,8 @@ from .models import (
     CustomUser, OTPVerification, PhoneOTPVerification,
     Category, Program, Syllabus, Topic, UserPurchase, UserBookmark,
     UserTopicProgress, UserCourseProgress, Carousel, Testimonial, Certificate,
-    ProgramEnquiry, Contact, UserCertificate, FCMToken, Notification, NotificationLog
+    ProgramEnquiry, Contact, UserCertificate, FCMToken, Notification, NotificationLog,
+    DeleteAccountRequest
 )
 
 # Restrict admin access to superusers only
@@ -681,3 +682,38 @@ class NotificationLogAdmin(admin.ModelAdmin):
     
     def has_module_permission(self, request):
         return request.user.is_superuser
+
+
+@admin.register(DeleteAccountRequest)
+class DeleteAccountRequestAdmin(admin.ModelAdmin):
+    list_display = ['id', 'email', 'phone_number', 'status', 'requested_at', 'processed_at']
+    list_filter = ['status', 'requested_at', 'processed_at']
+    search_fields = ['email', 'phone_number', 'reason', 'admin_notes']
+    readonly_fields = ['requested_at']
+    ordering = ['-requested_at']
+    
+    fieldsets = (
+        ('Request Information', {
+            'fields': ('email', 'phone_number', 'reason', 'requested_at')
+        }),
+        ('Status', {
+            'fields': ('status', 'processed_at', 'processed_by')
+        }),
+        ('Admin Notes', {
+            'fields': ('admin_notes',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        """Automatically set processed_by to current user when status changes"""
+        if change and obj.status in ['processing', 'completed', 'rejected']:
+            if not obj.processed_by:
+                obj.processed_by = request.user
+            if not obj.processed_at and obj.status in ['completed', 'rejected']:
+                from django.utils import timezone
+                obj.processed_at = timezone.now()
+        super().save_model(request, obj, form, change)
+    
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
