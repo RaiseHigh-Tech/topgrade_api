@@ -131,17 +131,17 @@
                     <div class="mb-2" id="message-container"></div>
 
                     <!-- Filters Form -->
-                    <form method="GET" class="row g-3 mb-4" style="margin-bottom: 36px !important">
+                    <form method="GET" class="row g-3 mb-4" style="margin-bottom: 36px !important" id="filter-form">
                         <div class="col-sm-6 col-xl-3">
                             <div class="search-box">
-                                <input type="text" name="search" class="form-control search" 
+                                <input type="text" name="search" id="search-input" class="form-control search" 
                                         placeholder="Search enquiries..." value="{{ current_filters.search }}">
                                 <i class="ri-search-line search-icon"></i>
                             </div>
                         </div>
 
                         <div class="col-sm-6 col-xl-2">
-                            <select class="form-select" name="status">
+                            <select class="form-select auto-submit-filter" name="status" id="status-filter">
                                 <option value="">All Status</option>
                                 {% for value, label in status_choices %}
                                     <option value="{{ value }}" {% if current_filters.status == value %}selected{% endif %}>
@@ -152,7 +152,7 @@
                         </div>
 
                         <div class="col-sm-6 col-xl-2">
-                            <select class="form-select" name="program">
+                            <select class="form-select auto-submit-filter" name="program" id="program-filter">
                                 <option value="">All Programs</option>
                                 {% for program in programs %}
                                     <option value="{{ program.id }}" {% if current_filters.program == program.id|stringformat:"s" %}selected{% endif %}>
@@ -163,7 +163,7 @@
                         </div>
 
                         <div class="col-sm-6 col-xl-2">
-                            <select class="form-select" name="assigned">
+                            <select class="form-select auto-submit-filter" name="assigned" id="assigned-filter">
                                 <option value="">All Assignments</option>
                                 <option value="unassigned" {% if current_filters.assigned == "unassigned" %}selected{% endif %}>
                                     Unassigned
@@ -433,6 +433,9 @@
 {% block js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Search and filters only work when clicking the Filter button
+    // No auto-submit functionality - user must click "Filter" button to search
+    
     // Function to show message
     function showMessage(message, type = 'success') {
         const messageContainer = document.getElementById('message-container');

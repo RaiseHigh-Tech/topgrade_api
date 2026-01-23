@@ -14,7 +14,7 @@ from .auth_view import admin_required
 def program_enquiries(request):
     """Program enquiries management view"""
     # Get filter parameters
-    status_filter = request.GET.get('status', 'all')
+    status_filter = request.GET.get('status', '')
     program_filter = request.GET.get('program', '')
     assigned_filter = request.GET.get('assigned', '')
     search_query = request.GET.get('search', '')
@@ -23,7 +23,7 @@ def program_enquiries(request):
     enquiries = ProgramEnquiry.objects.select_related('program', 'assigned_to').all().order_by('-created_at')
     
     # Apply filters
-    if status_filter != 'all':
+    if status_filter:
         enquiries = enquiries.filter(follow_up_status=status_filter)
     
     if program_filter:
