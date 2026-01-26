@@ -243,7 +243,19 @@ def programs_view(request):
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
         
-        if form_type == 'program':
+        if form_type == 'category':
+            # Handle Add Category form
+            name = request.POST.get('category_name')
+            description = request.POST.get('category_description')
+            icon = request.POST.get('category_icon')
+            if name:
+                Category.objects.create(name=name, description=description, icon=icon)
+                messages.success(request, 'Category added successfully')
+            else:
+                messages.error(request, 'Category name is required')
+            return redirect('dashboard:programs')
+        
+        elif form_type == 'program':
             # Handle Add Program form
             title = request.POST.get('program_title')
             subtitle = request.POST.get('program_subtitle')
