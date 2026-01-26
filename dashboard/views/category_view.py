@@ -116,18 +116,3 @@ def delete_category_view(request, id):
     categories_page = request.GET.get('categories_page', 1)
     return redirect(f'/dashboard/programs/?programs_page={programs_page}&categories_page={categories_page}')
 
-@admin_required
-def add_category_view(request):
-    """Add category functionality"""
-    if request.method == 'POST':
-        # Handle Add Category form
-        name = request.POST.get('category_name')
-        description = request.POST.get('category_description')
-        icon = request.POST.get('category_icon')
-        if name:
-            Category.objects.create(name=name, description=description, icon=icon)
-            messages.success(request, 'Category added successfully')
-        else:
-            messages.error(request, 'Category name is required')
-    
-    return redirect('dashboard:programs')
