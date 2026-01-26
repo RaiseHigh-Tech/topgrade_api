@@ -164,45 +164,69 @@ def calculate_video_duration_from_s3(s3_key):
         video_duration = None
         last_error = None
         
-        # Method 1: Try with moviepy first (more reliable for various formats)
+        # Method 1: Try with ffprobe first (most reliable, no extra dependencies)
         try:
-            try:
-                from moviepy import VideoFileClip
-            except ImportError:
-                # Try alternative import
-                from moviepy.editor import VideoFileClip
+            import subprocess
             
-            with VideoFileClip(temp_path) as clip:
-                duration_seconds = clip.duration
-                if duration_seconds and duration_seconds > 0:
+            result = subprocess.run(
+                ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', 
+                 '-of', 'default=noprint_wrappers=1:nokey=1', temp_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                duration_seconds = float(result.stdout.strip())
+                if duration_seconds > 0:
                     video_duration = format_duration(duration_seconds)
-                    logger.info(f"Successfully calculated duration from S3 video using moviepy: {video_duration}")
+                    logger.info(f"Successfully calculated duration from S3 video using ffprobe: {video_duration}")
                     
         except Exception as e:
-            last_error = f"Moviepy error: {str(e)}"
-            logger.warning(f"Moviepy failed for S3 video: {e}")
-            
-            # Method 2: Fallback to OpenCV
+            last_error = f"ffprobe error: {str(e)}"
+            logger.warning(f"ffprobe failed for S3 video: {e}")
+        
+        # Method 2: Try with moviepy if ffprobe failed
+        if video_duration is None:
             try:
-                import cv2
+                try:
+                    from moviepy import VideoFileClip
+                except ImportError:
+                    # Try alternative import
+                    from moviepy.editor import VideoFileClip
                 
-                cap = cv2.VideoCapture(temp_path)
-                if cap.isOpened():
-                    fps = cap.get(cv2.CAP_PROP_FPS)
-                    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-                    
-                    if fps > 0 and frame_count > 0:
-                        duration_seconds = frame_count / fps
+                with VideoFileClip(temp_path) as clip:
+                    duration_seconds = clip.duration
+                    if duration_seconds and duration_seconds > 0:
                         video_duration = format_duration(duration_seconds)
-                        logger.info(f"Successfully calculated duration from S3 video using OpenCV: {video_duration}")
-                    else:
-                        logger.warning("OpenCV: Invalid FPS or frame count for S3 video")
+                        logger.info(f"Successfully calculated duration from S3 video using moviepy: {video_duration}")
                         
-                cap.release()
+            except Exception as e:
+                last_error = f"Moviepy error: {str(e)}"
+                logger.warning(f"Moviepy failed for S3 video: {e}")
                 
-            except Exception as cv_error:
-                last_error = f"OpenCV error: {str(cv_error)}"
-                logger.error(f"OpenCV also failed for S3 video: {cv_error}")
+                # Method 3: Fallback to OpenCV
+                try:
+                    import cv2
+                    
+                    cap = cv2.VideoCapture(temp_path)
+                    if cap.isOpened():
+                        fps = cap.get(cv2.CAP_PROP_FPS)
+                        frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+                        
+                        if fps > 0 and frame_count > 0:
+                            duration_seconds = frame_count / fps
+                            video_duration = format_duration(duration_seconds)
+                            logger.info(f"Successfully calculated duration from S3 video using OpenCV: {video_duration}")
+                        else:
+                            logger.warning("OpenCV: Invalid FPS or frame count for S3 video")
+                            
+                    cap.release()
+                    
+                except Exception as cv_error:
+                    last_error = f"OpenCV error: {str(cv_error)}"
+                    logger.error(f"OpenCV also failed for S3 video: {cv_error}")
         
         if video_duration is None:
             logger.error(f"Failed to calculate video duration from S3. Last error: {last_error}")
