@@ -5,8 +5,6 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from django.template.loader import render_to_string
 
-from weasyprint import HTML
-
 
 def generate_certificate_pdf(user, program, certificate_number, completion_date=None, purchase_date=None, certificate_type='internship'):
     """
@@ -64,6 +62,9 @@ def generate_certificate_pdf(user, program, certificate_number, completion_date=
     
     # Render HTML template
     html_string = render_to_string(template_path, context)
+    
+    # Import WeasyPrint only when needed (lazy loading)
+    from weasyprint import HTML
     
     # Generate PDF from HTML
     html = HTML(string=html_string)

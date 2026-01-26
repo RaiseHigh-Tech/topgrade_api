@@ -406,3 +406,122 @@ def generate_otp():
     Generate a random 6-digit OTP code
     """
     return str(random.randint(100000, 999999))
+
+
+@shared_task(bind=True, max_retries=3)
+def calculate_video_duration_task(self, topic_id):
+    """
+    Calculate video duration for a topic in the background.
+    This is useful for S3 videos that take time to download and process.
+    
+    Args:
+        topic_id: ID of the Topic to calculate duration for
+    
+    Returns:
+        dict with success status and duration
+    """
+    from topgrade_api.models import Topic
+    from dashboard.views.program_view import calculate_video_duration_from_s3
+    
+    try:
+        # Get the topic
+        topic = Topic.objects.get(id=topic_id)
+        
+        if not topic.video_file:
+            logger.warning(f"Topic {topic_id} has no video file")
+            return {
+                'success': False,
+                'message': 'No video file found for this topic'
+            }
+        
+        # Check if duration already exists
+        if topic.video_duration:
+            logger.info(f"Topic {topic_id} already has duration: {topic.video_duration}")
+            return {
+                'success': True,
+                'message': 'Duration already calculated',
+                'duration': topic.video_duration
+            }
+        
+        # Calculate duration from S3
+        video_file_path = str(topic.video_file)
+        logger.info(f"Calculating duration for topic {topic_id}, video: {video_file_path}")
+        
+        duration = calculate_video_duration_from_s3(video_file_path)
+        
+        if duration:
+            # Update the topic
+            topic.video_duration = duration
+            topic.save(update_fields=['video_duration'])
+            
+            logger.info(f"Successfully calculated and saved duration for topic {topic_id}: {duration}")
+            
+            return {
+                'success': True,
+                'message': f'Duration calculated successfully: {duration}',
+                'topic_id': topic_id,
+                'duration': duration
+            }
+        else:
+            logger.error(f"Failed to calculate duration for topic {topic_id}")
+            return {
+                'success': False,
+                'message': 'Could not calculate video duration'
+            }
+        
+    except Topic.DoesNotExist:
+        logger.error(f"Topic not found: {topic_id}")
+        return {
+            'success': False,
+            'message': 'Topic not found'
+        }
+    except Exception as e:
+        logger.error(f"Error calculating video duration for topic {topic_id}: {str(e)}")
+        # Retry the task
+        raise self.retry(exc=e, countdown=120)  # Retry after 2 minutes
+
+
+@shared_task
+def calculate_video_durations_bulk(topic_ids):
+    """
+    Calculate video durations for multiple topics in bulk.
+    Useful for processing existing videos that don't have durations.
+    
+    Args:
+        topic_ids: List of Topic IDs to process
+    
+    Returns:
+        dict with results summary
+    """
+    from topgrade_api.models import Topic
+    
+    results = {
+        'total': len(topic_ids),
+        'success': 0,
+        'failed': 0,
+        'skipped': 0,
+        'details': []
+    }
+    
+    for topic_id in topic_ids:
+        try:
+            # Queue individual task for each topic
+            result = calculate_video_duration_task.delay(topic_id)
+            results['details'].append({
+                'topic_id': topic_id,
+                'task_id': result.id,
+                'status': 'queued'
+            })
+            results['success'] += 1
+        except Exception as e:
+            logger.error(f"Error queuing duration calculation for topic {topic_id}: {str(e)}")
+            results['failed'] += 1
+            results['details'].append({
+                'topic_id': topic_id,
+                'status': 'failed',
+                'error': str(e)
+            })
+    
+    logger.info(f"Bulk duration calculation queued: {results['success']} tasks, {results['failed']} failed")
+    
+    return results

@@ -93,6 +93,135 @@ def calculate_video_duration(video_file):
             except Exception as e:
                 logger.warning(f"Failed to cleanup temp file {temp_path}: {e}")
 
+
+def calculate_video_duration_from_s3(s3_key):
+    """
+    Calculate video duration from S3-stored video file
+    Downloads the video temporarily, calculates duration, and cleans up
+    
+    Args:
+        s3_key: S3 key/path of the video file (e.g., 'programs/advanced/program_name/video.mp4')
+    
+    Returns:
+        Duration string in format 'MM:SS' or 'HH:MM:SS', or None if calculation fails
+    """
+    import tempfile
+    import os
+    import logging
+    import boto3
+    from django.conf import settings
+    
+    logger = logging.getLogger(__name__)
+    temp_path = None
+    
+    try:
+        # Check if S3 is enabled
+        use_s3 = getattr(settings, 'USE_S3', False)
+        if not use_s3:
+            logger.warning("S3 is not enabled, cannot calculate duration from S3")
+            return None
+        
+        # Initialize S3 client
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name=settings.AWS_S3_REGION_NAME
+        )
+        
+        # Get file extension from S3 key
+        file_extension = os.path.splitext(s3_key)[1] or '.mp4'
+        
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_extension) as temp_file:
+            temp_path = temp_file.name
+            
+            # Construct full S3 key (add 'media/' prefix if not present)
+            full_s3_key = s3_key
+            if not s3_key.startswith('media/'):
+                full_s3_key = f'media/{s3_key}'
+            
+            logger.info(f"Downloading video from S3: {full_s3_key}")
+            
+            # Download file from S3
+            try:
+                s3_client.download_file(
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    full_s3_key,
+                    temp_path
+                )
+            except Exception as download_error:
+                # Try without 'media/' prefix if first attempt fails
+                logger.warning(f"Failed to download with key '{full_s3_key}', trying '{s3_key}'")
+                s3_client.download_file(
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    s3_key,
+                    temp_path
+                )
+        
+        logger.info(f"Video downloaded to temporary file: {temp_path}")
+        
+        video_duration = None
+        last_error = None
+        
+        # Method 1: Try with moviepy first (more reliable for various formats)
+        try:
+            try:
+                from moviepy import VideoFileClip
+            except ImportError:
+                # Try alternative import
+                from moviepy.editor import VideoFileClip
+            
+            with VideoFileClip(temp_path) as clip:
+                duration_seconds = clip.duration
+                if duration_seconds and duration_seconds > 0:
+                    video_duration = format_duration(duration_seconds)
+                    logger.info(f"Successfully calculated duration from S3 video using moviepy: {video_duration}")
+                    
+        except Exception as e:
+            last_error = f"Moviepy error: {str(e)}"
+            logger.warning(f"Moviepy failed for S3 video: {e}")
+            
+            # Method 2: Fallback to OpenCV
+            try:
+                import cv2
+                
+                cap = cv2.VideoCapture(temp_path)
+                if cap.isOpened():
+                    fps = cap.get(cv2.CAP_PROP_FPS)
+                    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+                    
+                    if fps > 0 and frame_count > 0:
+                        duration_seconds = frame_count / fps
+                        video_duration = format_duration(duration_seconds)
+                        logger.info(f"Successfully calculated duration from S3 video using OpenCV: {video_duration}")
+                    else:
+                        logger.warning("OpenCV: Invalid FPS or frame count for S3 video")
+                        
+                cap.release()
+                
+            except Exception as cv_error:
+                last_error = f"OpenCV error: {str(cv_error)}"
+                logger.error(f"OpenCV also failed for S3 video: {cv_error}")
+        
+        if video_duration is None:
+            logger.error(f"Failed to calculate video duration from S3. Last error: {last_error}")
+            
+        return video_duration
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in calculate_video_duration_from_s3: {e}")
+        return None
+        
+    finally:
+        # Clean up temp file
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.unlink(temp_path)
+                logger.info(f"Cleaned up temporary file: {temp_path}")
+            except Exception as e:
+                logger.warning(f"Failed to cleanup temp file {temp_path}: {e}")
+
 def format_duration(duration_seconds):
     """Format duration in seconds to HH:MM:SS or MM:SS string"""
     if not duration_seconds or duration_seconds <= 0:
@@ -214,8 +343,14 @@ def programs_view(request):
                                         # Video was uploaded directly to S3
                                         # Store the S3 URL in the video_file field
                                         video_file = video_s3_url
-                                        # Note: Duration calculation for S3 videos would require downloading
-                                        # which is not efficient. Consider calculating on client side or skipping.
+                                        # Calculate duration for S3 videos
+                                        try:
+                                            video_duration = calculate_video_duration_from_s3(video_s3_url)
+                                            if video_duration is None:
+                                                messages.warning(request, f'Could not calculate duration for S3 video in module {module_index + 1}, topic {topic_index + 1}. Video saved without duration.')
+                                        except Exception as e:
+                                            messages.warning(request, f'Error calculating S3 video duration: {str(e)}. Video saved without duration.')
+                                            video_duration = None
                                     elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
                                         # Traditional file upload (fallback)
                                         video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
@@ -474,7 +609,14 @@ def edit_program_view(request, id):
                                     if video_s3_url:
                                         # Video was uploaded directly to S3
                                         topic.video_file = video_s3_url
-                                        # Note: Duration calculation for S3 videos would require downloading
+                                        # Calculate duration for S3 videos
+                                        try:
+                                            topic.video_duration = calculate_video_duration_from_s3(video_s3_url)
+                                            if topic.video_duration is None:
+                                                messages.warning(request, f'Could not calculate duration for updated S3 video in module {module_index + 1}, topic {topic_index + 1}.')
+                                        except Exception as e:
+                                            messages.warning(request, f'Error calculating S3 video duration: {str(e)}. Video updated without duration.')
+                                            topic.video_duration = None
                                     elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
                                         # Traditional file upload (fallback)
                                         topic.video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
@@ -497,7 +639,14 @@ def edit_program_view(request, id):
                                     if video_s3_url:
                                         # Video was uploaded directly to S3
                                         video_file = video_s3_url
-                                        # Note: Duration calculation for S3 videos would require downloading
+                                        # Calculate duration for S3 videos
+                                        try:
+                                            video_duration = calculate_video_duration_from_s3(video_s3_url)
+                                            if video_duration is None:
+                                                messages.warning(request, f'Could not calculate duration for new S3 video in module {module_index + 1}, topic {topic_index + 1}. Video saved without duration.')
+                                        except Exception as e:
+                                            messages.warning(request, f'Error calculating S3 video duration: {str(e)}. Video saved without duration.')
+                                            video_duration = None
                                     elif f'modules[{module_index}][topics][{topic_index}][video_file]' in request.FILES:
                                         # Traditional file upload (fallback)
                                         video_file = request.FILES[f'modules[{module_index}][topics][{topic_index}][video_file]']
