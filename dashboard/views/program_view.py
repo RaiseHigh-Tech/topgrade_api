@@ -187,7 +187,7 @@ def calculate_video_duration_from_s3(s3_key):
             last_error = f"ffprobe error: {str(e)}"
             logger.warning(f"ffprobe failed for S3 video: {e}")
         
-        # Method 2: Try with moviepy if ffprobe failed
+        # Method 2: Try parsing duration from moviepy error message (contains metadata)
         if video_duration is None:
             try:
                 try:
@@ -204,7 +204,21 @@ def calculate_video_duration_from_s3(s3_key):
                         
             except Exception as e:
                 last_error = f"Moviepy error: {str(e)}"
+                error_msg = str(e)
                 logger.warning(f"Moviepy failed for S3 video: {e}")
+                
+                # Try to parse duration from the error message which contains ffmpeg metadata
+                import re
+                duration_match = re.search(r'Duration:\s*(\d{2}):(\d{2}):(\d{2})\.\d+', error_msg)
+                if duration_match:
+                    hours = int(duration_match.group(1))
+                    minutes = int(duration_match.group(2))
+                    seconds = int(duration_match.group(3))
+                    total_seconds = hours * 3600 + minutes * 60 + seconds
+                    video_duration = format_duration(total_seconds)
+                    logger.info(f"Successfully extracted duration from metadata: {video_duration}")
+                else:
+                    logger.warning(f"Could not parse duration from error message")
                 
                 # Method 3: Fallback to OpenCV
                 try:
