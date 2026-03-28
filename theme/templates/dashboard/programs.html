@@ -681,46 +681,74 @@
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" 
-                                                           class="form-control form-control-sm video-file-input" 
-                                                           data-module-index="0" 
-                                                           data-topic-index="0"
-                                                           accept="video/*"
-                                                           onchange="handleVideoSelection(this)">
-                                                    
+                                                    <!-- Video upload type toggle -->
+                                                    <div class="btn-group btn-group-sm mb-2 d-block" role="group">
+                                                        <input type="radio" class="btn-check video-type-radio" name="video-type-0-0" id="type-mp4-0-0" value="mp4" checked onchange="toggleVideoUploadType(this)">
+                                                        <label class="btn btn-outline-secondary" for="type-mp4-0-0"><i class="ri-file-video-line me-1"></i>MP4</label>
+                                                        <input type="radio" class="btn-check video-type-radio" name="video-type-0-0" id="type-hls-0-0" value="hls" onchange="toggleVideoUploadType(this)">
+                                                        <label class="btn btn-outline-secondary" for="type-hls-0-0"><i class="ri-live-line me-1"></i>HLS Folder</label>
+                                                    </div>
+
                                                     <!-- Hidden input to store S3 URL after upload -->
-                                                    <input type="hidden" 
-                                                           class="video-s3-url" 
+                                                    <input type="hidden"
+                                                           class="video-s3-url"
                                                            name="modules[0][topics][0][video_s3_url]">
-                                                    
-                                                    <!-- Upload button -->
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
-                                                            style="display: none;"
-                                                            onclick="uploadVideoToS3(this)">
-                                                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
-                                                    </button>
-                                                    
-                                                    <!-- Progress bar -->
-                                                    <div class="upload-progress-container mt-2" style="display: none;">
-                                                        <div class="d-flex justify-content-between mb-1">
-                                                            <small class="text-muted upload-status">Uploading...</small>
-                                                            <small class="text-muted upload-percentage">0%</small>
+
+                                                    <!-- MP4 upload section -->
+                                                    <div class="mp4-upload-section">
+                                                        <input type="file"
+                                                               class="form-control form-control-sm video-file-input"
+                                                               data-module-index="0"
+                                                               data-topic-index="0"
+                                                               accept="video/*"
+                                                               onchange="handleVideoSelection(this)">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-success mt-2 upload-video-btn"
+                                                                style="display: none;"
+                                                                onclick="uploadVideoToS3(this)">
+                                                            <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                                                        </button>
+                                                        <div class="upload-progress-container mt-2" style="display: none;">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <small class="text-muted upload-status">Uploading...</small>
+                                                                <small class="text-muted upload-percentage">0%</small>
+                                                            </div>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar"
+                                                                     role="progressbar" style="width: 0%;"
+                                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
                                                         </div>
-                                                        <div class="progress" style="height: 6px;">
-                                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
-                                                                 role="progressbar" 
-                                                                 style="width: 0%;" 
-                                                                 aria-valuenow="0" 
-                                                                 aria-valuemin="0" 
-                                                                 aria-valuemax="100"></div>
+                                                        <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                                                            <i class="ri-checkbox-circle-line me-1"></i>
+                                                            <small>Video uploaded successfully!</small>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <!-- Success message -->
-                                                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
-                                                        <i class="ri-checkbox-circle-line me-1"></i>
-                                                        <small>Video uploaded successfully!</small>
+
+                                                    <!-- HLS upload section -->
+                                                    <div class="hls-upload-section" style="display: none;">
+                                                        <input type="file" class="form-control form-control-sm hls-folder-input"
+                                                               webkitdirectory mozdirectory directory multiple
+                                                               onchange="handleHlsFolderSelection(this)">
+                                                        <small class="text-muted d-block mb-1">Select the folder containing master.m3u8 and quality subdirectories</small>
+                                                        <div class="hls-file-info mt-1" style="display: none;">
+                                                            <small class="text-info hls-file-count"></small>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-primary mt-2 upload-hls-btn" style="display: none;" onclick="uploadHlsFolder(this)">
+                                                            <i class="ri-folders-line me-1"></i>Upload HLS Folder to S3
+                                                        </button>
+                                                        <div class="hls-upload-status mt-2" style="display: none;">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <small class="text-muted hls-status-text">Uploading...</small>
+                                                                <small class="text-muted hls-file-counter">0 / 0</small>
+                                                            </div>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary hls-progress-bar"
+                                                                     role="progressbar" style="width: 0%;"
+                                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="alert alert-success mt-2 hls-upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1075,67 +1103,97 @@
                                             <div class="row mt-2">
                                                 <div class="col-12">
                                                     <label class="form-label form-label-sm">Video File:</label>
-                                                    <input type="file" 
-                                                           class="form-control form-control-sm video-file-input" 
-                                                           data-module-index="{{ forloop.parentloop.counter0 }}" 
-                                                           data-topic-index="{{ forloop.counter0 }}"
-                                                           accept="video/*"
-                                                           onchange="handleVideoSelection(this)">
-                                                    
+                                                    <!-- Video upload type toggle -->
+                                                    <div class="btn-group btn-group-sm mb-2 d-block" role="group">
+                                                        <input type="radio" class="btn-check video-type-radio" name="video-type-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" id="type-mp4-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" value="mp4" checked onchange="toggleVideoUploadType(this)">
+                                                        <label class="btn btn-outline-secondary" for="type-mp4-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}"><i class="ri-file-video-line me-1"></i>MP4</label>
+                                                        <input type="radio" class="btn-check video-type-radio" name="video-type-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" id="type-hls-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}" value="hls" onchange="toggleVideoUploadType(this)">
+                                                        <label class="btn btn-outline-secondary" for="type-hls-{{ forloop.parentloop.counter0 }}-{{ forloop.counter0 }}"><i class="ri-live-line me-1"></i>HLS Folder</label>
+                                                    </div>
+
                                                     <!-- Hidden input to store S3 URL after upload -->
-                                                    <input type="hidden" 
-                                                           class="video-s3-url" 
+                                                    <input type="hidden"
+                                                           class="video-s3-url"
                                                            name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][video_s3_url]">
-                                                    
-                                                    <!-- Hidden input to preserve existing video file -->
+
+                                                    <!-- Hidden inputs to preserve existing video file -->
                                                     {% if topic.video_file %}
                                                         <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][existing_video_file]" value="{{ topic.video_file.name }}">
                                                         <input type="hidden" name="modules[{{ forloop.parentloop.counter0 }}][topics][{{ forloop.counter0 }}][topic_id]" value="{{ topic.id }}">
-                                                        <div class="mt-1 existing-video-info">
-                                                            <small class="text-muted d-block">
-                                                                <i class="ri-video-line me-1 text-success"></i>
-                                                                <strong>Current video:</strong> {{ topic.video_file.name }}
-                                                            </small>
-                                                            <small class="text-info d-block">
-                                                                <i class="ri-information-line me-1"></i>
-                                                                Leave empty to keep current video, or upload a new file to replace it
-                                                            </small>
-                                                        </div>
-                                                    {% else %}
-                                                        <small class="text-muted d-block mt-1 existing-video-info">
-                                                            <i class="ri-upload-line me-1"></i>
-                                                            No video file uploaded for this topic
-                                                        </small>
                                                     {% endif %}
-                                                    
-                                                    <!-- Upload button -->
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
-                                                            style="display: none;"
-                                                            onclick="uploadVideoToS3(this)">
-                                                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
-                                                    </button>
-                                                    
-                                                    <!-- Progress bar -->
-                                                    <div class="upload-progress-container mt-2" style="display: none;">
-                                                        <div class="d-flex justify-content-between mb-1">
-                                                            <small class="text-muted upload-status">Uploading...</small>
-                                                            <small class="text-muted upload-percentage">0%</small>
+
+                                                    <!-- MP4 upload section -->
+                                                    <div class="mp4-upload-section">
+                                                        <input type="file"
+                                                               class="form-control form-control-sm video-file-input"
+                                                               data-module-index="{{ forloop.parentloop.counter0 }}"
+                                                               data-topic-index="{{ forloop.counter0 }}"
+                                                               accept="video/*"
+                                                               onchange="handleVideoSelection(this)">
+                                                        {% if topic.video_file %}
+                                                            <div class="mt-1 existing-video-info">
+                                                                <small class="text-muted d-block">
+                                                                    <i class="ri-video-line me-1 text-success"></i>
+                                                                    <strong>Current video:</strong> {{ topic.video_file.name }}
+                                                                </small>
+                                                                <small class="text-info d-block">
+                                                                    <i class="ri-information-line me-1"></i>
+                                                                    Leave empty to keep current video, or upload a new file to replace it
+                                                                </small>
+                                                            </div>
+                                                        {% else %}
+                                                            <small class="text-muted d-block mt-1 existing-video-info">
+                                                                <i class="ri-upload-line me-1"></i>
+                                                                No video file uploaded for this topic
+                                                            </small>
+                                                        {% endif %}
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-success mt-2 upload-video-btn"
+                                                                style="display: none;"
+                                                                onclick="uploadVideoToS3(this)">
+                                                            <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                                                        </button>
+                                                        <div class="upload-progress-container mt-2" style="display: none;">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <small class="text-muted upload-status">Uploading...</small>
+                                                                <small class="text-muted upload-percentage">0%</small>
+                                                            </div>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar"
+                                                                     role="progressbar" style="width: 0%;"
+                                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
                                                         </div>
-                                                        <div class="progress" style="height: 6px;">
-                                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
-                                                                 role="progressbar" 
-                                                                 style="width: 0%;" 
-                                                                 aria-valuenow="0" 
-                                                                 aria-valuemin="0" 
-                                                                 aria-valuemax="100"></div>
+                                                        <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                                                            <i class="ri-checkbox-circle-line me-1"></i>
+                                                            <small>Video uploaded successfully!</small>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <!-- Success message -->
-                                                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
-                                                        <i class="ri-checkbox-circle-line me-1"></i>
-                                                        <small>Video uploaded successfully!</small>
+
+                                                    <!-- HLS upload section -->
+                                                    <div class="hls-upload-section" style="display: none;">
+                                                        <input type="file" class="form-control form-control-sm hls-folder-input"
+                                                               webkitdirectory mozdirectory directory multiple
+                                                               onchange="handleHlsFolderSelection(this)">
+                                                        <small class="text-muted d-block mb-1">Select the folder containing master.m3u8 and quality subdirectories</small>
+                                                        <div class="hls-file-info mt-1" style="display: none;">
+                                                            <small class="text-info hls-file-count"></small>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-primary mt-2 upload-hls-btn" style="display: none;" onclick="uploadHlsFolder(this)">
+                                                            <i class="ri-folders-line me-1"></i>Upload HLS Folder to S3
+                                                        </button>
+                                                        <div class="hls-upload-status mt-2" style="display: none;">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <small class="text-muted hls-status-text">Uploading...</small>
+                                                                <small class="text-muted hls-file-counter">0 / 0</small>
+                                                            </div>
+                                                            <div class="progress" style="height: 6px;">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary hls-progress-bar"
+                                                                     role="progressbar" style="width: 0%;"
+                                                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="alert alert-success mt-2 hls-upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2604,42 +2662,67 @@ function addTopic(button) {
             <div class="row mt-2">
                 <div class="col-12">
                     <label class="form-label form-label-sm">Video File:</label>
-                    <input type="file" 
-                           class="form-control form-control-sm video-file-input" 
-                           data-module-index="${moduleIndex}" 
-                           data-topic-index="${topicCount}"
-                           accept="video/*"
-                           onchange="handleVideoSelection(this)">
-                    
-                    <input type="hidden" 
-                           class="video-s3-url" 
+                    <div class="btn-group btn-group-sm mb-2 d-block" role="group">
+                        <input type="radio" class="btn-check video-type-radio" name="video-type-${moduleIndex}-${topicCount}" id="type-mp4-${moduleIndex}-${topicCount}" value="mp4" checked onchange="toggleVideoUploadType(this)">
+                        <label class="btn btn-outline-secondary" for="type-mp4-${moduleIndex}-${topicCount}"><i class="ri-file-video-line me-1"></i>MP4</label>
+                        <input type="radio" class="btn-check video-type-radio" name="video-type-${moduleIndex}-${topicCount}" id="type-hls-${moduleIndex}-${topicCount}" value="hls" onchange="toggleVideoUploadType(this)">
+                        <label class="btn btn-outline-secondary" for="type-hls-${moduleIndex}-${topicCount}"><i class="ri-live-line me-1"></i>HLS Folder</label>
+                    </div>
+                    <input type="hidden"
+                           class="video-s3-url"
                            name="modules[${moduleIndex}][topics][${topicCount}][video_s3_url]">
-                    
-                    <button type="button" 
-                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
-                            style="display: none;"
-                            onclick="uploadVideoToS3(this)">
-                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
-                    </button>
-                    
-                    <div class="upload-progress-container mt-2" style="display: none;">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted upload-status">Uploading...</small>
-                            <small class="text-muted upload-percentage">0%</small>
+                    <div class="mp4-upload-section">
+                        <input type="file"
+                               class="form-control form-control-sm video-file-input"
+                               data-module-index="${moduleIndex}"
+                               data-topic-index="${topicCount}"
+                               accept="video/*"
+                               onchange="handleVideoSelection(this)">
+                        <button type="button"
+                                class="btn btn-sm btn-success mt-2 upload-video-btn"
+                                style="display: none;"
+                                onclick="uploadVideoToS3(this)">
+                            <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                        </button>
+                        <div class="upload-progress-container mt-2" style="display: none;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted upload-status">Uploading...</small>
+                                <small class="text-muted upload-percentage">0%</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar"
+                                     role="progressbar" style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
-                                 role="progressbar" 
-                                 style="width: 0%;" 
-                                 aria-valuenow="0" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100"></div>
+                        <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                            <i class="ri-checkbox-circle-line me-1"></i>
+                            <small>Video uploaded successfully!</small>
                         </div>
                     </div>
-                    
-                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
-                        <i class="ri-checkbox-circle-line me-1"></i>
-                        <small>Video uploaded successfully!</small>
+                    <div class="hls-upload-section" style="display: none;">
+                        <input type="file" class="form-control form-control-sm hls-folder-input"
+                               webkitdirectory mozdirectory directory multiple
+                               onchange="handleHlsFolderSelection(this)">
+                        <small class="text-muted d-block mb-1">Select the folder containing master.m3u8 and quality subdirectories</small>
+                        <div class="hls-file-info mt-1" style="display: none;">
+                            <small class="text-info hls-file-count"></small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary mt-2 upload-hls-btn" style="display: none;" onclick="uploadHlsFolder(this)">
+                            <i class="ri-folders-line me-1"></i>Upload HLS Folder to S3
+                        </button>
+                        <div class="hls-upload-status mt-2" style="display: none;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted hls-status-text">Uploading...</small>
+                                <small class="text-muted hls-file-counter">0 / 0</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary hls-progress-bar"
+                                     role="progressbar" style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="alert alert-success mt-2 hls-upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;"></div>
                     </div>
                 </div>
             </div>
@@ -3323,44 +3406,68 @@ function getEditTopicHTML(moduleIndex, topicIndex, topicTitle = '', topicDescrip
             <div class="row mt-2">
                 <div class="col-12">
                     <label class="form-label form-label-sm">Video File:</label>
-                    <input type="file" 
-                           class="form-control form-control-sm video-file-input" 
-                           data-module-index="${moduleIndex}" 
-                           data-topic-index="${topicIndex}"
-                           accept="video/*"
-                           onchange="handleVideoSelection(this)">
-                    
-                    <input type="hidden" 
-                           class="video-s3-url" 
+                    <div class="btn-group btn-group-sm mb-2 d-block" role="group">
+                        <input type="radio" class="btn-check video-type-radio" name="video-type-${moduleIndex}-${topicIndex}" id="type-mp4-${moduleIndex}-${topicIndex}" value="mp4" checked onchange="toggleVideoUploadType(this)">
+                        <label class="btn btn-outline-secondary" for="type-mp4-${moduleIndex}-${topicIndex}"><i class="ri-file-video-line me-1"></i>MP4</label>
+                        <input type="radio" class="btn-check video-type-radio" name="video-type-${moduleIndex}-${topicIndex}" id="type-hls-${moduleIndex}-${topicIndex}" value="hls" onchange="toggleVideoUploadType(this)">
+                        <label class="btn btn-outline-secondary" for="type-hls-${moduleIndex}-${topicIndex}"><i class="ri-live-line me-1"></i>HLS Folder</label>
+                    </div>
+                    <input type="hidden"
+                           class="video-s3-url"
                            name="modules[${moduleIndex}][topics][${topicIndex}][video_s3_url]">
-                    
-                    ${topicVideoFile ? `<small class="text-muted d-block mt-1 existing-video-info"><i class="ri-video-line me-1 text-success"></i>Current: ${topicVideoFile}</small>` : ''}
-                    
-                    <button type="button" 
-                            class="btn btn-sm btn-success mt-2 upload-video-btn" 
-                            style="display: none;"
-                            onclick="uploadVideoToS3(this)">
-                        <i class="ri-upload-cloud-line me-1"></i>Upload to S3
-                    </button>
-                    
-                    <div class="upload-progress-container mt-2" style="display: none;">
-                        <div class="d-flex justify-content-between mb-1">
-                            <small class="text-muted upload-status">Uploading...</small>
-                            <small class="text-muted upload-percentage">0%</small>
+                    <div class="mp4-upload-section">
+                        <input type="file"
+                               class="form-control form-control-sm video-file-input"
+                               data-module-index="${moduleIndex}"
+                               data-topic-index="${topicIndex}"
+                               accept="video/*"
+                               onchange="handleVideoSelection(this)">
+                        ${topicVideoFile ? `<small class="text-muted d-block mt-1 existing-video-info"><i class="ri-video-line me-1 text-success"></i>Current: ${topicVideoFile}</small>` : ''}
+                        <button type="button"
+                                class="btn btn-sm btn-success mt-2 upload-video-btn"
+                                style="display: none;"
+                                onclick="uploadVideoToS3(this)">
+                            <i class="ri-upload-cloud-line me-1"></i>Upload to S3
+                        </button>
+                        <div class="upload-progress-container mt-2" style="display: none;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted upload-status">Uploading...</small>
+                                <small class="text-muted upload-percentage">0%</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar"
+                                     role="progressbar" style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success upload-progress-bar" 
-                                 role="progressbar" 
-                                 style="width: 0%;" 
-                                 aria-valuenow="0" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100"></div>
+                        <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
+                            <i class="ri-checkbox-circle-line me-1"></i>
+                            <small>Video uploaded successfully!</small>
                         </div>
                     </div>
-                    
-                    <div class="alert alert-success mt-2 upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;">
-                        <i class="ri-checkbox-circle-line me-1"></i>
-                        <small>Video uploaded successfully!</small>
+                    <div class="hls-upload-section" style="display: none;">
+                        <input type="file" class="form-control form-control-sm hls-folder-input"
+                               webkitdirectory mozdirectory directory multiple
+                               onchange="handleHlsFolderSelection(this)">
+                        <small class="text-muted d-block mb-1">Select the folder containing master.m3u8 and quality subdirectories</small>
+                        <div class="hls-file-info mt-1" style="display: none;">
+                            <small class="text-info hls-file-count"></small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary mt-2 upload-hls-btn" style="display: none;" onclick="uploadHlsFolder(this)">
+                            <i class="ri-folders-line me-1"></i>Upload HLS Folder to S3
+                        </button>
+                        <div class="hls-upload-status mt-2" style="display: none;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted hls-status-text">Uploading...</small>
+                                <small class="text-muted hls-file-counter">0 / 0</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary hls-progress-bar"
+                                     role="progressbar" style="width: 0%;"
+                                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="alert alert-success mt-2 hls-upload-success" style="display: none; padding: 0.5rem; font-size: 0.875rem;"></div>
                     </div>
                 </div>
             </div>
@@ -3575,6 +3682,163 @@ function handleVideoSelection(input) {
     }
     
     console.log('Video file selected:', file.name, 'Size:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
+}
+
+/**
+ * Toggle between MP4 and HLS upload sections
+ */
+function toggleVideoUploadType(radio) {
+    const container = radio.closest('.col-12');
+    const mp4Section = container.querySelector('.mp4-upload-section');
+    const hlsSection = container.querySelector('.hls-upload-section');
+    const hiddenInput = container.querySelector('.video-s3-url');
+
+    if (radio.value === 'hls') {
+        if (mp4Section) mp4Section.style.display = 'none';
+        if (hlsSection) hlsSection.style.display = 'block';
+    } else {
+        if (mp4Section) mp4Section.style.display = 'block';
+        if (hlsSection) hlsSection.style.display = 'none';
+    }
+    // Clear any previously set S3 URL when switching type
+    if (hiddenInput) {
+        hiddenInput.value = '';
+        hiddenInput.removeAttribute('data-uploaded');
+    }
+}
+
+/**
+ * Handle HLS folder selection — validate master.m3u8 is present, show file count
+ */
+function handleHlsFolderSelection(input) {
+    const container = input.closest('.col-12');
+    const fileInfo = container.querySelector('.hls-file-info');
+    const fileCount = container.querySelector('.hls-file-count');
+    const uploadBtn = container.querySelector('.upload-hls-btn');
+    const hiddenInput = container.querySelector('.video-s3-url');
+    const successAlert = container.querySelector('.hls-upload-success');
+
+    if (hiddenInput) { hiddenInput.value = ''; hiddenInput.removeAttribute('data-uploaded'); }
+    if (successAlert) successAlert.style.display = 'none';
+
+    const files = Array.from(input.files);
+    if (!files.length) { if (uploadBtn) uploadBtn.style.display = 'none'; return; }
+
+    const hasMaster = files.some(f => f.name === 'master.m3u8' && !f.webkitRelativePath.slice(0, -f.name.length - 1).includes('/'));
+    if (!hasMaster) {
+        alert('master.m3u8 not found at the root of the selected folder. Please select the correct HLS output folder.');
+        input.value = '';
+        if (fileInfo) fileInfo.style.display = 'none';
+        if (uploadBtn) uploadBtn.style.display = 'none';
+        return;
+    }
+
+    if (fileInfo) { fileInfo.style.display = 'block'; }
+    if (fileCount) { fileCount.textContent = `${files.length} files selected (${files.filter(f => f.name.endsWith('.ts')).length} segments)`; }
+    if (uploadBtn) uploadBtn.style.display = 'inline-block';
+}
+
+/**
+ * Upload all HLS folder files directly to S3 using per-file presigned URLs
+ */
+async function uploadHlsFolder(button) {
+    const container = button.closest('.col-12');
+    const folderInput = container.querySelector('.hls-folder-input');
+    const hiddenInput = container.querySelector('.video-s3-url');
+    const statusDiv = container.querySelector('.hls-upload-status');
+    const statusText = container.querySelector('.hls-status-text');
+    const fileCounter = container.querySelector('.hls-file-counter');
+    const progressBar = container.querySelector('.hls-progress-bar');
+    const successAlert = container.querySelector('.hls-upload-success');
+
+    const files = Array.from(folderInput.files);
+    if (!files.length) { alert('Please select an HLS folder first'); return; }
+
+    const programName = getProgramSubtitle();
+    const programType = getProgramType();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // Single UUID shared across all files in this session
+    const folderUuid = crypto.randomUUID ? crypto.randomUUID() : ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Uploading...';
+    if (statusDiv) statusDiv.style.display = 'block';
+    if (successAlert) successAlert.style.display = 'none';
+
+    const HLS_MIME = { '.m3u8': 'application/x-mpegURL', '.ts': 'video/mp2t', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png' };
+
+    try {
+        let uploaded = 0;
+        const total = files.length;
+
+        for (const file of files) {
+            // relativePath is like "folder_name/1080p/000.ts" — strip the leading folder name
+            const parts = file.webkitRelativePath.split('/');
+            const relativePath = parts.slice(1).join('/');  // remove root folder name
+            const ext = '.' + file.name.split('.').pop().toLowerCase();
+            const fileType = HLS_MIME[ext] || file.type || 'application/octet-stream';
+
+            if (statusText) statusText.textContent = `Uploading ${relativePath}...`;
+            if (fileCounter) fileCounter.textContent = `${uploaded + 1} / ${total}`;
+
+            // Get presigned URL for this file
+            const fd = new FormData();
+            fd.append('relative_path', relativePath);
+            fd.append('file_type', fileType);
+            fd.append('program_name', programName);
+            fd.append('program_type', programType);
+            fd.append('folder_uuid', folderUuid);
+
+            const res = await fetch('{% url "dashboard:generate_hls_presigned_url" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                body: fd
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(`Failed to get URL for ${relativePath}: ${data.error}`);
+
+            // Upload directly to S3
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', data.presigned_url);
+                xhr.setRequestHeader('Content-Type', fileType);
+                xhr.onload = () => xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`S3 upload failed for ${relativePath}: ${xhr.status}`));
+                xhr.onerror = () => reject(new Error(`Network error uploading ${relativePath}`));
+                xhr.send(file);
+            });
+
+            uploaded++;
+            const pct = Math.round((uploaded / total) * 100);
+            if (progressBar) { progressBar.style.width = pct + '%'; progressBar.setAttribute('aria-valuenow', pct); }
+            if (fileCounter) fileCounter.textContent = `${uploaded} / ${total}`;
+        }
+
+        // Derive the master.m3u8 DB key (no media/ prefix)
+        const safeProgName = programName.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '_');
+        const safePType = ['advanced', 'regular'].includes(programType) ? programType : 'regular';
+        const dbKey = `programs/${safePType}/${safeProgName}/${folderUuid}/master.m3u8`;
+
+        hiddenInput.value = dbKey;
+        hiddenInput.setAttribute('data-uploaded', 'true');
+
+        if (statusDiv) statusDiv.style.display = 'none';
+        button.style.display = 'none';
+        if (successAlert) {
+            successAlert.style.display = 'block';
+            successAlert.innerHTML = `
+                <i class="ri-checkbox-circle-line me-1"></i>
+                <strong>HLS folder uploaded! (${uploaded} files)</strong><br>
+                <small class="text-muted d-block mt-1"><i class="ri-folder-line me-1"></i>${dbKey}</small>
+            `;
+        }
+
+    } catch (error) {
+        console.error('HLS upload error:', error);
+        alert('Error uploading HLS folder: ' + error.message);
+        button.disabled = false;
+        button.innerHTML = '<i class="ri-folders-line me-1"></i>Upload HLS Folder to S3';
+        if (statusDiv) statusDiv.style.display = 'none';
+    }
 }
 
 /**
@@ -3808,14 +4072,14 @@ function validateVideosUploaded(formId) {
             const container = input.closest('.col-12');
             const hiddenInput = container.querySelector('.video-s3-url');
             const isUploaded = hiddenInput && hiddenInput.getAttribute('data-uploaded') === 'true';
-            
+
             if (!isUploaded) {
                 // Video selected but not uploaded
                 const moduleItem = input.closest('.module-item');
                 const topicItem = input.closest('.topic-item');
                 const moduleIndex = moduleItem ? moduleItem.getAttribute('data-module-index') : 'unknown';
                 const topicIndex = topicItem ? topicItem.getAttribute('data-topic-index') : 'unknown';
-                
+
                 pendingUploads.push({
                     module: parseInt(moduleIndex) + 1,
                     topic: parseInt(topicIndex) + 1,
@@ -3825,25 +4089,65 @@ function validateVideosUploaded(formId) {
             }
         }
     });
-    
+
+    // Also check HLS folder inputs that have files selected but are not yet uploaded
+    const hlsFolderInputs = form.querySelectorAll('.hls-folder-input');
+    hlsFolderInputs.forEach(input => {
+        const hlsSection = input.closest('.hls-upload-section');
+        if (!hlsSection || hlsSection.style.display === 'none') return;
+        if (!input.files || !input.files.length) return;
+
+        const container = input.closest('.col-12');
+        const hiddenInput = container.querySelector('.video-s3-url');
+        const isUploaded = hiddenInput && hiddenInput.getAttribute('data-uploaded') === 'true';
+
+        if (!isUploaded) {
+            const moduleItem = input.closest('.module-item');
+            const topicItem = input.closest('.topic-item');
+            const moduleIndex = moduleItem ? moduleItem.getAttribute('data-module-index') : 'unknown';
+            const topicIndex = topicItem ? topicItem.getAttribute('data-topic-index') : 'unknown';
+
+            pendingUploads.push({
+                module: parseInt(moduleIndex) + 1,
+                topic: parseInt(topicIndex) + 1,
+                input: input,
+                container: container,
+                isHls: true
+            });
+        }
+    });
+
     if (pendingUploads.length > 0) {
         // Show error message
         let message = 'Please upload all selected videos before submitting:\n\n';
         pendingUploads.forEach(item => {
-            message += `• Module ${item.module}, Topic ${item.topic}\n`;
-            
+            const type = item.isHls ? 'HLS folder' : 'MP4';
+            message += `• Module ${item.module}, Topic ${item.topic} (${type})\n`;
+
             // Highlight the upload button
-            const uploadBtn = item.container.querySelector('.upload-video-btn');
-            if (uploadBtn && uploadBtn.style.display !== 'none') {
-                uploadBtn.classList.add('btn-danger');
-                uploadBtn.classList.remove('btn-success');
-                setTimeout(() => {
-                    uploadBtn.classList.remove('btn-danger');
-                    uploadBtn.classList.add('btn-success');
-                }, 3000);
+            if (item.isHls) {
+                const uploadBtn = item.container.querySelector('.upload-hls-btn');
+                if (uploadBtn) {
+                    uploadBtn.classList.add('btn-danger');
+                    uploadBtn.classList.remove('btn-primary');
+                    setTimeout(() => {
+                        uploadBtn.classList.remove('btn-danger');
+                        uploadBtn.classList.add('btn-primary');
+                    }, 3000);
+                }
+            } else {
+                const uploadBtn = item.container.querySelector('.upload-video-btn');
+                if (uploadBtn && uploadBtn.style.display !== 'none') {
+                    uploadBtn.classList.add('btn-danger');
+                    uploadBtn.classList.remove('btn-success');
+                    setTimeout(() => {
+                        uploadBtn.classList.remove('btn-danger');
+                        uploadBtn.classList.add('btn-success');
+                    }, 3000);
+                }
             }
         });
-        
+
         alert(message);
         return false;
     }

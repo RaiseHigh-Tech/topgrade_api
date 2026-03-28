@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views.video_upload_view import generate_presigned_url, confirm_upload
+from .views.video_upload_view import generate_presigned_url, confirm_upload, generate_hls_presigned_url
 
 app_name = 'dashboard'
 
@@ -30,6 +30,7 @@ urlpatterns = [
     # Video upload endpoints
     path('api/generate-presigned-url/', generate_presigned_url, name='generate_presigned_url'),
     path('api/confirm-upload/', confirm_upload, name='confirm_upload'),
+    path('api/generate-hls-presigned-url/', generate_hls_presigned_url, name='generate_hls_presigned_url'),
     
     # Testimonials management
     path('testimonials/', views.testimonials_view, name='testimonials'),
