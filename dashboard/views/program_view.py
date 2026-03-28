@@ -96,24 +96,32 @@ def calculate_video_duration(video_file):
 
 def calculate_video_duration_from_s3(s3_key):
     """
-    Calculate video duration from S3-stored video file
-    Downloads the video temporarily, calculates duration, and cleans up
-    
+    Calculate video duration from an S3-stored video file or HLS master playlist.
+
+    For .m3u8 keys, delegates to calculate_hls_duration_from_s3 which parses
+    the playlist files without downloading any .ts segments.
+    For .mp4 / other video files, downloads to a temp file and uses ffprobe/moviepy.
+
     Args:
-        s3_key: S3 key/path of the video file (e.g., 'programs/advanced/program_name/video.mp4')
-    
+        s3_key: S3 key/path (e.g., 'programs/advanced/course/<uuid>/master.m3u8'
+                              or  'programs/advanced/course/video.mp4')
+
     Returns:
-        Duration string in format 'MM:SS' or 'HH:MM:SS', or None if calculation fails
+        Duration string 'MM:SS' or 'HH:MM:SS', or None on failure.
     """
-    import tempfile
     import os
+    # Route HLS playlists to the lightweight parser
+    if s3_key and s3_key.lower().endswith('.m3u8'):
+        return calculate_hls_duration_from_s3(s3_key)
+
+    import tempfile
     import logging
     import boto3
     from django.conf import settings
-    
+
     logger = logging.getLogger(__name__)
     temp_path = None
-    
+
     try:
         # Check if S3 is enabled
         use_s3 = getattr(settings, 'USE_S3', False)
@@ -264,16 +272,113 @@ def format_duration(duration_seconds):
     """Format duration in seconds to HH:MM:SS or MM:SS string"""
     if not duration_seconds or duration_seconds <= 0:
         return None
-        
+
     total_seconds = int(duration_seconds)
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
-    
+
     if hours > 0:
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     else:
         return f"{minutes:02d}:{seconds:02d}"
+
+
+def calculate_hls_duration_from_s3(s3_key):
+    """
+    Calculate total video duration from an HLS master.m3u8 stored in S3.
+
+    Strategy:
+      1. Download master.m3u8 (plain text, a few hundred bytes)
+      2. Find the first variant playlist path (e.g. '1080p/playlist.m3u8')
+      3. Download that variant playlist
+      4. Sum every #EXTINF duration value
+
+    No .ts segments are downloaded.
+
+    Args:
+        s3_key: DB key of the master.m3u8, e.g.
+                'programs/advanced/my_course/<uuid>/master.m3u8'
+
+    Returns:
+        Duration string 'MM:SS' / 'HH:MM:SS', or None on failure.
+    """
+    import re
+    import logging
+    import boto3
+    from django.conf import settings
+
+    logger = logging.getLogger(__name__)
+
+    use_s3 = getattr(settings, 'USE_S3', False)
+    if not use_s3:
+        logger.warning("S3 not enabled, cannot calculate HLS duration")
+        return None
+
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_S3_REGION_NAME,
+    )
+    bucket = settings.AWS_STORAGE_BUCKET_NAME
+
+    def full_key(key):
+        """Ensure the key has the media/ prefix used in the bucket."""
+        return key if key.startswith('media/') else f'media/{key}'
+
+    def download_text(key):
+        obj = s3_client.get_object(Bucket=bucket, Key=full_key(key))
+        return obj['Body'].read().decode('utf-8')
+
+    try:
+        master_text = download_text(s3_key)
+    except Exception as e:
+        logger.warning(f"Could not download master.m3u8 ({s3_key}): {e}")
+        return None
+
+    # Extract the first variant playlist path from master.m3u8
+    # Lines after #EXT-X-STREAM-INF are the playlist URIs
+    variant_path = None
+    lines = master_text.splitlines()
+    for i, line in enumerate(lines):
+        if line.startswith('#EXT-X-STREAM-INF'):
+            if i + 1 < len(lines) and not lines[i + 1].startswith('#'):
+                variant_path = lines[i + 1].strip()
+                break
+
+    if not variant_path:
+        logger.warning(f"No variant playlist found in master.m3u8: {s3_key}")
+        return None
+
+    # Construct S3 key for the variant playlist
+    # s3_key is like 'programs/.../master.m3u8'
+    # variant_path is like '1080p/playlist.m3u8'
+    base_dir = s3_key.rsplit('/', 1)[0]  # 'programs/.../<uuid>'
+    variant_key = f"{base_dir}/{variant_path}"
+
+    try:
+        variant_text = download_text(variant_key)
+    except Exception as e:
+        logger.warning(f"Could not download variant playlist ({variant_key}): {e}")
+        return None
+
+    # Sum all #EXTINF durations
+    total_seconds = 0.0
+    for line in variant_text.splitlines():
+        if line.startswith('#EXTINF:'):
+            # Format: #EXTINF:9.009,optional title
+            try:
+                duration_str = line[8:].split(',')[0]
+                total_seconds += float(duration_str)
+            except ValueError:
+                pass
+
+    if total_seconds <= 0:
+        logger.warning(f"No #EXTINF entries found in variant playlist: {variant_key}")
+        return None
+
+    return format_duration(total_seconds)
 
 @admin_required
 def programs_view(request):
